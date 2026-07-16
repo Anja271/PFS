@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="PLAVE livestreams with optional English fan subtitles.">
+  <title>PLAVE Lives with English Fan Subtitles</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="shell">
+      <p class="eyebrow">Unofficial fan project</p>
+      <h1>PLAVE Lives with English Fan Subtitles</h1>
+      <p class="intro">Choose a livestream from the official PLAVE channel’s Live tab.</p>
+    </div>
+  </header>
+
+  <main class="shell" id="main-content">
+    <section id="list-view" aria-labelledby="lives-heading">
+      <div class="section-heading">
+        <div>
+          <h2 id="lives-heading">Livestreams</h2>
+          <p class="sort-note">Newest first</p>
+        </div>
+        <label class="filter-control" for="video-filter">
+          <span>Show</span>
+          <select id="video-filter">
+            <option value="all">All lives</option>
+            <option value="subtitled">With fan subtitles</option>
+          </select>
+        </label>
+      </div>
+      <div id="list-message" class="message" role="status">Loading livestreams…</div>
+      <div id="video-grid" class="video-grid" aria-live="polite"></div>
+    </section>
+
+    <section id="player-view" class="player-view" aria-labelledby="player-title" hidden>
+      <a class="back-link" href="./" id="back-link">← Back to livestreams</a>
+      <h2 id="player-title"></h2>
+      <p id="player-status" class="subtitle-status"></p>
+
+      <div class="player-frame" id="player-frame">
+        <div id="youtube-player"></div>
+        <div id="subtitle-overlay" class="subtitle-overlay" aria-hidden="true"></div>
+      </div>
+
+      <div id="player-message" class="message" role="alert" hidden></div>
+
+      <div class="player-actions">
+        <button id="subtitle-toggle" class="button button-primary" type="button" disabled>
+          Turn fan subtitles on
+        </button>
+        <a id="youtube-link" class="button button-secondary" href="#" target="_blank" rel="noopener noreferrer">
+          Open on YouTube
+        </a>
+      </div>
+
+      <section class="subtitle-panel" aria-labelledby="subtitle-heading">
+        <h3 id="subtitle-heading">Fan subtitle text</h3>
+        <p id="subtitle-fallback" aria-live="polite">Fan subtitles are off.</p>
+      </section>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="shell">Unofficial fan subtitles. No analytics or tracking.</div>
+  </footer>
+
+  <noscript>
+    <div class="shell message message-error">JavaScript is required to load the livestream list and player.</div>
+  </noscript>
+  <script src="app.js" defer></script>
+</body>
+</html>
