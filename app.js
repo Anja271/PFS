@@ -480,6 +480,7 @@
     state.player.seekTo(startSeconds, true);
     if (state.cues.length && !state.subtitlesEnabled) toggleSubtitles();
     if (typeof state.player.playVideo === "function") state.player.playVideo();
+    elements.playerFrame.scrollIntoView({ behavior: "auto", block: "center" });
   }
 
   function toggleSubtitles() {
