@@ -214,6 +214,7 @@ select {
   position: relative;
   width: 100%;
   aspect-ratio: 16 / 9;
+  scroll-margin-top: 24px;
   overflow: hidden;
   background: #000;
   border-radius: 16px;

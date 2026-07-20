@@ -477,11 +477,12 @@
 
   function seekToChapter(startSeconds) {
     if (!state.playerReady || !state.player || typeof state.player.seekTo !== "function") return;
+    centerPlayerInView();
+    window.setTimeout(centerPlayerInView, 250);
+    window.setTimeout(ensurePlayerInView, 450);
     state.player.seekTo(startSeconds, true);
     if (state.cues.length && !state.subtitlesEnabled) toggleSubtitles();
     if (typeof state.player.playVideo === "function") state.player.playVideo();
-    centerPlayerInView();
-    window.setTimeout(centerPlayerInView, 250);
   }
 
   function centerPlayerInView() {
@@ -491,6 +492,21 @@
       : window.innerHeight;
     const targetTop = window.scrollY + rect.top - Math.max(0, (viewportHeight - rect.height) / 2);
     window.scrollTo(0, Math.max(0, targetTop));
+  }
+
+  function ensurePlayerInView() {
+    const rect = elements.playerFrame.getBoundingClientRect();
+    const viewportHeight = window.visualViewport
+      ? window.visualViewport.height
+      : window.innerHeight;
+    const desiredTop = Math.max(0, (viewportHeight - rect.height) / 2);
+    if (Math.abs(rect.top - desiredTop) <= 24) return;
+
+    // Safari can ignore scripted scrolling while the YouTube iframe takes
+    // focus. A same-page fragment navigation uses Safari's native scrolling.
+    const baseUrl = `${window.location.pathname}${window.location.search}`;
+    window.history.replaceState(window.history.state, "", baseUrl);
+    window.location.replace(`${baseUrl}#player-frame`);
   }
 
   function toggleSubtitles() {
