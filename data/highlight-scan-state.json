@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-07-20T21:01:23Z",
+  "updatedAt": "2026-07-20T21:06:55Z",
   "retryAfterDays": 30,
   "videos": {
     "x7qic07HViw": {
@@ -103,6 +103,46 @@
           "peakValue": 1.0
         }
       ]
+    },
+    "Sq9mSS5CVr8": {
+      "status": "error",
+      "checkedAt": "2026-07-20T21:06:55Z",
+      "title": "감히 날 짜증 나게 해?!💢 노라인 짜증 나는😡 상황 월드컵💜❤️ | #플레이브 PLAVE | PLAVE Noah & Eunho Live Full Ver.",
+      "publishedAt": "",
+      "subtitleCoverage": "none",
+      "error": "ERROR: [youtube] Sq9mSS5CVr8: Sign in to confirm you’re not a bot. Use --cookies-from-browser or --cookies for the authentication. See  https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp  for how to manually pass cookies. Also see  https://github.com/yt-dlp/yt-dlp/wiki/Extractors#exporting-youtube-cookies  for tips on effectively exporting YouTube cookies"
+    },
+    "9cJsEa_6YUQ": {
+      "status": "error",
+      "checkedAt": "2026-07-20T21:06:55Z",
+      "title": "플리 야~호✌️ K-버추돌의 일일 갸루 체험!💅 💙💜🩷❤️🖤 | #플레이브 PLAVE | PLAVE Live Full Ver.",
+      "publishedAt": "",
+      "subtitleCoverage": "none",
+      "error": "ERROR: [youtube] 9cJsEa_6YUQ: Sign in to confirm you’re not a bot. Use --cookies-from-browser or --cookies for the authentication. See  https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp  for how to manually pass cookies. Also see  https://github.com/yt-dlp/yt-dlp/wiki/Extractors#exporting-youtube-cookies  for tips on effectively exporting YouTube cookies"
+    },
+    "yT5NPxMKovc": {
+      "status": "error",
+      "checkedAt": "2026-07-20T21:06:55Z",
+      "title": "예주니와 함니의 🌊두근두근 바다 갔섬🏝️ 아일랜드 💙🖤 | #플레이브 PLAVE | PLAVE Yejun & Hamin Live",
+      "publishedAt": "",
+      "subtitleCoverage": "none",
+      "error": "ERROR: [youtube] yT5NPxMKovc: Sign in to confirm you’re not a bot. Use --cookies-from-browser or --cookies for the authentication. See  https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp  for how to manually pass cookies. Also see  https://github.com/yt-dlp/yt-dlp/wiki/Extractors#exporting-youtube-cookies  for tips on effectively exporting YouTube cookies"
+    },
+    "QXWEwVWLhU0": {
+      "status": "error",
+      "checkedAt": "2026-07-20T21:06:55Z",
+      "title": "플리야 일단 뛰어!🏃 아스테룸 워터 페스티벌🔫 💙💜🩷❤️🖤 | #플레이브 PLAVE | PLAVE Live Full Ver.",
+      "publishedAt": "",
+      "subtitleCoverage": "none",
+      "error": "ERROR: [youtube] QXWEwVWLhU0: Sign in to confirm you’re not a bot. Use --cookies-from-browser or --cookies for the authentication. See  https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp  for how to manually pass cookies. Also see  https://github.com/yt-dlp/yt-dlp/wiki/Extractors#exporting-youtube-cookies  for tips on effectively exporting YouTube cookies"
+    },
+    "FJgYDi6GwKw": {
+      "status": "error",
+      "checkedAt": "2026-07-20T21:06:55Z",
+      "title": "노라인 어디가 좋아요? 🙏존재. 근본의 자동음정조율뱅🎤 💜❤️ | #플레이브 PLAVE | PLAVE Noah & Eunho Live Full Ver.",
+      "publishedAt": "",
+      "subtitleCoverage": "none",
+      "error": "ERROR: [youtube] FJgYDi6GwKw: Sign in to confirm you’re not a bot. Use --cookies-from-browser or --cookies for the authentication. See  https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp  for how to manually pass cookies. Also see  https://github.com/yt-dlp/yt-dlp/wiki/Extractors#exporting-youtube-cookies  for tips on effectively exporting YouTube cookies"
     }
   }
 }
