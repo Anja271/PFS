@@ -3,11 +3,13 @@
 
   const VIDEO_ID_PATTERN = /^[A-Za-z0-9_-]{6,20}$/;
   const POLL_INTERVAL_MS = 150;
+  const HOT_CHAPTER_THRESHOLD = 0.5;
   const state = {
     videos: [],
     subtitleIds: new Set(),
     subtitleManifestLoaded: false,
     chaptersByVideo: new Map(),
+    heatmapsByVideo: new Map(),
     currentChapters: [],
     selectedVideo: null,
     player: null,
@@ -48,10 +50,11 @@
     document.addEventListener("fullscreenchange", updateFullscreenButton);
     window.addEventListener("popstate", route);
 
-    const [videosResult, subtitlesResult, chaptersResult] = await Promise.allSettled([
+    const [videosResult, subtitlesResult, chaptersResult, heatmapsResult] = await Promise.allSettled([
       fetchJson("data/videos.json"),
       fetchJson("data/subtitles.json"),
-      fetchJson("data/chapters.json")
+      fetchJson("data/chapters.json"),
+      fetchJson("data/heatmaps.json")
     ]);
 
     if (videosResult.status === "fulfilled" && Array.isArray(videosResult.value)) {
@@ -70,6 +73,10 @@
 
     if (chaptersResult.status === "fulfilled") {
       state.chaptersByVideo = normalizeChapterManifest(chaptersResult.value);
+    }
+
+    if (heatmapsResult.status === "fulfilled") {
+      state.heatmapsByVideo = normalizeHeatmapManifest(heatmapsResult.value);
     }
 
     renderVideoList();
@@ -112,6 +119,36 @@
         previousStart = startSeconds;
       }
       if (normalized.length) manifest.set(videoId, normalized);
+    });
+    return manifest;
+  }
+
+  function normalizeHeatmapManifest(value) {
+    const manifest = new Map();
+    if (!value || typeof value !== "object" || Array.isArray(value)) return manifest;
+    Object.entries(value).forEach(([videoId, points]) => {
+      if (!isValidVideoId(videoId) || !Array.isArray(points) || !points.length) return;
+      const normalized = [];
+      let previousStart = -1;
+      for (const point of points) {
+        if (!point || typeof point !== "object") return;
+        const startSeconds = point.startSeconds;
+        const endSeconds = point.endSeconds;
+        const heat = point.value;
+        if (
+          !Number.isFinite(startSeconds)
+          || !Number.isFinite(endSeconds)
+          || !Number.isFinite(heat)
+          || startSeconds < 0
+          || endSeconds <= startSeconds
+          || startSeconds <= previousStart
+          || heat < 0
+          || heat > 1
+        ) return;
+        normalized.push({ startSeconds, endSeconds, value: heat });
+        previousStart = startSeconds;
+      }
+      manifest.set(videoId, normalized);
     });
     return manifest;
   }
@@ -436,7 +473,7 @@
     if (!chapters.length) return;
 
     const fragment = document.createDocumentFragment();
-    chapters.forEach((chapter) => {
+    chapters.forEach((chapter, index) => {
       const item = document.createElement("li");
       const button = document.createElement("button");
       button.type = "button";
@@ -449,7 +486,18 @@
 
       const title = document.createElement("span");
       title.className = "chapter-title";
-      title.textContent = chapter.title;
+      const titleText = document.createElement("span");
+      titleText.className = "chapter-title-text";
+      titleText.textContent = chapter.title;
+      title.appendChild(titleText);
+
+      const nextStart = chapters[index + 1]?.startSeconds ?? Number.POSITIVE_INFINITY;
+      if (isHotChapter(videoId, chapter.startSeconds, nextStart)) {
+        const badge = document.createElement("span");
+        badge.className = "chapter-hot-badge";
+        badge.textContent = "🔥 Most replayed";
+        title.appendChild(badge);
+      }
 
       button.append(time, title);
       button.addEventListener("click", () => seekToChapter(chapter.startSeconds));
@@ -457,6 +505,14 @@
       fragment.appendChild(item);
     });
     elements.chapterList.appendChild(fragment);
+  }
+
+  function isHotChapter(videoId, chapterStart, chapterEnd) {
+    const points = state.heatmapsByVideo.get(videoId) || [];
+    return points.some((point) => {
+      const midpoint = point.startSeconds + (point.endSeconds - point.startSeconds) / 2;
+      return midpoint >= chapterStart && midpoint < chapterEnd && point.value >= HOT_CHAPTER_THRESHOLD;
+    });
   }
 
   function formatChapterTime(totalSeconds) {

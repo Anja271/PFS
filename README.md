@@ -20,7 +20,7 @@ If the workflow cannot push, check **Settings → Actions → General → Workfl
 
 ## How the livestream list is updated
 
-The workflow runs daily and can also be started at any time from **Actions → Update livestream list → Run workflow**. Scheduled GitHub Actions runs are not guaranteed to start at an exact second and can be delayed during busy periods.
+The workflow runs daily and can also be started at any time from **Actions → Update livestream list → Run workflow**. Scheduled GitHub Actions runs are not guaranteed to start at an exact second and can be delayed during busy periods. It also checks chaptered videos for optional YouTube **Most replayed** heatmap data.
 
 `scripts/update_videos.py` passes only this address to yt-dlp:
 
@@ -104,6 +104,14 @@ Chapter starts are whole seconds, must be strictly increasing, and should match 
 
 Save the chapter file together with `subtitles/abc123XYZ.vtt`, then commit and push both files. The update workflow validates all chapter files and regenerates `data/chapters.json`; do not edit that generated manifest manually. A video without a chapter file continues to work normally and simply hides the Chapters section.
 
+### Most replayed chapter badges
+
+The daily workflow also asks yt-dlp for YouTube's optional replay heatmap for every video that has a chapter source file. No video media is downloaded and no API key is used. YouTube does not publish this information through its official public APIs, does not provide it for every video, and may add it only after enough viewing activity has accumulated. A missing heatmap is therefore normal.
+
+When valid heatmap data exists, `scripts/update_heatmaps.py` writes it atomically to `data/heatmaps.json`. A temporary extraction failure or missing response does not erase the last valid heatmap for that video. The website assigns each YouTube heatmap interval to the chapter containing its midpoint. Every chapter containing a normalized heat value of at least `0.5` receives the text badge **🔥 Most replayed**. There is no maximum number of marked chapters: an eventful stream can have many. Videos without heatmap data and chapters below the threshold remain unchanged.
+
+Do not edit `data/heatmaps.json` manually. yt-dlp reads an internal YouTube player representation for this optional feature, so YouTube changes can temporarily break extraction even while normal video and subtitle playback continue to work.
+
 ## Replace or correct subtitles
 
 1. Edit the existing `.vtt` file.
@@ -125,7 +133,7 @@ Then open `http://localhost:8000/`. The checked-in `data/videos.json` starts emp
 
 ## How playback works
 
-The YouTube IFrame Player API supplies the current playback time every 150 ms. The page selects active VTT cues and safely displays their text both over the embedded video and in a persistent fallback panel below it. Seeking, pausing, resuming, and playback-speed changes work because each poll uses the player's current time rather than a separate clock. If chapter data exists, the page displays large chapter buttons below the player; selecting one seeks to that chapter, turns on available fan subtitles, starts playback in the normal embedded view, and scrolls the player back into the center of the screen. The centering is repeated after a short delay so Safari cannot immediately undo it while the YouTube iframe starts playback. If Safari still ignores it, a native same-page anchor jump brings the player back into view without adding an extra browser-history entry. Chapter selection never opens fullscreen automatically.
+The YouTube IFrame Player API supplies the current playback time every 150 ms. The page selects active VTT cues and safely displays their text both over the embedded video and in a persistent fallback panel below it. Seeking, pausing, resuming, and playback-speed changes work because each poll uses the player's current time rather than a separate clock. If chapter data exists, the page displays large chapter buttons below the player. Optional static heatmap data adds a textual **🔥 Most replayed** badge to every chapter that crosses the documented threshold, without changing chapter order. Selecting a chapter seeks to it, turns on available fan subtitles, starts playback in the normal embedded view, and scrolls the player back into the center of the screen. The centering is repeated after a short delay so Safari cannot immediately undo it while the YouTube iframe starts playback. If Safari still ignores it, a native same-page anchor jump brings the player back into view without adding an extra browser-history entry. Chapter selection never opens fullscreen automatically.
 
 Embedded iframe fullscreen behavior on iPad is controlled by Safari and YouTube, so the normal inline 16:9 player is the primary experience. `playsinline=1` is enabled, and the subtitle panel below the player remains the dependable viewing mode.
 
@@ -139,7 +147,9 @@ The site has no analytics, cookies of its own, or first-party tracking. Livestre
 - `data/videos.json` — generated Live-tab video metadata
 - `data/subtitles.json` — generated list of available subtitle IDs
 - `data/chapters.json` — generated chapter data for the website
+- `data/heatmaps.json` — generated optional YouTube replay heatmaps
 - `subtitles/*.vtt` — your English fan subtitle files
 - `chapters/*.json` — optional per-video chapter source files
 - `scripts/update_videos.py` — yt-dlp metadata and subtitle/chapter-manifest updater
+- `scripts/update_heatmaps.py` — optional yt-dlp replay-heatmap updater
 - `.github/workflows/update-videos.yml` — daily, manual, and subtitle-push automation
