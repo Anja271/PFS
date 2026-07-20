@@ -480,7 +480,17 @@
     state.player.seekTo(startSeconds, true);
     if (state.cues.length && !state.subtitlesEnabled) toggleSubtitles();
     if (typeof state.player.playVideo === "function") state.player.playVideo();
-    elements.playerFrame.scrollIntoView({ behavior: "auto", block: "center" });
+    centerPlayerInView();
+    window.setTimeout(centerPlayerInView, 250);
+  }
+
+  function centerPlayerInView() {
+    const rect = elements.playerFrame.getBoundingClientRect();
+    const viewportHeight = window.visualViewport
+      ? window.visualViewport.height
+      : window.innerHeight;
+    const targetTop = window.scrollY + rect.top - Math.max(0, (viewportHeight - rect.height) / 2);
+    window.scrollTo(0, Math.max(0, targetTop));
   }
 
   function toggleSubtitles() {
