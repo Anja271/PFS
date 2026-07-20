@@ -1,0 +1,54 @@
+[
+  {
+    "youtubeId": "x7qic07HViw",
+    "date": "2026-06-19",
+    "displayTitle": "Three-Year-Old PLLI, Together Forever! 🌕 A Birthday Party Packed with Love 🎂💙💜🩷❤️🖤",
+    "originalTitle": "세 살 플리 평플까지 간다!🌕 사랑 꽉 끼는 🎂플리 생일 파티💙💜🩷❤️🖤 | #플레이브 PLAVE | PLAVE Live Full Ver.",
+    "coverage": "full",
+    "subtitlePath": "subtitles/x7qic07HViw.vtt",
+    "scenes": [
+      {
+        "startSeconds": 2693,
+        "endSeconds": 3225,
+        "title": "Discovering Yejun's habits",
+        "peakSeconds": 2825,
+        "peakValue": 0.560596
+      },
+      {
+        "startSeconds": 3225,
+        "endSeconds": 3738,
+        "title": "Discovering Noah's habits",
+        "peakSeconds": 3363,
+        "peakValue": 0.704646
+      },
+      {
+        "startSeconds": 3738,
+        "endSeconds": 4231,
+        "title": "Discovering Bamby's habits",
+        "peakSeconds": 3811,
+        "peakValue": 0.687649
+      },
+      {
+        "startSeconds": 4231,
+        "endSeconds": 4916,
+        "title": "Discovering Eunho's habits",
+        "peakSeconds": 4349,
+        "peakValue": 1.0
+      },
+      {
+        "startSeconds": 6599,
+        "endSeconds": 7091,
+        "title": "The missing disk and the moon mission",
+        "peakSeconds": 7040,
+        "peakValue": 0.639897
+      },
+      {
+        "startSeconds": 7091,
+        "endSeconds": 7465,
+        "title": "Discovering PLLI's surprise cover",
+        "peakSeconds": 7130,
+        "peakValue": 0.692932
+      }
+    ]
+  }
+]

@@ -8,6 +8,8 @@
     videos: [],
     subtitleIds: new Set(),
     subtitleManifestLoaded: false,
+    subtitleCoverage: new Map(),
+    coverageManifestLoaded: false,
     chaptersByVideo: new Map(),
     heatmapsByVideo: new Map(),
     currentChapters: [],
@@ -17,7 +19,9 @@
     cues: [],
     subtitlesEnabled: false,
     activeCueKey: null,
-    pollTimer: null
+    pollTimer: null,
+    initialStartSeconds: 0,
+    returnToHighlights: false
   };
 
   const elements = {
@@ -50,9 +54,10 @@
     document.addEventListener("fullscreenchange", updateFullscreenButton);
     window.addEventListener("popstate", route);
 
-    const [videosResult, subtitlesResult, chaptersResult, heatmapsResult] = await Promise.allSettled([
+    const [videosResult, subtitlesResult, coverageResult, chaptersResult, heatmapsResult] = await Promise.allSettled([
       fetchJson("data/videos.json"),
       fetchJson("data/subtitles.json"),
+      fetchJson("data/subtitle-coverage.json"),
       fetchJson("data/chapters.json"),
       fetchJson("data/heatmaps.json")
     ]);
@@ -69,6 +74,13 @@
       state.subtitleManifestLoaded = true;
     } else {
       state.subtitleManifestLoaded = false;
+    }
+
+    if (coverageResult.status === "fulfilled") {
+      state.subtitleCoverage = normalizeCoverageManifest(coverageResult.value);
+      state.coverageManifestLoaded = true;
+    } else {
+      state.coverageManifestLoaded = false;
     }
 
     if (chaptersResult.status === "fulfilled") {
@@ -123,6 +135,34 @@
     return manifest;
   }
 
+  function normalizeCoverageManifest(value) {
+    const manifest = new Map();
+    if (!value || typeof value !== "object" || Array.isArray(value)) return manifest;
+    Object.entries(value).forEach(([videoId, entry]) => {
+      if (!isValidVideoId(videoId) || !entry || typeof entry !== "object") return;
+      if (entry.coverage !== "full" && entry.coverage !== "highlights") return;
+      const ranges = [];
+      let previousEnd = -1;
+      if (!Array.isArray(entry.ranges)) return;
+      for (const range of entry.ranges) {
+        if (
+          !range
+          || !Number.isInteger(range.startSeconds)
+          || !Number.isInteger(range.endSeconds)
+          || range.startSeconds < 0
+          || range.endSeconds <= range.startSeconds
+          || range.startSeconds < previousEnd
+        ) return;
+        ranges.push({ startSeconds: range.startSeconds, endSeconds: range.endSeconds });
+        previousEnd = range.endSeconds;
+      }
+      if (entry.coverage === "full" && ranges.length) return;
+      if (entry.coverage === "highlights" && !ranges.length) return;
+      manifest.set(videoId, { coverage: entry.coverage, ranges });
+    });
+    return manifest;
+  }
+
   function normalizeHeatmapManifest(value) {
     const manifest = new Map();
     if (!value || typeof value !== "object" || Array.isArray(value)) return manifest;
@@ -157,10 +197,10 @@
     elements.videoGrid.replaceChildren();
     const onlySubtitled = elements.filter.value === "subtitled";
     const videos = onlySubtitled
-      ? state.videos.filter((video) => state.subtitleIds.has(video.youtubeId))
+      ? state.videos.filter((video) => hasAnySubtitles(video.youtubeId))
       : state.videos;
 
-    if (!state.subtitleManifestLoaded) {
+    if (!state.subtitleManifestLoaded && !state.coverageManifestLoaded) {
       showMessage(elements.listMessage, "Subtitle availability could not be loaded. Livestreams are still available to watch.", true);
     } else if (videos.length === 0) {
       showMessage(
@@ -234,16 +274,30 @@
 
   function setStatus(element, videoId) {
     element.className = "subtitle-status";
-    if (!state.subtitleManifestLoaded) {
+    const coverage = getSubtitleCoverage(videoId);
+    if (!state.subtitleManifestLoaded && !state.coverageManifestLoaded) {
       element.textContent = "Fan subtitle status unknown";
       element.classList.add("status-unknown");
-    } else if (state.subtitleIds.has(videoId)) {
+    } else if (coverage === "full") {
       element.textContent = "English fan subtitles available";
       element.classList.add("status-available");
+    } else if (coverage === "highlights") {
+      element.textContent = "English subtitles available for highlighted scenes";
+      element.classList.add("status-highlight");
     } else {
       element.textContent = "No fan subtitles yet";
       element.classList.add("status-missing");
     }
+  }
+
+  function getSubtitleCoverage(videoId) {
+    const entry = state.subtitleCoverage.get(videoId);
+    if (entry) return entry.coverage;
+    return state.subtitleIds.has(videoId) ? "full" : null;
+  }
+
+  function hasAnySubtitles(videoId) {
+    return getSubtitleCoverage(videoId) !== null;
   }
 
   function formatDate(dateString) {
@@ -272,7 +326,11 @@
       showMessage(elements.listMessage, "This video is not in the official PLAVE Live list. Choose a livestream below.", true);
       return;
     }
-    showPlayerView(video);
+    const requestedStart = params.get("t");
+    const startSeconds = requestedStart && /^\d+$/.test(requestedStart)
+      ? Number(requestedStart)
+      : 0;
+    showPlayerView(video, startSeconds, params.get("from") === "highlights");
   }
 
   function showListView() {
@@ -290,23 +348,34 @@
     }
     resetSubtitleDisplay("Fan subtitles are off.");
     state.selectedVideo = null;
+    state.initialStartSeconds = 0;
+    state.returnToHighlights = false;
+    elements.backLink.href = "./";
+    elements.backLink.textContent = "← Back to livestreams";
     elements.playerView.hidden = true;
     elements.listView.hidden = false;
     document.title = "PLAVE Lives with English Fan Subtitles";
   }
 
-  async function showPlayerView(video) {
+  async function showPlayerView(video, startSeconds, returnToHighlights) {
     showListView();
     state.selectedVideo = video;
+    state.initialStartSeconds = Number.isSafeInteger(startSeconds) && startSeconds >= 0 ? startSeconds : 0;
+    state.returnToHighlights = returnToHighlights;
     elements.listView.hidden = true;
     elements.playerView.hidden = false;
+    elements.backLink.href = returnToHighlights ? "highlights.html" : "./";
+    elements.backLink.textContent = returnToHighlights
+      ? "← Back to Most replayed scenes"
+      : "← Back to livestreams";
     elements.playerTitle.textContent = video.title;
     setStatus(elements.playerStatus, video.youtubeId);
-    elements.youtubeLink.href = `https://www.youtube.com/watch?v=${encodeURIComponent(video.youtubeId)}`;
+    elements.youtubeLink.href = `https://www.youtube.com/watch?v=${encodeURIComponent(video.youtubeId)}`
+      + (state.initialStartSeconds ? `&t=${state.initialStartSeconds}s` : "");
     elements.playerMessage.hidden = true;
     document.title = `${video.title} — PLAVE Lives`;
 
-    const hasSubtitles = state.subtitleManifestLoaded && state.subtitleIds.has(video.youtubeId);
+    const hasSubtitles = hasAnySubtitles(video.youtubeId);
     state.cues = [];
     state.subtitlesEnabled = false;
     elements.subtitleToggle.disabled = !hasSubtitles;
@@ -319,7 +388,7 @@
     if (hasSubtitles) await loadVtt(video.youtubeId);
     try {
       await loadYouTubeApi();
-      if (state.selectedVideo === video) createPlayer(video.youtubeId);
+      if (state.selectedVideo === video) createPlayer(video.youtubeId, state.initialStartSeconds);
     } catch (error) {
       showMessage(elements.playerMessage, "The YouTube player could not be loaded. Check your connection or open the video on YouTube.", true);
     }
@@ -328,6 +397,10 @@
 
   function handleBackLink(event) {
     event.preventDefault();
+    if (state.returnToHighlights) {
+      window.location.href = "highlights.html";
+      return;
+    }
     if (history.state && history.state.fromList) history.back();
     else {
       history.replaceState({}, "", window.location.pathname);
@@ -357,7 +430,7 @@
     return window.youtubeApiPromise;
   }
 
-  function createPlayer(videoId) {
+  function createPlayer(videoId, startSeconds) {
     if (!document.getElementById("youtube-player")) {
       const mount = document.createElement("div");
       mount.id = "youtube-player";
@@ -367,13 +440,16 @@
       videoId,
       width: "100%",
       height: "100%",
-      playerVars: { playsinline: 1, rel: 0 },
+      playerVars: { playsinline: 1, rel: 0, start: startSeconds || 0 },
       events: {
         onReady: () => {
           state.playerReady = true;
           startPolling();
           elements.fullscreenToggle.disabled = !state.cues.length;
           setChapterButtonsDisabled(false);
+          if (startSeconds > 0 && state.cues.length && !state.subtitlesEnabled) {
+            toggleSubtitles();
+          }
         },
         onError: () => {
           state.playerReady = false;
@@ -391,7 +467,9 @@
 
   async function loadVtt(videoId) {
     try {
-      const response = await fetch(`subtitles/${encodeURIComponent(videoId)}.vtt`, { cache: "no-cache" });
+      const coverage = getSubtitleCoverage(videoId);
+      const directory = coverage === "highlights" ? "highlight-subtitles" : "subtitles";
+      const response = await fetch(`${directory}/${encodeURIComponent(videoId)}.vtt`, { cache: "no-cache" });
       if (!response.ok) throw new Error("VTT missing");
       const cues = parseVtt(await response.text());
       if (cues.length === 0) throw new Error("VTT invalid");

@@ -3,7 +3,7 @@
 A small, static GitHub Pages website that lists only the livestreams shown at
 [`@plave_official/streams`](https://www.youtube.com/@plave_official/streams) and plays optional, locally maintained English WebVTT fan subtitles in sync with the embedded YouTube player.
 
-The site uses HTML, CSS, vanilla JavaScript, the YouTube IFrame Player API, and a scheduled GitHub Action. It needs no API key, database, server, account, browser extension, npm installation, or website build step. Videos can optionally include broad, clickable chapter navigation alongside the fan subtitles.
+The site uses HTML, CSS, vanilla JavaScript, the YouTube IFrame Player API, and a scheduled GitHub Action. It needs no API key, database, server, account, browser extension, npm installation, or website build step. Videos can optionally include broad, clickable chapter navigation alongside the fan subtitles. A separate **Most replayed** page collects subtitled scenes identified from YouTube's optional replay heatmaps.
 
 ## Publish the website for the first time
 
@@ -112,6 +112,35 @@ When valid heatmap data exists, `scripts/update_heatmaps.py` writes it atomicall
 
 Do not edit `data/heatmaps.json` manually. yt-dlp reads an internal YouTube player representation for this optional feature, so YouTube changes can temporarily break extraction even while normal video and subtitle playback continue to work.
 
+## Most replayed scene page and partial subtitle coverage
+
+`highlights.html` groups subtitled Most replayed scenes by livestream. The date and livestream title are plain headings, not links. Only a scene's timestamp and title form the link that opens the corresponding video at that scene with fan subtitles.
+
+The generated `data/subtitle-coverage.json` distinguishes two states:
+
+- `full` — the complete VTT is stored at `subtitles/VIDEO_ID.vtt`.
+- `highlights` — only declared highlighted scenes are stored at `highlight-subtitles/VIDEO_ID.vtt`.
+
+This prevents a partially translated livestream from being labelled as completely subtitled. Partial scene boundaries are declared in `highlights/VIDEO_ID.json`:
+
+```json
+[
+  {
+    "startSeconds": 615,
+    "endSeconds": 842,
+    "title": "A complete, understandable scene title"
+  }
+]
+```
+
+Each partial scene must start at a real VTT cue, contain its complete local cue sequence, and end before another undeclared section begins. A cue must never extend across the gap between two translated scenes. If a full `subtitles/VIDEO_ID.vtt` is later added, it automatically takes precedence over the partial file.
+
+`scripts/update_highlights.py` validates the coverage files and generates both `data/subtitle-coverage.json` and `data/highlights.json`. For fully translated streams it maps heatmap peaks to existing broad chapters. For partial translations it uses the deliberately reviewed scene boundaries in `highlights/VIDEO_ID.json`. The same normalized `0.5` threshold used for chapter badges determines whether a scene qualifies. Dates and natural English display titles can be supplied in `metadata/VIDEO_ID.json`.
+
+If a later heatmap no longer places a declared partial scene above the threshold, that scene remains safely stored and subtitled but is temporarily omitted from the Most replayed page. It can reappear automatically if later valid heatmap data qualifies it again.
+
+Do not edit `data/subtitle-coverage.json` or `data/highlights.json` manually. The daily/manual workflow regenerates them after refreshing the video list, chapter manifest, and optional heatmaps.
+
 ## Replace or correct subtitles
 
 1. Edit the existing `.vtt` file.
@@ -144,12 +173,19 @@ The site has no analytics, cookies of its own, or first-party tracking. Livestre
 ## Project files
 
 - `index.html`, `styles.css`, `app.js` — static website and player
+- `highlights.html`, `highlights.js` — static Most replayed scene overview
 - `data/videos.json` — generated Live-tab video metadata
 - `data/subtitles.json` — generated list of available subtitle IDs
 - `data/chapters.json` — generated chapter data for the website
 - `data/heatmaps.json` — generated optional YouTube replay heatmaps
+- `data/subtitle-coverage.json` — generated full/partial subtitle availability
+- `data/highlights.json` — generated stream groups and clickable highlighted scenes
 - `subtitles/*.vtt` — your English fan subtitle files
+- `highlight-subtitles/*.vtt` — optional VTT files covering only declared highlighted scenes
 - `chapters/*.json` — optional per-video chapter source files
+- `highlights/*.json` — reviewed boundaries and titles for partial subtitle scenes
+- `metadata/*.json` — optional dates and natural English display titles
 - `scripts/update_videos.py` — yt-dlp metadata and subtitle/chapter-manifest updater
 - `scripts/update_heatmaps.py` — optional yt-dlp replay-heatmap updater
+- `scripts/update_highlights.py` — coverage validator and static highlight-manifest generator
 - `.github/workflows/update-videos.yml` — daily, manual, and subtitle-push automation

@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="Most replayed PLAVE livestream scenes with English fan subtitles.">
+  <title>Most Replayed PLAVE Scenes</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="shell">
+      <p class="eyebrow">Unofficial fan project</p>
+      <h1>Most Replayed PLAVE Scenes</h1>
+      <p class="intro">Jump directly to memorable livestream scenes with English fan subtitles.</p>
+      <nav class="site-nav" aria-label="Main navigation">
+        <a href="./">Livestreams</a>
+        <a href="highlights.html" aria-current="page">🔥 Most replayed</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="shell highlights-view" id="main-content">
+    <div class="section-heading">
+      <div>
+        <h2>Subtitled highlights</h2>
+        <p class="sort-note">Newest livestreams first</p>
+      </div>
+    </div>
+    <div id="highlights-message" class="message" role="status">Loading Most replayed scenes…</div>
+    <div id="highlight-groups" class="highlight-groups" aria-live="polite"></div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="shell">Unofficial fan subtitles. No analytics or tracking.</div>
+  </footer>
+
+  <noscript>
+    <div class="shell message message-error">JavaScript is required to load the highlighted scenes.</div>
+  </noscript>
+  <script src="highlights.js" defer></script>
+</body>
+</html>
