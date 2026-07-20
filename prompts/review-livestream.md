@@ -35,6 +35,9 @@ Review every conversation continuously, especially phone calls, stories, games, 
 - Identify scene boundaries and maintain a speaker ledger.
 - Check that each question has a coherent response.
 - Check subjects, objects, pronouns, and addressees across cue boundaries.
+- Audit every explicit English `I`, `you`, `we`, `he`, `she`, or member name that was omitted in Korean. Require explicit evidence or several independent scene-level signals.
+- Treat pauses and caption boundaries only as supporting evidence, never as proof of a speaker change.
+- Replace unsupported assignments with natural neutral wording where possible; otherwise document the narrowest chosen reading and alternatives.
 - Look for false speaker changes caused by voice impressions or ASR name substitutions.
 - Use later identification to repair earlier ambiguity when justified.
 - Correct unnatural literal translations that obscure the actual conversational move.

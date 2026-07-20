@@ -45,11 +45,12 @@ Do not modify the downloaded source. Do not publish or commit files yourself.
 4. Divide the source into coherent scenes, not arbitrary isolated cues.
 5. Translate scenes sequentially with contextual overlap at section boundaries.
 6. Maintain a scene ledger for speakers, addressees, topic, relationship terms, and unresolved turns.
-7. For damaged ASR, check grammar, surrounding questions and answers, repeated expressions, and the glossary. Use the narrowest supported interpretation.
-8. Record every material uncertainty instead of silently inventing a polished answer.
-9. Save progress regularly to the temporary output, while retaining complete timestamp coverage.
-10. Recount timestamps after each major section.
-11. Record broad scene boundaries while translating, then turn them into the chapter JSON draft.
+7. Mark every restored omitted subject, object, or addressee as confirmed, strongly supported, or unclear. Do not use pauses or caption boundaries as sufficient speaker evidence.
+8. For damaged ASR, check grammar, surrounding questions and answers, repeated expressions, and the glossary. Use the narrowest supported interpretation.
+9. Record every material uncertainty instead of silently inventing a polished answer.
+10. Save progress regularly to the temporary output, while retaining complete timestamp coverage.
+11. Recount timestamps after each major section.
+12. Record broad scene boundaries while translating, then turn them into the chapter JSON draft.
 
 ## Chapter draft
 
@@ -71,6 +72,7 @@ For calls, stories, games, and extended jokes, read and translate the full scene
 
 - questions and answers logically connect;
 - omitted subjects are restored consistently;
+- explicit English pronouns are backed by confirmed or multiple strongly supporting scene signals;
 - pronouns and member names do not switch without evidence;
 - voice impressions are not mistaken for speaker changes;
 - `hyung` points in the correct relationship direction;
