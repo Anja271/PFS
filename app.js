@@ -478,6 +478,7 @@
   function seekToChapter(startSeconds) {
     if (!state.playerReady || !state.player || typeof state.player.seekTo !== "function") return;
     state.player.seekTo(startSeconds, true);
+    if (state.cues.length && !state.subtitlesEnabled) toggleSubtitles();
     if (typeof state.player.playVideo === "function") state.player.playVideo();
   }
 
