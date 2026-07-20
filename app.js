@@ -33,8 +33,7 @@
     playerTitle: document.getElementById("player-title"),
     playerStatus: document.getElementById("player-status"),
     playerMessage: document.getElementById("player-message"),
-    highlightPlayHelp: document.getElementById("highlight-play-help"),
-    highlightPlay: document.getElementById("highlight-play"),
+    highlightStart: document.getElementById("highlight-start"),
     subtitleToggle: document.getElementById("subtitle-toggle"),
     fullscreenToggle: document.getElementById("fullscreen-toggle"),
     playerFrame: document.getElementById("player-frame"),
@@ -50,7 +49,6 @@
 
   async function init() {
     elements.filter.addEventListener("change", renderVideoList);
-    elements.highlightPlay.addEventListener("click", playHighlightedScene);
     elements.subtitleToggle.addEventListener("click", toggleSubtitles);
     elements.fullscreenToggle.addEventListener("click", togglePlayerFullscreen);
     elements.backLink.addEventListener("click", handleBackLink);
@@ -355,11 +353,8 @@
     state.returnToHighlights = false;
     elements.backLink.href = "./";
     elements.backLink.textContent = "← Back to livestreams";
-    elements.highlightPlay.hidden = true;
-    elements.highlightPlay.disabled = true;
-    elements.highlightPlay.textContent = "Play highlighted scene";
-    elements.highlightPlayHelp.hidden = true;
-    elements.highlightPlayHelp.textContent = "";
+    elements.highlightStart.hidden = true;
+    elements.highlightStart.textContent = "";
     elements.subtitleToggle.className = "button button-primary";
     elements.playerView.hidden = true;
     elements.listView.hidden = false;
@@ -382,12 +377,9 @@
     elements.youtubeLink.href = `https://www.youtube.com/watch?v=${encodeURIComponent(video.youtubeId)}`
       + (state.initialStartSeconds ? `&t=${state.initialStartSeconds}s` : "");
     elements.playerMessage.hidden = true;
-    elements.highlightPlay.hidden = state.initialStartSeconds === 0;
-    elements.highlightPlay.disabled = true;
-    elements.highlightPlay.textContent = "Play highlighted scene";
-    elements.highlightPlayHelp.hidden = state.initialStartSeconds === 0;
-    elements.highlightPlayHelp.textContent = state.initialStartSeconds > 0
-      ? `Ready at ${formatChapterTime(state.initialStartSeconds)}. If playback does not start automatically, tap Play in the YouTube video.`
+    elements.highlightStart.hidden = state.initialStartSeconds === 0;
+    elements.highlightStart.textContent = state.initialStartSeconds > 0
+      ? `Preparing scene at ${formatChapterTime(state.initialStartSeconds)}…`
       : "";
     elements.subtitleToggle.className = state.initialStartSeconds > 0
       ? "button button-secondary"
@@ -463,7 +455,8 @@
         playsinline: 1,
         rel: 0,
         start: startSeconds || 0,
-        autoplay: startSeconds > 0 ? 1 : 0
+        cc_load_policy: 0,
+        cc_lang_pref: "en"
       },
       events: {
         onReady: () => {
@@ -471,15 +464,20 @@
           startPolling();
           elements.fullscreenToggle.disabled = !state.cues.length;
           setChapterButtonsDisabled(false);
-          elements.highlightPlay.disabled = startSeconds <= 0;
+          disableYouTubeCaptions();
           if (startSeconds > 0) {
-            playHighlightedScene();
+            prepareHighlightedScene();
+            elements.highlightStart.textContent = `Ready at ${formatChapterTime(startSeconds)} — tap Play in the YouTube video`;
           }
         },
         onStateChange: handlePlayerStateChange,
+        onApiChange: disableYouTubeCaptions,
+        onAutoplayBlocked: () => {
+          elements.highlightStart.hidden = state.initialStartSeconds <= 0;
+        },
         onError: () => {
           state.playerReady = false;
-          elements.highlightPlay.disabled = true;
+          elements.highlightStart.hidden = true;
           elements.fullscreenToggle.disabled = true;
           setChapterButtonsDisabled(true);
           showMessage(
@@ -492,28 +490,26 @@
     });
   }
 
-  function playHighlightedScene() {
+  function prepareHighlightedScene() {
     if (
       !state.playerReady
       || !state.player
       || state.initialStartSeconds <= 0
       || typeof state.player.seekTo !== "function"
     ) return;
+    state.player.seekTo(state.initialStartSeconds, true);
     if (state.cues.length && !state.subtitlesEnabled) toggleSubtitles();
-    if (
-      state.selectedVideo
-      && typeof state.player.loadVideoById === "function"
-    ) {
-      state.player.loadVideoById({
-        videoId: state.selectedVideo.youtubeId,
-        startSeconds: state.initialStartSeconds
-      });
-    } else {
-      state.player.seekTo(state.initialStartSeconds, true);
-      if (typeof state.player.playVideo === "function") state.player.playVideo();
-    }
     centerPlayerInView();
     window.setTimeout(centerPlayerInView, 250);
+  }
+
+  function disableYouTubeCaptions() {
+    if (!state.player || typeof state.player.setOption !== "function") return;
+    try {
+      state.player.setOption("captions", "track", {});
+    } catch (error) {
+      // YouTube does not expose caption-track control in every player version.
+    }
   }
 
   function handlePlayerStateChange(event) {
@@ -523,7 +519,8 @@
       && window.YT.PlayerState
       && event.data === window.YT.PlayerState.PLAYING
     ) {
-      elements.highlightPlay.textContent = "Restart highlighted scene";
+      disableYouTubeCaptions();
+      elements.highlightStart.hidden = true;
     }
   }
 

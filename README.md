@@ -116,7 +116,7 @@ Do not edit `data/heatmaps.json` manually. yt-dlp reads an internal YouTube play
 
 `highlights.html` groups subtitled Most replayed scenes by livestream. The date and livestream title are plain headings, not links. Only a scene's timestamp and title form the link that opens the corresponding video at that scene with fan subtitles.
 
-The player passes the scene start to YouTube, seeks to it again when the IFrame API is ready, enables fan subtitles, and attempts to start playback. Safari and iPadOS may still block automatic playback with sound. For that case the page explains that the viewer can tap Play in the YouTube video. A large **Play highlighted scene** button also retries the seek and playback without opening fullscreen. Once YouTube confirms playback, the same control becomes **Restart highlighted scene**.
+The player passes the scene start to YouTube, seeks to it when the IFrame API is ready, and enables fan subtitles. Because Safari and iPadOS commonly block automatic playback with sound, a clearly visible banner appears inside the top of the video and asks the viewer to tap YouTube's native Play button. The button in the middle of the video remains unobstructed, so one direct tap starts the prepared scene without opening fullscreen. The banner disappears once YouTube confirms playback. The website also requests that YouTube's own caption track be turned off so it does not compete with the English fan subtitles.
 
 The generated `data/subtitle-coverage.json` distinguishes two states:
 
