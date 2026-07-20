@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Update the PLAVE Live-tab video list and local subtitle manifest.
+"""Update the PLAVE Live-tab video list and local subtitle/chapter manifests.
 
 Only CHANNEL_STREAMS_URL is passed to yt-dlp. The extractor is run in flat mode,
 so no video media is downloaded. YouTube's /streams tab is already newest-first;
@@ -26,6 +26,8 @@ CHANNEL_STREAMS_URL = "https://www.youtube.com/@plave_official/streams"
 VIDEOS_PATH = ROOT / "data" / "videos.json"
 SUBTITLES_PATH = ROOT / "data" / "subtitles.json"
 SUBTITLES_DIR = ROOT / "subtitles"
+CHAPTERS_PATH = ROOT / "data" / "chapters.json"
+CHAPTERS_DIR = ROOT / "chapters"
 VIDEO_ID_RE = re.compile(r"^[A-Za-z0-9_-]{6,20}$")
 UNAVAILABLE_TITLES = {"[private video]", "[deleted video]", "private video", "deleted video"}
 
@@ -125,8 +127,71 @@ def update_subtitle_manifest() -> None:
     print(f"Updated {SUBTITLES_PATH.relative_to(ROOT)} with {len(ids)} subtitle file(s).")
 
 
+def update_chapter_manifest() -> None:
+    manifest: dict[str, list[dict[str, Any]]] = {}
+    for path in sorted(CHAPTERS_DIR.glob("*.json")):
+        if not path.is_file() or not VIDEO_ID_RE.fullmatch(path.stem):
+            continue
+        try:
+            raw_chapters = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as error:
+            raise RuntimeError(f"Invalid chapter file {path.relative_to(ROOT)}: {error}") from error
+        if not isinstance(raw_chapters, list) or not raw_chapters:
+            raise RuntimeError(f"Chapter file {path.relative_to(ROOT)} must be a non-empty list")
+
+        subtitle_path = SUBTITLES_DIR / f"{path.stem}.vtt"
+        try:
+            subtitle_text = subtitle_path.read_text(encoding="utf-8")
+        except OSError as error:
+            raise RuntimeError(
+                f"Chapter file {path.relative_to(ROOT)} has no readable matching subtitle file"
+            ) from error
+        cue_starts = {
+            int(hours) * 3600 + int(minutes) * 60 + int(seconds)
+            for hours, minutes, seconds in re.findall(
+                r"^(\d{2}):(\d{2}):(\d{2})\.000\s+-->", subtitle_text, flags=re.MULTILINE
+            )
+        }
+        if not cue_starts:
+            raise RuntimeError(f"Matching subtitle file {subtitle_path.relative_to(ROOT)} has no whole-second cues")
+
+        chapters: list[dict[str, Any]] = []
+        previous_start = -1
+        for index, chapter in enumerate(raw_chapters, start=1):
+            if not isinstance(chapter, dict):
+                raise RuntimeError(f"Chapter {index} in {path.relative_to(ROOT)} is not an object")
+            start_seconds = chapter.get("startSeconds")
+            title = chapter.get("title")
+            if (
+                isinstance(start_seconds, bool)
+                or not isinstance(start_seconds, int)
+                or start_seconds < 0
+                or start_seconds <= previous_start
+            ):
+                raise RuntimeError(
+                    f"Chapter {index} in {path.relative_to(ROOT)} has an invalid or non-increasing startSeconds"
+                )
+            if not isinstance(title, str) or not title.strip() or len(title.strip()) > 120:
+                raise RuntimeError(f"Chapter {index} in {path.relative_to(ROOT)} has an invalid title")
+            if start_seconds not in cue_starts:
+                raise RuntimeError(
+                    f"Chapter {index} in {path.relative_to(ROOT)} does not match a VTT cue start"
+                )
+            if index == 1 and start_seconds != min(cue_starts):
+                raise RuntimeError(
+                    f"First chapter in {path.relative_to(ROOT)} must match the first VTT cue"
+                )
+            previous_start = start_seconds
+            chapters.append({"startSeconds": start_seconds, "title": title.strip()})
+        manifest[path.stem] = chapters
+
+    atomic_write_json(CHAPTERS_PATH, manifest)
+    print(f"Updated {CHAPTERS_PATH.relative_to(ROOT)} with chapters for {len(manifest)} video(s).")
+
+
 def main() -> int:
     update_subtitle_manifest()
+    update_chapter_manifest()
     try:
         videos = extract_videos()
     except Exception as error:  # Preserve known-good data on temporary extractor/network failures.

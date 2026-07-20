@@ -7,8 +7,11 @@
     videos: [],
     subtitleIds: new Set(),
     subtitleManifestLoaded: false,
+    chaptersByVideo: new Map(),
+    currentChapters: [],
     selectedVideo: null,
     player: null,
+    playerReady: false,
     cues: [],
     subtitlesEnabled: false,
     activeCueKey: null,
@@ -27,6 +30,8 @@
     subtitleToggle: document.getElementById("subtitle-toggle"),
     fullscreenToggle: document.getElementById("fullscreen-toggle"),
     playerFrame: document.getElementById("player-frame"),
+    chapterSection: document.getElementById("chapter-section"),
+    chapterList: document.getElementById("chapter-list"),
     subtitleOverlay: document.getElementById("subtitle-overlay"),
     subtitleFallback: document.getElementById("subtitle-fallback"),
     youtubeLink: document.getElementById("youtube-link"),
@@ -43,9 +48,10 @@
     document.addEventListener("fullscreenchange", updateFullscreenButton);
     window.addEventListener("popstate", route);
 
-    const [videosResult, subtitlesResult] = await Promise.allSettled([
+    const [videosResult, subtitlesResult, chaptersResult] = await Promise.allSettled([
       fetchJson("data/videos.json"),
-      fetchJson("data/subtitles.json")
+      fetchJson("data/subtitles.json"),
+      fetchJson("data/chapters.json")
     ]);
 
     if (videosResult.status === "fulfilled" && Array.isArray(videosResult.value)) {
@@ -60,6 +66,10 @@
       state.subtitleManifestLoaded = true;
     } else {
       state.subtitleManifestLoaded = false;
+    }
+
+    if (chaptersResult.status === "fulfilled") {
+      state.chaptersByVideo = normalizeChapterManifest(chaptersResult.value);
     }
 
     renderVideoList();
@@ -78,6 +88,32 @@
 
   function isValidVideo(video) {
     return Boolean(video && isValidVideoId(video.youtubeId) && typeof video.title === "string");
+  }
+
+  function normalizeChapterManifest(value) {
+    const manifest = new Map();
+    if (!value || typeof value !== "object" || Array.isArray(value)) return manifest;
+    Object.entries(value).forEach(([videoId, chapters]) => {
+      if (!isValidVideoId(videoId) || !Array.isArray(chapters)) return;
+      const normalized = [];
+      let previousStart = -1;
+      for (const chapter of chapters) {
+        if (!chapter || typeof chapter !== "object") return;
+        const startSeconds = chapter.startSeconds;
+        const title = typeof chapter.title === "string" ? chapter.title.trim() : "";
+        if (
+          !Number.isInteger(startSeconds)
+          || startSeconds < 0
+          || startSeconds <= previousStart
+          || !title
+          || title.length > 120
+        ) return;
+        normalized.push({ startSeconds, title });
+        previousStart = startSeconds;
+      }
+      if (normalized.length) manifest.set(videoId, normalized);
+    });
+    return manifest;
   }
 
   function renderVideoList() {
@@ -204,6 +240,10 @@
 
   function showListView() {
     stopPolling();
+    state.playerReady = false;
+    state.currentChapters = [];
+    elements.chapterList.replaceChildren();
+    elements.chapterSection.hidden = true;
     if (document.fullscreenElement === elements.playerFrame) {
       document.exitFullscreen().catch(() => {});
     }
@@ -237,6 +277,7 @@
     elements.fullscreenToggle.hidden = !supportsPlayerFullscreen() || !hasSubtitles;
     elements.fullscreenToggle.disabled = true;
     updateFullscreenButton();
+    renderChapters(video.youtubeId);
 
     if (hasSubtitles) await loadVtt(video.youtubeId);
     try {
@@ -292,14 +333,21 @@
       playerVars: { playsinline: 1, rel: 0 },
       events: {
         onReady: () => {
+          state.playerReady = true;
           startPolling();
           elements.fullscreenToggle.disabled = !state.cues.length;
+          setChapterButtonsDisabled(false);
         },
-        onError: () => showMessage(
-          elements.playerMessage,
-          "This video cannot be played in the embedded player. Use “Open on YouTube” instead.",
-          true
-        )
+        onError: () => {
+          state.playerReady = false;
+          elements.fullscreenToggle.disabled = true;
+          setChapterButtonsDisabled(true);
+          showMessage(
+            elements.playerMessage,
+            "This video cannot be played in the embedded player. Use “Open on YouTube” instead.",
+            true
+          );
+        }
       }
     });
   }
@@ -378,6 +426,59 @@
     if (![secondsPart, minutes, hours].every(Number.isFinite)) return null;
     if (secondsPart < 0 || secondsPart >= 60 || minutes < 0 || minutes >= 60 || hours < 0) return null;
     return hours * 3600 + minutes * 60 + secondsPart;
+  }
+
+  function renderChapters(videoId) {
+    const chapters = state.chaptersByVideo.get(videoId) || [];
+    state.currentChapters = chapters;
+    elements.chapterList.replaceChildren();
+    elements.chapterSection.hidden = chapters.length === 0;
+    if (!chapters.length) return;
+
+    const fragment = document.createDocumentFragment();
+    chapters.forEach((chapter) => {
+      const item = document.createElement("li");
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "chapter-button";
+      button.disabled = !state.playerReady;
+
+      const time = document.createElement("span");
+      time.className = "chapter-time";
+      time.textContent = formatChapterTime(chapter.startSeconds);
+
+      const title = document.createElement("span");
+      title.className = "chapter-title";
+      title.textContent = chapter.title;
+
+      button.append(time, title);
+      button.addEventListener("click", () => seekToChapter(chapter.startSeconds));
+      item.appendChild(button);
+      fragment.appendChild(item);
+    });
+    elements.chapterList.appendChild(fragment);
+  }
+
+  function formatChapterTime(totalSeconds) {
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+    if (hours > 0) {
+      return `${hours}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+    }
+    return `${minutes}:${String(seconds).padStart(2, "0")}`;
+  }
+
+  function setChapterButtonsDisabled(disabled) {
+    elements.chapterList.querySelectorAll("button").forEach((button) => {
+      button.disabled = disabled;
+    });
+  }
+
+  function seekToChapter(startSeconds) {
+    if (!state.playerReady || !state.player || typeof state.player.seekTo !== "function") return;
+    state.player.seekTo(startSeconds, true);
+    if (typeof state.player.playVideo === "function") state.player.playVideo();
   }
 
   function toggleSubtitles() {

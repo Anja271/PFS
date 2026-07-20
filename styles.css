@@ -267,6 +267,74 @@ select {
   margin: 24px 0;
 }
 
+.chapter-section {
+  margin: 24px 0;
+  padding: 24px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+}
+
+.chapter-heading {
+  margin-bottom: 16px;
+}
+
+.chapter-heading h3,
+.chapter-heading p {
+  margin: 0;
+}
+
+.chapter-heading p {
+  margin-top: 8px;
+  color: var(--muted);
+}
+
+.chapter-list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.chapter-button {
+  display: grid;
+  width: 100%;
+  min-height: 48px;
+  grid-template-columns: 64px minmax(0, 1fr);
+  gap: 16px;
+  align-items: center;
+  padding: 16px;
+  color: var(--text);
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.chapter-button:hover {
+  border-color: var(--primary);
+}
+
+.chapter-button:disabled {
+  cursor: wait;
+  opacity: 0.6;
+}
+
+.chapter-time {
+  color: var(--primary);
+  font-variant-numeric: tabular-nums;
+  font-weight: 750;
+}
+
+.chapter-title {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-weight: 700;
+}
+
 .subtitle-panel {
   padding: 24px;
   background: #202538;
@@ -304,6 +372,8 @@ select {
   .player-actions .button { width: 100%; }
   .subtitle-overlay { bottom: 48px; padding: 8px; }
   .player-frame:fullscreen .subtitle-overlay { bottom: 64px; padding: 16px; }
+  .chapter-section { padding: 16px; }
+  .chapter-button { grid-template-columns: 56px minmax(0, 1fr); gap: 8px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

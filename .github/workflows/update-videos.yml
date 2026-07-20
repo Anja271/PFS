@@ -9,6 +9,7 @@ on:
       - main
     paths:
       - "subtitles/*.vtt"
+      - "chapters/*.json"
       - "scripts/update_videos.py"
 
 permissions:
@@ -38,12 +39,12 @@ jobs:
 
       - name: Commit changed data
         run: |
-          if git diff --quiet -- data/videos.json data/subtitles.json; then
+          if git diff --quiet -- data/videos.json data/subtitles.json data/chapters.json; then
             echo "No data changes to commit."
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/videos.json data/subtitles.json
+          git add data/videos.json data/subtitles.json data/chapters.json
           git commit -m "Update livestream and subtitle data"
           git push

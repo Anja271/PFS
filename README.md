@@ -3,7 +3,7 @@
 A small, static GitHub Pages website that lists only the livestreams shown at
 [`@plave_official/streams`](https://www.youtube.com/@plave_official/streams) and plays optional, locally maintained English WebVTT fan subtitles in sync with the embedded YouTube player.
 
-The site uses HTML, CSS, vanilla JavaScript, the YouTube IFrame Player API, and a scheduled GitHub Action. It needs no API key, database, server, account, browser extension, npm installation, or website build step.
+The site uses HTML, CSS, vanilla JavaScript, the YouTube IFrame Player API, and a scheduled GitHub Action. It needs no API key, database, server, account, browser extension, npm installation, or website build step. Videos can optionally include broad, clickable chapter navigation alongside the fan subtitles.
 
 ## Publish the website for the first time
 
@@ -16,7 +16,7 @@ The site uses HTML, CSS, vanilla JavaScript, the YouTube IFrame Player API, and 
 
 All browser paths are relative, so this works both for a user/organization Page and for a project Page hosted below `https://USERNAME.github.io/REPOSITORY/`.
 
-If the workflow cannot push, check **Settings → Actions → General → Workflow permissions** and allow read and write permissions for `GITHUB_TOKEN`. The workflow itself requests only `contents: write`, which is required to update the two generated JSON files.
+If the workflow cannot push, check **Settings → Actions → General → Workflow permissions** and allow read and write permissions for `GITHUB_TOKEN`. The workflow itself requests only `contents: write`, which is required to update the generated JSON files.
 
 ## How the livestream list is updated
 
@@ -77,6 +77,33 @@ Replace this file with your own translation.
 
 The browser parser supports `MM:SS.mmm`, `HH:MM:SS.mmm`, optional cue IDs, multiline cues, and Windows or Unix line endings. Cue text is inserted with `textContent`, never as unchecked HTML.
 
+## Add chapter navigation
+
+An optional chapter file uses the same YouTube video ID as its filename:
+
+```text
+chapters/abc123XYZ.json
+```
+
+Example:
+
+```json
+[
+  {
+    "startSeconds": 1,
+    "title": "Opening and introductions"
+  },
+  {
+    "startSeconds": 615,
+    "title": "Weekend stories"
+  }
+]
+```
+
+Chapter starts are whole seconds, must be strictly increasing, and should match real VTT cue starts. Use broad scene or topic boundaries rather than many tiny sections. Titles should be concise English descriptions supported by the translated conversation.
+
+Save the chapter file together with `subtitles/abc123XYZ.vtt`, then commit and push both files. The update workflow validates all chapter files and regenerates `data/chapters.json`; do not edit that generated manifest manually. A video without a chapter file continues to work normally and simply hides the Chapters section.
+
 ## Replace or correct subtitles
 
 1. Edit the existing `.vtt` file.
@@ -98,7 +125,7 @@ Then open `http://localhost:8000/`. The checked-in `data/videos.json` starts emp
 
 ## How playback works
 
-The YouTube IFrame Player API supplies the current playback time every 150 ms. The page selects active VTT cues and safely displays their text both over the embedded video and in a persistent fallback panel below it. Seeking, pausing, resuming, and playback-speed changes work because each poll uses the player's current time rather than a separate clock.
+The YouTube IFrame Player API supplies the current playback time every 150 ms. The page selects active VTT cues and safely displays their text both over the embedded video and in a persistent fallback panel below it. Seeking, pausing, resuming, and playback-speed changes work because each poll uses the player's current time rather than a separate clock. If chapter data exists, the page displays large chapter buttons below the player; selecting one seeks to that chapter and starts playback.
 
 Embedded iframe fullscreen behavior on iPad is controlled by Safari and YouTube, so the normal inline 16:9 player is the primary experience. `playsinline=1` is enabled, and the subtitle panel below the player remains the dependable viewing mode.
 
@@ -111,6 +138,8 @@ The site has no analytics, cookies of its own, or first-party tracking. Livestre
 - `index.html`, `styles.css`, `app.js` — static website and player
 - `data/videos.json` — generated Live-tab video metadata
 - `data/subtitles.json` — generated list of available subtitle IDs
+- `data/chapters.json` — generated chapter data for the website
 - `subtitles/*.vtt` — your English fan subtitle files
-- `scripts/update_videos.py` — yt-dlp metadata and subtitle-manifest updater
+- `chapters/*.json` — optional per-video chapter source files
+- `scripts/update_videos.py` — yt-dlp metadata and subtitle/chapter-manifest updater
 - `.github/workflows/update-videos.yml` — daily, manual, and subtitle-push automation
