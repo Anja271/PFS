@@ -106,7 +106,7 @@ Save the chapter file together with `subtitles/abc123XYZ.vtt`, then commit and p
 
 ### Most replayed chapter badges
 
-The daily workflow also asks yt-dlp for YouTube's optional replay heatmap for every video that has a chapter source file. No video media is downloaded and no API key is used. YouTube does not publish this information through its official public APIs, does not provide it for every video, and may add it only after enough viewing activity has accumulated. A missing heatmap is therefore normal.
+The daily workflow also asks yt-dlp for YouTube's optional replay heatmap for every video that has a complete chapter source file or reviewed partial-highlight boundaries. No video media is downloaded and no API key is used. YouTube does not publish this information through its official public APIs, does not provide it for every video, and may add it only after enough viewing activity has accumulated. A missing heatmap is therefore normal.
 
 When valid heatmap data exists, `scripts/update_heatmaps.py` writes it atomically to `data/heatmaps.json`. A temporary extraction failure or missing response does not erase the last valid heatmap for that video. The website assigns each YouTube heatmap interval to the chapter containing its midpoint. Every chapter containing a normalized heat value of at least `0.5` receives the text badge **🔥 Most replayed**. There is no maximum number of marked chapters: an eventful stream can have many. Videos without heatmap data and chapters below the threshold remain unchanged.
 
@@ -155,7 +155,7 @@ Candidates are **not** shown on the public Highlights page. They first need revi
 python scripts/scan_highlight_candidates.py --limit 5
 ```
 
-Public GitHub-hosted runners are frequently stopped by YouTube's anti-bot check during repeated per-video requests. The scanner therefore does not run in the scheduled GitHub Action and requires no account cookies or repository secrets. Run it locally—or ask Codex to process the next batch—and commit the two queue files afterward. Use `--force` only for an intentional immediate recheck. Use `--retry-errors` to retry only temporary extraction errors immediately.
+Public GitHub-hosted runners are frequently stopped by YouTube's anti-bot check during repeated per-video requests. The scanner therefore does not run in the scheduled GitHub Action and requires no account cookies or repository secrets. Run it locally—or ask Codex to process the next batch—and commit the two queue files afterward. Use `--force` only for an intentional immediate recheck. Use `--retry-errors` to retry only temporary extraction errors immediately. After publishing a candidate, `--sync-only` removes it from the candidate queue without making any YouTube request.
 
 ## Replace or correct subtitles
 
@@ -207,4 +207,6 @@ The site has no analytics, cookies of its own, or first-party tracking. Livestre
 - `scripts/update_heatmaps.py` — optional yt-dlp replay-heatmap updater
 - `scripts/update_highlights.py` — coverage validator and static highlight-manifest generator
 - `scripts/scan_highlight_candidates.py` — bounded, resumable back-catalogue heatmap discovery
+- `tools/validate_subtitle_package.py` — validates complete subtitle packages
+- `tools/validate_partial_subtitle_package.py` — validates highlight-only VTT files against their complete source transcript
 - `.github/workflows/update-videos.yml` — daily, manual, and subtitle-push automation

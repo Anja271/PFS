@@ -1,13 +1,13 @@
 {
   "version": 1,
-  "updatedAt": "2026-07-20T21:09:30Z",
+  "updatedAt": "2026-07-20T21:34:11Z",
   "retryAfterDays": 30,
   "videos": {
     "x7qic07HViw": {
       "status": "published",
       "checkedAt": "2026-07-20T21:01:23Z",
       "title": "세 살 플리 평플까지 간다!🌕 사랑 꽉 끼는 🎂플리 생일 파티💙💜🩷❤️🖤 | #플레이브 PLAVE | PLAVE Live Full Ver.",
-      "publishedAt": "",
+      "publishedAt": "2026-07-07",
       "subtitleCoverage": "full"
     },
     "5Vn9-DflIq0": {
@@ -35,27 +35,11 @@
       "hasKoreanCaptions": true
     },
     "I05J9qhc8AM": {
-      "status": "ready",
-      "checkedAt": "2026-07-20T21:01:23Z",
+      "status": "published",
       "title": "작곡즈의 🎙️한소절 노래방 & 🔒잠금창법 🎶한호흡 챌린지 💙💜❤️ | #플레이브 PLAVE | PLAVE Yejun & Noah & Eunho Live Full Ver.",
-      "publishedAt": "2026-07-07",
-      "subtitleCoverage": "none",
-      "hasKoreanCaptions": true,
-      "heatmapPoints": 100,
-      "hotClusters": [
-        {
-          "startSeconds": 4168,
-          "endSeconds": 4248,
-          "peakSeconds": 4208,
-          "peakValue": 0.533615
-        },
-        {
-          "startSeconds": 6172,
-          "endSeconds": 6252,
-          "peakSeconds": 6212,
-          "peakValue": 1.0
-        }
-      ]
+      "publishedAt": "",
+      "subtitleCoverage": "highlights",
+      "checkedAt": "2026-07-20T21:34:11Z"
     },
     "56IvdSggoFg": {
       "status": "ready",

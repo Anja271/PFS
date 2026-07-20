@@ -13,5 +13,19 @@
     "coverage": "full",
     "subtitlePath": "subtitles/x7qic07HViw.vtt",
     "ranges": []
+  },
+  "I05J9qhc8AM": {
+    "coverage": "highlights",
+    "subtitlePath": "highlight-subtitles/I05J9qhc8AM.vtt",
+    "ranges": [
+      {
+        "startSeconds": 3900,
+        "endSeconds": 4598
+      },
+      {
+        "startSeconds": 5926,
+        "endSeconds": 6231
+      }
+    ]
   }
 }

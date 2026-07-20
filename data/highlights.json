@@ -1,5 +1,29 @@
 [
   {
+    "youtubeId": "I05J9qhc8AM",
+    "date": "2026-07-07",
+    "displayTitle": "Producer Line’s 🎙️One-Line Karaoke & 🔒Locked Vocal Technique 🎶One-Breath Challenge 💙💜❤️",
+    "originalTitle": "작곡즈의 🎙️한소절 노래방 & 🔒잠금창법 🎶한호흡 챌린지 💙💜❤️ | #플레이브 PLAVE | PLAVE Yejun & Noah & Eunho Live Full Ver.",
+    "coverage": "highlights",
+    "subtitlePath": "highlight-subtitles/I05J9qhc8AM.vtt",
+    "scenes": [
+      {
+        "startSeconds": 3900,
+        "endSeconds": 4598,
+        "title": "The one-breath “PLAVE Island” challenge",
+        "peakSeconds": 4208,
+        "peakValue": 0.533615
+      },
+      {
+        "startSeconds": 5926,
+        "endSeconds": 6231,
+        "title": "Learning and performing “The Road to Me”",
+        "peakSeconds": 6212,
+        "peakValue": 1.0
+      }
+    ]
+  },
+  {
     "youtubeId": "x7qic07HViw",
     "date": "2026-06-19",
     "displayTitle": "Three-Year-Old PLLI, Together Forever! 🌕 A Birthday Party Packed with Love 🎂💙💜🩷❤️🖤",

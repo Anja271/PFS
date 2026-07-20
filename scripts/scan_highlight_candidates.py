@@ -294,6 +294,11 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="retry saved extraction errors immediately without rechecking normal results",
     )
+    parser.add_argument(
+        "--sync-only",
+        action="store_true",
+        help="mark newly published highlights and rebuild the queue without YouTube requests",
+    )
     return parser.parse_args()
 
 
@@ -319,13 +324,14 @@ def main() -> int:
     for video in videos:
         video_id = video["youtubeId"]
         if video_id in published:
+            current = entries.get(video_id)
+            previous = current if isinstance(current, dict) else {}
             published_entry = {
                 "status": "published",
-                "title": video["title"],
-                "publishedAt": video["publishedAt"],
+                "title": video["title"] or str(previous.get("title") or ""),
+                "publishedAt": video["publishedAt"] or str(previous.get("publishedAt") or ""),
                 "subtitleCoverage": subtitle_coverage(video_id),
             }
-            current = entries.get(video_id)
             comparable = (
                 {key: value for key, value in current.items() if key != "checkedAt"}
                 if isinstance(current, dict)
@@ -335,33 +341,34 @@ def main() -> int:
                 entries[video_id] = {**published_entry, "checkedAt": checked_at}
 
     attempted = 0
-    for video in videos:
-        if attempted >= args.limit:
-            break
-        video_id = video["youtubeId"]
-        saved_entry = entries.get(video_id)
-        force_this_entry = args.force or (
-            args.retry_errors and isinstance(saved_entry, dict) and saved_entry.get("status") == "error"
-        )
-        if video_id in published or not should_scan(
-            saved_entry, now, timedelta(days=args.retry_after_days), force_this_entry
-        ):
-            continue
-        attempted += 1
-        print(f"[{attempted}/{args.limit}] Checking {video_id}: {video['title']}")
-        try:
-            info = extract_candidate(video_id)
-            entries[video_id] = classify(video, info, checked_at)
-        except Exception as error:
-            entries[video_id] = {
-                "status": "error",
-                "checkedAt": checked_at,
-                "title": video["title"],
-                "publishedAt": video["publishedAt"],
-                "subtitleCoverage": subtitle_coverage(video_id),
-                "error": str(error).strip()[:500] or error.__class__.__name__,
-            }
-        print(f"  -> {entries[video_id]['status']}")
+    if not args.sync_only:
+        for video in videos:
+            if attempted >= args.limit:
+                break
+            video_id = video["youtubeId"]
+            saved_entry = entries.get(video_id)
+            force_this_entry = args.force or (
+                args.retry_errors and isinstance(saved_entry, dict) and saved_entry.get("status") == "error"
+            )
+            if video_id in published or not should_scan(
+                saved_entry, now, timedelta(days=args.retry_after_days), force_this_entry
+            ):
+                continue
+            attempted += 1
+            print(f"[{attempted}/{args.limit}] Checking {video_id}: {video['title']}")
+            try:
+                info = extract_candidate(video_id)
+                entries[video_id] = classify(video, info, checked_at)
+            except Exception as error:
+                entries[video_id] = {
+                    "status": "error",
+                    "checkedAt": checked_at,
+                    "title": video["title"],
+                    "publishedAt": video["publishedAt"],
+                    "subtitleCoverage": subtitle_coverage(video_id),
+                    "error": str(error).strip()[:500] or error.__class__.__name__,
+                }
+            print(f"  -> {entries[video_id]['status']}")
 
     candidates = build_candidates(videos, entries)
     counts: dict[str, int] = {}

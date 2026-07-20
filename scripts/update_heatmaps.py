@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Refresh optional YouTube "Most replayed" heatmaps for chaptered videos.
+"""Refresh optional YouTube "Most replayed" heatmaps for publishable videos.
 
 YouTube does not expose heatmaps through its public APIs. yt-dlp can sometimes
 read them from the player metadata, but they are not available for every video
@@ -23,6 +23,7 @@ from yt_dlp import YoutubeDL
 
 ROOT = Path(__file__).resolve().parents[1]
 CHAPTERS_DIR = ROOT / "chapters"
+PARTIAL_SCENES_DIR = ROOT / "highlights"
 HEATMAPS_PATH = ROOT / "data" / "heatmaps.json"
 VIDEO_ID_RE = re.compile(r"^[A-Za-z0-9_-]{6,20}$")
 
@@ -110,12 +111,14 @@ def load_existing_manifest() -> dict[str, list[dict[str, float]]]:
     return valid
 
 
-def chaptered_video_ids() -> list[str]:
-    return sorted(
+def eligible_video_ids() -> list[str]:
+    ids = {
         path.stem
-        for path in CHAPTERS_DIR.glob("*.json")
+        for directory in (CHAPTERS_DIR, PARTIAL_SCENES_DIR)
+        for path in directory.glob("*.json")
         if path.is_file() and VIDEO_ID_RE.fullmatch(path.stem)
-    )
+    }
+    return sorted(ids)
 
 
 def extract_heatmap(video_id: str) -> list[dict[str, float]] | None:
@@ -139,7 +142,7 @@ def main() -> int:
     existing = load_existing_manifest()
     manifest: dict[str, list[dict[str, float]]] = {}
 
-    for video_id in chaptered_video_ids():
+    for video_id in eligible_video_ids():
         try:
             heatmap = extract_heatmap(video_id)
         except Exception as error:

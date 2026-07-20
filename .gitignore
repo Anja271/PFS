@@ -1,3 +1,5 @@
 .DS_Store
 .subtitle-work/
+__pycache__/
+*.pyc
 plave-bamby-subs/

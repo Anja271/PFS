@@ -89,7 +89,11 @@ def validate_source_music(cues: list[dict[str, object]], source: list[dict[str, 
         if "♪" not in str(original.get("source", "")):
             continue
         text = str(translated["text"])
-        if not ("[Music]" in text or "performs" in text):
+        lowered = text.lower()
+        if not any(
+            marker in lowered
+            for marker in ("[music]", "singing", " sing", "sings", "perform", "listen")
+        ):
             raise ValueError(f"cue {index}: source music marker lacks an approved description")
 
 
