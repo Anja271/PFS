@@ -143,6 +143,20 @@ If a later heatmap no longer places a declared partial scene above the threshold
 
 Do not edit `data/subtitle-coverage.json` or `data/highlights.json` manually. The daily/manual workflow regenerates them after refreshing the video list, chapter manifest, and optional heatmaps.
 
+### Back-catalogue highlight scan
+
+The daily workflow also inspects the next five unprocessed livestreams from `data/videos.json`, always following the official Live-tab order from newest to oldest. `scripts/scan_highlight_candidates.py` downloads no video or audio. It reads only per-video metadata, Korean caption availability, and YouTube's optional replay heatmap.
+
+The resumable results are stored in `data/highlight-scan-state.json`. A normal missing heatmap or missing Korean auto-caption result is retried after 30 days; extraction errors can be retried after one day. A temporary failure is recorded separately and never treated as proof that no heatmap exists. Already published highlights are skipped. `data/highlight-candidates.json` contains only streams that currently have usable source captions (or existing English fan subtitles) and a valid heatmap, including contiguous heat clusters at the same `0.5` threshold used by the website.
+
+Candidates are **not** shown on the public Highlights page. They first need reviewed scene boundaries, English fan subtitles, and the normal validation described above. This separation prevents raw heatmap peaks or untranslated material from appearing on the website. To run the next five-video batch locally or through a checked-out repository, use:
+
+```sh
+python scripts/scan_highlight_candidates.py --limit 5
+```
+
+Use `--force` only for an intentional immediate recheck. The workflow commits the two generated queue files only when their contents change.
+
 ## Replace or correct subtitles
 
 1. Edit the existing `.vtt` file.
@@ -182,6 +196,8 @@ The site has no analytics, cookies of its own, or first-party tracking. Livestre
 - `data/heatmaps.json` — generated optional YouTube replay heatmaps
 - `data/subtitle-coverage.json` — generated full/partial subtitle availability
 - `data/highlights.json` — generated stream groups and clickable highlighted scenes
+- `data/highlight-scan-state.json` — resumable back-catalogue scan status
+- `data/highlight-candidates.json` — non-public-facing queue of usable heatmap candidates
 - `subtitles/*.vtt` — your English fan subtitle files
 - `highlight-subtitles/*.vtt` — optional VTT files covering only declared highlighted scenes
 - `chapters/*.json` — optional per-video chapter source files
@@ -190,4 +206,5 @@ The site has no analytics, cookies of its own, or first-party tracking. Livestre
 - `scripts/update_videos.py` — yt-dlp metadata and subtitle/chapter-manifest updater
 - `scripts/update_heatmaps.py` — optional yt-dlp replay-heatmap updater
 - `scripts/update_highlights.py` — coverage validator and static highlight-manifest generator
+- `scripts/scan_highlight_candidates.py` — bounded, resumable back-catalogue heatmap discovery
 - `.github/workflows/update-videos.yml` — daily, manual, and subtitle-push automation

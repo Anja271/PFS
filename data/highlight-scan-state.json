@@ -1,0 +1,108 @@
+{
+  "version": 1,
+  "updatedAt": "2026-07-20T21:01:23Z",
+  "retryAfterDays": 30,
+  "videos": {
+    "x7qic07HViw": {
+      "status": "published",
+      "checkedAt": "2026-07-20T21:01:23Z",
+      "title": "세 살 플리 평플까지 간다!🌕 사랑 꽉 끼는 🎂플리 생일 파티💙💜🩷❤️🖤 | #플레이브 PLAVE | PLAVE Live Full Ver.",
+      "publishedAt": "",
+      "subtitleCoverage": "full"
+    },
+    "5Vn9-DflIq0": {
+      "status": "no_heatmap",
+      "checkedAt": "2026-07-20T21:01:23Z",
+      "title": "플리👑 그냥 느끼시오. 예은하의 로판(?)🎻 라이브 💙❤️🖤 | #플레이브 PLAVE | Yejun & Eunho & Hamin Live Full Ver.",
+      "publishedAt": "2026-07-20",
+      "subtitleCoverage": "full",
+      "hasKoreanCaptions": true
+    },
+    "99nR8UeN76M": {
+      "status": "no_heatmap",
+      "checkedAt": "2026-07-20T21:01:23Z",
+      "title": "봉구 밭🍉 과수원 길의 핑크 쪼꼬미🐹 밤비 생일 라이브🌻 🩷 | #플레이브 PLAVE | PLAVE BAMBY Birthday Live Full Ver.",
+      "publishedAt": "2026-07-15",
+      "subtitleCoverage": "full",
+      "hasKoreanCaptions": true
+    },
+    "-jsSfOBUtAI": {
+      "status": "no_heatmap",
+      "checkedAt": "2026-07-20T21:01:23Z",
+      "title": "멧챠 스키 플레이브의 🔍멧챠 카멜레온🎨 라이브💙💜🩷❤️🖤 | #플레이브 PLAVE | PLAVE Live Full Ver.",
+      "publishedAt": "2026-07-14",
+      "subtitleCoverage": "none",
+      "hasKoreanCaptions": true
+    },
+    "I05J9qhc8AM": {
+      "status": "ready",
+      "checkedAt": "2026-07-20T21:01:23Z",
+      "title": "작곡즈의 🎙️한소절 노래방 & 🔒잠금창법 🎶한호흡 챌린지 💙💜❤️ | #플레이브 PLAVE | PLAVE Yejun & Noah & Eunho Live Full Ver.",
+      "publishedAt": "2026-07-07",
+      "subtitleCoverage": "none",
+      "hasKoreanCaptions": true,
+      "heatmapPoints": 100,
+      "hotClusters": [
+        {
+          "startSeconds": 4168,
+          "endSeconds": 4248,
+          "peakSeconds": 4208,
+          "peakValue": 0.533615
+        },
+        {
+          "startSeconds": 6172,
+          "endSeconds": 6252,
+          "peakSeconds": 6212,
+          "peakValue": 1.0
+        }
+      ]
+    },
+    "56IvdSggoFg": {
+      "status": "ready",
+      "checkedAt": "2026-07-20T21:01:23Z",
+      "title": "댄라즈가 다 춰드립니다!!!🎶 2026 상반기 결산 랜플댄🕺🩷🖤 | #플레이브 PLAVE | PLAVE Bamby & Hamin Live Full Ver.",
+      "publishedAt": "2026-06-29",
+      "subtitleCoverage": "none",
+      "hasKoreanCaptions": true,
+      "heatmapPoints": 100,
+      "hotClusters": [
+        {
+          "startSeconds": 2877,
+          "endSeconds": 2951,
+          "peakSeconds": 2914,
+          "peakValue": 0.800394
+        },
+        {
+          "startSeconds": 3172,
+          "endSeconds": 3320,
+          "peakSeconds": 3283,
+          "peakValue": 0.569235
+        },
+        {
+          "startSeconds": 3762,
+          "endSeconds": 3836,
+          "peakSeconds": 3799,
+          "peakValue": 0.661071
+        },
+        {
+          "startSeconds": 4426,
+          "endSeconds": 4500,
+          "peakSeconds": 4463,
+          "peakValue": 0.559762
+        },
+        {
+          "startSeconds": 4869,
+          "endSeconds": 5016,
+          "peakSeconds": 4906,
+          "peakValue": 0.97222
+        },
+        {
+          "startSeconds": 6934,
+          "endSeconds": 7008,
+          "peakSeconds": 6971,
+          "peakValue": 1.0
+        }
+      ]
+    }
+  }
+}

@@ -16,6 +16,7 @@ on:
       - "scripts/update_videos.py"
       - "scripts/update_heatmaps.py"
       - "scripts/update_highlights.py"
+      - "scripts/scan_highlight_candidates.py"
 
 permissions:
   contents: write
@@ -45,17 +46,20 @@ jobs:
       - name: Update optional Most replayed data
         run: python scripts/update_heatmaps.py
 
+      - name: Scan the next livestream batch for highlight candidates
+        run: python scripts/scan_highlight_candidates.py --limit 5
+
       - name: Build subtitle coverage and highlight data
         run: python scripts/update_highlights.py
 
       - name: Commit changed data
         run: |
-          if git diff --quiet -- data/videos.json data/subtitles.json data/chapters.json data/heatmaps.json data/subtitle-coverage.json data/highlights.json; then
+          if git diff --quiet -- data/videos.json data/subtitles.json data/chapters.json data/heatmaps.json data/subtitle-coverage.json data/highlights.json data/highlight-scan-state.json data/highlight-candidates.json; then
             echo "No data changes to commit."
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/videos.json data/subtitles.json data/chapters.json data/heatmaps.json data/subtitle-coverage.json data/highlights.json
+          git add data/videos.json data/subtitles.json data/chapters.json data/heatmaps.json data/subtitle-coverage.json data/highlights.json data/highlight-scan-state.json data/highlight-candidates.json
           git commit -m "Update livestream and subtitle data"
           git push
