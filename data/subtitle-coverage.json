@@ -14,6 +14,32 @@
     "subtitlePath": "subtitles/x7qic07HViw.vtt",
     "ranges": []
   },
+  "56IvdSggoFg": {
+    "coverage": "highlights",
+    "subtitlePath": "highlight-subtitles/56IvdSggoFg.vtt",
+    "ranges": [
+      {
+        "startSeconds": 2840,
+        "endSeconds": 3372
+      },
+      {
+        "startSeconds": 3671,
+        "endSeconds": 4068
+      },
+      {
+        "startSeconds": 4276,
+        "endSeconds": 4725
+      },
+      {
+        "startSeconds": 4725,
+        "endSeconds": 5153
+      },
+      {
+        "startSeconds": 6752,
+        "endSeconds": 7003
+      }
+    ]
+  },
   "I05J9qhc8AM": {
     "coverage": "highlights",
     "subtitlePath": "highlight-subtitles/I05J9qhc8AM.vtt",
