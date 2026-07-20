@@ -33,6 +33,8 @@
     playerTitle: document.getElementById("player-title"),
     playerStatus: document.getElementById("player-status"),
     playerMessage: document.getElementById("player-message"),
+    highlightPlayHelp: document.getElementById("highlight-play-help"),
+    highlightPlay: document.getElementById("highlight-play"),
     subtitleToggle: document.getElementById("subtitle-toggle"),
     fullscreenToggle: document.getElementById("fullscreen-toggle"),
     playerFrame: document.getElementById("player-frame"),
@@ -48,6 +50,7 @@
 
   async function init() {
     elements.filter.addEventListener("change", renderVideoList);
+    elements.highlightPlay.addEventListener("click", playHighlightedScene);
     elements.subtitleToggle.addEventListener("click", toggleSubtitles);
     elements.fullscreenToggle.addEventListener("click", togglePlayerFullscreen);
     elements.backLink.addEventListener("click", handleBackLink);
@@ -352,6 +355,12 @@
     state.returnToHighlights = false;
     elements.backLink.href = "./";
     elements.backLink.textContent = "← Back to livestreams";
+    elements.highlightPlay.hidden = true;
+    elements.highlightPlay.disabled = true;
+    elements.highlightPlay.textContent = "Play highlighted scene";
+    elements.highlightPlayHelp.hidden = true;
+    elements.highlightPlayHelp.textContent = "";
+    elements.subtitleToggle.className = "button button-primary";
     elements.playerView.hidden = true;
     elements.listView.hidden = false;
     document.title = "PLAVE Lives with English Fan Subtitles";
@@ -373,6 +382,16 @@
     elements.youtubeLink.href = `https://www.youtube.com/watch?v=${encodeURIComponent(video.youtubeId)}`
       + (state.initialStartSeconds ? `&t=${state.initialStartSeconds}s` : "");
     elements.playerMessage.hidden = true;
+    elements.highlightPlay.hidden = state.initialStartSeconds === 0;
+    elements.highlightPlay.disabled = true;
+    elements.highlightPlay.textContent = "Play highlighted scene";
+    elements.highlightPlayHelp.hidden = state.initialStartSeconds === 0;
+    elements.highlightPlayHelp.textContent = state.initialStartSeconds > 0
+      ? `Ready at ${formatChapterTime(state.initialStartSeconds)}. If playback does not start automatically, tap Play in the YouTube video.`
+      : "";
+    elements.subtitleToggle.className = state.initialStartSeconds > 0
+      ? "button button-secondary"
+      : "button button-primary";
     document.title = `${video.title} — PLAVE Lives`;
 
     const hasSubtitles = hasAnySubtitles(video.youtubeId);
@@ -440,19 +459,27 @@
       videoId,
       width: "100%",
       height: "100%",
-      playerVars: { playsinline: 1, rel: 0, start: startSeconds || 0 },
+      playerVars: {
+        playsinline: 1,
+        rel: 0,
+        start: startSeconds || 0,
+        autoplay: startSeconds > 0 ? 1 : 0
+      },
       events: {
         onReady: () => {
           state.playerReady = true;
           startPolling();
           elements.fullscreenToggle.disabled = !state.cues.length;
           setChapterButtonsDisabled(false);
-          if (startSeconds > 0 && state.cues.length && !state.subtitlesEnabled) {
-            toggleSubtitles();
+          elements.highlightPlay.disabled = startSeconds <= 0;
+          if (startSeconds > 0) {
+            playHighlightedScene();
           }
         },
+        onStateChange: handlePlayerStateChange,
         onError: () => {
           state.playerReady = false;
+          elements.highlightPlay.disabled = true;
           elements.fullscreenToggle.disabled = true;
           setChapterButtonsDisabled(true);
           showMessage(
@@ -463,6 +490,41 @@
         }
       }
     });
+  }
+
+  function playHighlightedScene() {
+    if (
+      !state.playerReady
+      || !state.player
+      || state.initialStartSeconds <= 0
+      || typeof state.player.seekTo !== "function"
+    ) return;
+    if (state.cues.length && !state.subtitlesEnabled) toggleSubtitles();
+    if (
+      state.selectedVideo
+      && typeof state.player.loadVideoById === "function"
+    ) {
+      state.player.loadVideoById({
+        videoId: state.selectedVideo.youtubeId,
+        startSeconds: state.initialStartSeconds
+      });
+    } else {
+      state.player.seekTo(state.initialStartSeconds, true);
+      if (typeof state.player.playVideo === "function") state.player.playVideo();
+    }
+    centerPlayerInView();
+    window.setTimeout(centerPlayerInView, 250);
+  }
+
+  function handlePlayerStateChange(event) {
+    if (
+      state.initialStartSeconds > 0
+      && window.YT
+      && window.YT.PlayerState
+      && event.data === window.YT.PlayerState.PLAYING
+    ) {
+      elements.highlightPlay.textContent = "Restart highlighted scene";
+    }
   }
 
   async function loadVtt(videoId) {

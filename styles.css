@@ -297,6 +297,15 @@ select {
   margin: 24px 0;
 }
 
+.highlight-play-help {
+  margin: 16px 0 0;
+  padding: 16px;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
 .chapter-section {
   margin: 24px 0;
   padding: 24px;
