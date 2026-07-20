@@ -25,6 +25,8 @@
     playerStatus: document.getElementById("player-status"),
     playerMessage: document.getElementById("player-message"),
     subtitleToggle: document.getElementById("subtitle-toggle"),
+    fullscreenToggle: document.getElementById("fullscreen-toggle"),
+    playerFrame: document.getElementById("player-frame"),
     subtitleOverlay: document.getElementById("subtitle-overlay"),
     subtitleFallback: document.getElementById("subtitle-fallback"),
     youtubeLink: document.getElementById("youtube-link"),
@@ -36,7 +38,9 @@
   async function init() {
     elements.filter.addEventListener("change", renderVideoList);
     elements.subtitleToggle.addEventListener("click", toggleSubtitles);
+    elements.fullscreenToggle.addEventListener("click", togglePlayerFullscreen);
     elements.backLink.addEventListener("click", handleBackLink);
+    document.addEventListener("fullscreenchange", updateFullscreenButton);
     window.addEventListener("popstate", route);
 
     const [videosResult, subtitlesResult] = await Promise.allSettled([
@@ -200,6 +204,9 @@
 
   function showListView() {
     stopPolling();
+    if (document.fullscreenElement === elements.playerFrame) {
+      document.exitFullscreen().catch(() => {});
+    }
     if (state.player && typeof state.player.destroy === "function") {
       state.player.destroy();
       state.player = null;
@@ -227,6 +234,9 @@
     state.subtitlesEnabled = false;
     elements.subtitleToggle.disabled = !hasSubtitles;
     elements.subtitleToggle.textContent = hasSubtitles ? "Turn fan subtitles on" : "Fan subtitles unavailable";
+    elements.fullscreenToggle.hidden = !supportsPlayerFullscreen() || !hasSubtitles;
+    elements.fullscreenToggle.disabled = true;
+    updateFullscreenButton();
 
     if (hasSubtitles) await loadVtt(video.youtubeId);
     try {
@@ -281,7 +291,10 @@
       height: "100%",
       playerVars: { playsinline: 1, rel: 0 },
       events: {
-        onReady: startPolling,
+        onReady: () => {
+          startPolling();
+          elements.fullscreenToggle.disabled = !state.cues.length;
+        },
         onError: () => showMessage(
           elements.playerMessage,
           "This video cannot be played in the embedded player. Use “Open on YouTube” instead.",
@@ -377,6 +390,40 @@
     state.activeCueKey = null;
     if (!state.subtitlesEnabled) resetSubtitleDisplay("Fan subtitles are off.");
     else updateSubtitles();
+  }
+
+  function supportsPlayerFullscreen() {
+    return Boolean(
+      elements.playerFrame
+      && typeof elements.playerFrame.requestFullscreen === "function"
+      && typeof document.exitFullscreen === "function"
+    );
+  }
+
+  async function togglePlayerFullscreen() {
+    if (!supportsPlayerFullscreen() || !state.cues.length) return;
+    try {
+      if (document.fullscreenElement === elements.playerFrame) {
+        await document.exitFullscreen();
+        return;
+      }
+      if (!state.subtitlesEnabled) toggleSubtitles();
+      await elements.playerFrame.requestFullscreen();
+    } catch (error) {
+      showMessage(
+        elements.playerMessage,
+        "Fullscreen could not be opened. The video and fan subtitles still work in the normal view.",
+        true
+      );
+    }
+  }
+
+  function updateFullscreenButton() {
+    const isFullscreen = document.fullscreenElement === elements.playerFrame;
+    elements.fullscreenToggle.textContent = isFullscreen
+      ? "Exit fullscreen"
+      : "Fullscreen with fan subtitles";
+    elements.fullscreenToggle.setAttribute("aria-pressed", String(isFullscreen));
   }
 
   function startPolling() {

@@ -246,6 +246,20 @@ select {
 
 .subtitle-overlay.has-text { display: block; }
 
+.player-frame:fullscreen {
+  width: 100vw;
+  height: 100vh;
+  aspect-ratio: auto;
+  border-radius: 0;
+}
+
+.player-frame:fullscreen .subtitle-overlay {
+  bottom: 64px;
+  max-width: calc(100% - 32px);
+  padding: 16px;
+  font-size: clamp(1.25rem, 3vw, 2rem);
+}
+
 .player-actions {
   display: flex;
   flex-wrap: wrap;
@@ -289,6 +303,7 @@ select {
   .player-actions { flex-direction: column; }
   .player-actions .button { width: 100%; }
   .subtitle-overlay { bottom: 48px; padding: 8px; }
+  .player-frame:fullscreen .subtitle-overlay { bottom: 64px; padding: 16px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
