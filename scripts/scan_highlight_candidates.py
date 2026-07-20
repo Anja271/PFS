@@ -289,6 +289,11 @@ def parse_args() -> argparse.Namespace:
         help="days before retrying a normal no-data result",
     )
     parser.add_argument("--force", action="store_true", help="ignore saved retry dates")
+    parser.add_argument(
+        "--retry-errors",
+        action="store_true",
+        help="retry saved extraction errors immediately without rechecking normal results",
+    )
     return parser.parse_args()
 
 
@@ -334,8 +339,12 @@ def main() -> int:
         if attempted >= args.limit:
             break
         video_id = video["youtubeId"]
+        saved_entry = entries.get(video_id)
+        force_this_entry = args.force or (
+            args.retry_errors and isinstance(saved_entry, dict) and saved_entry.get("status") == "error"
+        )
         if video_id in published or not should_scan(
-            entries.get(video_id), now, timedelta(days=args.retry_after_days), args.force
+            saved_entry, now, timedelta(days=args.retry_after_days), force_this_entry
         ):
             continue
         attempted += 1
