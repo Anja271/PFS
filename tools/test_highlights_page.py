@@ -24,13 +24,12 @@ def main() -> int:
     assert "window.sessionStorage.setItem" in javascript
     assert "from=highlights" in javascript
     assert "endSeconds: scene.endSeconds" in javascript
-    assert "coverage: stream.coverage" in javascript
     assert "&end=${endSeconds}" in javascript
-    assert 'coverage === "highlights"' in javascript
     assert "link.href = sceneUrl" in javascript
     app_javascript = (ROOT / "app.js").read_text(encoding="utf-8")
     assert "coverageRange?.endSeconds" in app_javascript
-    assert 'getSubtitleCoverage(video.youtubeId) === "highlights"' in app_javascript
+    assert 'params.get("from") === "highlights"' in app_javascript
+    assert "returnToHighlights && Number.isSafeInteger(parsedEnd)" in app_javascript
     assert "state.player.pauseVideo()" in app_javascript
     assert "End of this subtitled highlight" in app_javascript
     assert "#random-highlight { width: 100%; }" in stylesheet
@@ -38,8 +37,8 @@ def main() -> int:
 
     print(
         "PASS: the Random Most replayed button is present, uses the fan-subtitle "
-        "scene route with explicit end boundaries, avoids immediate repeats, "
-        "and has a mobile-width rule."
+        "scene route with explicit end boundaries for both partial and fully "
+        "subtitled streams, avoids immediate repeats, and has a mobile-width rule."
     )
     return 0
 
