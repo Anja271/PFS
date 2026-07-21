@@ -81,5 +81,27 @@
         "endSeconds": 8421
       }
     ]
+  },
+  "y1KuyYaGcW8": {
+    "coverage": "highlights",
+    "subtitlePath": "highlight-subtitles/y1KuyYaGcW8.vtt",
+    "ranges": [
+      {
+        "startSeconds": 1645,
+        "endSeconds": 1896
+      },
+      {
+        "startSeconds": 5441,
+        "endSeconds": 5650
+      },
+      {
+        "startSeconds": 6285,
+        "endSeconds": 6544
+      },
+      {
+        "startSeconds": 8365,
+        "endSeconds": 8431
+      }
+    ]
   }
 }
