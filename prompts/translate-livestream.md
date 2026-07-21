@@ -52,6 +52,10 @@ Do not modify the downloaded source. Do not publish or commit files yourself.
 11. Recount timestamps after each major section.
 12. Record broad scene boundaries while translating, then turn them into the chapter JSON draft.
 
+Clearly independent scenes may be translated in parallel only after their boundaries have been contextually reviewed. Do not parallelize adjacent parts of one call, story, game, joke, role-play, or unresolved speaker exchange. Give every parallel scene the same glossary and known-speaker ledger, preserve contextual overlap, and return its uncertainty notes. After merging in source order, perform a single sequential pass across all scene boundaries. When independence is doubtful, keep the scenes sequential.
+
+Use only the already prepared work-directory inputs during translation. Do not publish, commit, push, or make repeated network requests. Save resumable progress locally so the user does not need to supervise the long-running phase.
+
 ## Chapter draft
 
 Create a concise navigation outline for the entire livestream:

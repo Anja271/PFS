@@ -143,6 +143,28 @@ Translate `[콧방귀]` contextually as `[Snorts]` or `[Chuckles]`, or omit it i
 
 ## Required two-pass workflow
 
+### Two approval gates
+
+The long translation and review phase must not require the user to remain present.
+
+1. **Preparation approval:** run `scripts/prepare_stream.py` once. This is the only network-bearing source-preparation step. It stores metadata, Korean captions, heatmap data, normalized cues, a scene plan, and resumable job state under `.subtitle-work/<VIDEO_ID>/`.
+2. **Unattended local work:** translate, review, correct, and validate using only the prepared files. Do not make additional network requests merely to repeat information already present in the work directory. Save progress in the work directory so an interrupted job resumes rather than restarts.
+3. **Publication approval:** after `scripts/finalize_subtitle_job.py` has sealed a passing package, stop and request a separate explicit approval. Only then may `scripts/publish_subtitle_job.py --confirm-publication` copy, commit, and push it.
+
+Never publish during preparation, translation, review, or validation. A prompt asking for subtitle creation is not by itself approval to publish.
+
+### Limited parallel scene work
+
+Independent scenes may be translated in parallel only when doing so cannot break conversation continuity.
+
+- First establish complete scene boundaries and retain contextual overlap around every scene.
+- A scene is independent only if no phone call, story, game round, role-play, sustained joke, speaker-identification problem, or question-and-answer exchange crosses its boundary.
+- Adjacent fragments of the same conversation are never independent merely because a heatmap or chapter boundary separates them.
+- Record the shared glossary, known speakers, unresolved identities, song ranges, and terminology decisions before parallel work begins.
+- Each worker must return timestamp-complete scene output plus uncertainties and speaker evidence.
+- Merge scenes in source order, then perform one sequential editorial pass across every boundary and one global terminology/pronoun/song audit.
+- If independence is uncertain, process the scenes sequentially.
+
 ### Pass 1: translation
 
 - Translate all cues in order with contextual overlap between sections.

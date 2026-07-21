@@ -122,6 +122,10 @@ Run the repository's deterministic VTT validator. It must verify at minimum:
 
 If validation reports any failure, correct the VTT and rerun it. Do not replace a previously published subtitle file unless the temporary candidate passes every check.
 
+If the translation used parallel scene work, the review must additionally read every merged boundary sequentially with cues on both sides. Confirm that speaker identity, addressee, pronouns, topic, jokes, and terminology remain continuous. Parallel scene completion is not a substitute for this unified final pass.
+
+After validation succeeds, run the local finalization step to seal the exact reviewed files. Stop at `ready_for_publication_approval`; publication requires a new explicit user approval.
+
 ## Review report output
 
 Create a Markdown report containing:

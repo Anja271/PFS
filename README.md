@@ -157,6 +157,27 @@ python scripts/scan_highlight_candidates.py --limit 5
 
 Public GitHub-hosted runners are frequently stopped by YouTube's anti-bot check during repeated per-video requests. The scanner therefore does not run in the scheduled GitHub Action and requires no account cookies or repository secrets. Run it locally—or ask Codex to process the next batch—and commit the two queue files afterward. Use `--force` only for an intentional immediate recheck. Use `--retry-errors` to retry only temporary extraction errors immediately. After publishing a candidate, `--sync-only` removes it from the candidate queue without making any YouTube request.
 
+### Two-approval subtitle workflow
+
+Subtitle creation is deliberately separated into two approval gates so the long translation and review phase can run unattended.
+
+1. Approve one preparation command. It reads metadata, Korean captions, and the optional heatmap, but never downloads video or audio:
+
+   ```text
+   /Users/anjademmel/.local/pipx/venvs/yt-dlp/bin/python scripts/prepare_stream.py VIDEO_ID --mode highlights
+   ```
+
+   Use `--mode full` for a complete livestream or `latest` instead of an ID for the newest finished official stream whose Korean captions are ready.
+2. Codex works only in the ignored `.subtitle-work/VIDEO_ID/` directory, saves resumable progress, performs the required contextual review, and runs all local validators. Clearly independent scenes may be processed in parallel, but connected conversations remain sequential and the merged result receives a unified final review.
+3. The local `scripts/finalize_subtitle_job.py VIDEO_ID` check seals the passing files and stops with `ready_for_publication_approval`. It uses no network service and changes nothing public.
+4. After a separate explicit approval, the following command rechecks the seal, copies only the allow-listed output files, rebuilds the static manifests, commits them, and pushes `main`:
+
+   ```text
+   /Users/anjademmel/.local/pipx/venvs/yt-dlp/bin/python scripts/publish_subtitle_job.py VIDEO_ID --confirm-publication
+   ```
+
+Never grant a blanket approval for arbitrary shell or Python commands. If the Codex approval dialog offers a remembered rule, scope it to these exact repository scripts. The safe default is to approve preparation, leave during translation, and approve publication after returning.
+
 ## Replace or correct subtitles
 
 1. Edit the existing `.vtt` file.

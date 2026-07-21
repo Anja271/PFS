@@ -3,3 +3,4 @@
 __pycache__/
 *.pyc
 plave-bamby-subs/
+data/stream-priority-preview.json

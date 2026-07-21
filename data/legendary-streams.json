@@ -1,0 +1,88 @@
+[
+  {
+    "youtubeId": "jYVVjJP1grw",
+    "legendaryScore": 100,
+    "confidence": "confirmed",
+    "reason": "The 2024-06-05 producer-line stream where the melody that became “Pump Up The Volume!” was improvised with PLLI input.",
+    "evidence": [
+      "https://www.kpopwise.com/2024/08/plave-pump-up-volume-in-new-single.html",
+      "https://envimedia.co/plave-pump-up-the-volume-in-their-latest-digital-single/"
+    ]
+  },
+  {
+    "youtubeId": "UEEXMtY9P5o",
+    "legendaryScore": 100,
+    "confidence": "confirmed",
+    "reason": "PLLI’s second-birthday stream on 2025-06-19, including the first surprise performance by PLLI for PLAVE.",
+    "evidence": [
+      "user-confirmed milestone"
+    ]
+  },
+  {
+    "youtubeId": "HyQyd6czf7I",
+    "legendaryScore": 90,
+    "confidence": "moment-needs-verification",
+    "reason": "Eunho’s rap-class stream with Yejun and Hamin; repeatedly associated with Yejun’s famous rap, but the exact Homework Rap source moment must be verified in the transcript before publication.",
+    "evidence": [
+      "https://www.reddit.com/r/plave/comments/1gu6j9q",
+      "https://www.reddit.com/r/plave/comments/1eb16lf",
+      "https://www.ptt.cc/bbs/PLAVE/M.1705657179.A.982.html"
+    ]
+  },
+  {
+    "youtubeId": "al0Af_vgWLg",
+    "legendaryScore": 82,
+    "confidence": "strong",
+    "reason": "The first Yejun–Eunho dance-ranking battle for fourth place, repeatedly cited as a favorite foundational running gag.",
+    "evidence": [
+      "https://www.reddit.com/r/plave/comments/1gu6j9q",
+      "https://www.reddit.com/r/plave/comments/1lnu54x"
+    ]
+  },
+  {
+    "youtubeId": "b4MrhpJB1xw",
+    "legendaryScore": 78,
+    "confidence": "strong",
+    "reason": "The 2023 PLAVE Awards retrospective, repeatedly recommended as a concentrated recap of early running jokes and memorable moments.",
+    "evidence": [
+      "https://www.reddit.com/r/plave/comments/1gu6j9q"
+    ]
+  },
+  {
+    "youtubeId": "HY2EgIaC9ZE",
+    "legendaryScore": 76,
+    "confidence": "strong",
+    "reason": "Yejun, Noah, and Bamby’s Musical Night, recommended for both vocal performances and entertainment value.",
+    "evidence": [
+      "https://www.reddit.com/r/plave/comments/1gu6j9q"
+    ]
+  },
+  {
+    "youtubeId": "77q4q-nFbtk",
+    "legendaryScore": 76,
+    "confidence": "strong",
+    "reason": "Yejun and Bamby’s early Super Bunny Man and Poppy Playtime stream, repeatedly recommended as a classic rewatch.",
+    "evidence": [
+      "https://www.reddit.com/r/plave/comments/15dzj2y",
+      "https://www.reddit.com/r/plave/comments/1flga27"
+    ]
+  },
+  {
+    "youtubeId": "Y37mtUScCZc",
+    "legendaryScore": 72,
+    "confidence": "strong",
+    "reason": "An early full-group liar and mafia game stream; the OT5 liar game is repeatedly cited among favorite moments.",
+    "evidence": [
+      "https://www.reddit.com/r/plave/comments/1eb16lf"
+    ]
+  },
+  {
+    "youtubeId": "XGPFGClyQQk",
+    "legendaryScore": 68,
+    "confidence": "probable",
+    "reason": "Hamin’s early birthday stream, remembered for the member-message segment that showed each member’s way of supporting him.",
+    "evidence": [
+      "https://www.reddit.com/r/plave/comments/1gu6j9q"
+    ]
+  }
+]

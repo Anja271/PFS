@@ -64,10 +64,12 @@ def main() -> int:
             start_seconds = int(original["startSeconds"])
             index = source_index[start_seconds]
             if index + 1 >= len(source_starts):
-                raise ValueError(f"cue {number}: no following full-source timestamp")
-            expected_end = source_starts[index + 1] * 1000 - 1
+                expected_end = start_seconds * 1000 + 6000
+            else:
+                expected_end = source_starts[index + 1] * 1000 - 1
             if int(translated["end"]) != expected_end:
-                raise ValueError(f"cue {number}: end is not the following full-source start minus 1 ms")
+                rule = "a six-second final duration" if index + 1 >= len(source_starts) else "the following full-source start minus 1 ms"
+                raise ValueError(f"cue {number}: end does not use {rule}")
         validate_source_music(cues, expected)
 
         for number, scene in enumerate(scenes, start=1):
