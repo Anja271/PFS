@@ -18,9 +18,6 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from yt_dlp import YoutubeDL
-
-
 ROOT = Path(__file__).resolve().parents[1]
 CHANNEL_STREAMS_URL = "https://www.youtube.com/@plave_official/streams"
 VIDEOS_PATH = ROOT / "data" / "videos.json"
@@ -68,6 +65,16 @@ def normalize_date(entry: dict[str, Any]) -> str:
 
 
 def extract_videos() -> list[dict[str, str]]:
+    # Keep manifest-only helpers importable from the publication workflow even
+    # when its Python interpreter does not have yt-dlp installed. Network
+    # extraction is the only operation that actually requires this dependency.
+    try:
+        from yt_dlp import YoutubeDL
+    except ImportError as error:
+        raise RuntimeError(
+            "yt-dlp is required only for refreshing the YouTube Live-tab video list"
+        ) from error
+
     options = {
         "extract_flat": "in_playlist",
         "skip_download": True,

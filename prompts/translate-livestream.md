@@ -1,6 +1,6 @@
-# Task: Translate a complete PLAVE livestream into English WebVTT
+# Task: Translate a complete PLAVE livestream or selected highlight scenes into English WebVTT
 
-Translate the complete Korean source for YouTube video `<VIDEO_ID>` into natural English fan subtitles. Work through the entire source; do not stop after a sample or partial draft.
+Translate the workflow-selected coverage for YouTube video `<VIDEO_ID>` into natural English fan subtitles. For `full` mode, process the complete source. For `highlights` mode, process every approved scene completely. Do not stop after a sample or an incomplete selected scene.
 
 ## Required references
 
@@ -17,15 +17,17 @@ The translation guide and glossary are binding. Video-specific context may clari
 
 Create:
 
-- the complete English VTT at the workflow-provided temporary output path;
-- a complete chapter JSON draft at the workflow-provided temporary chapter path;
+- the English VTT at the workflow-provided temporary output path;
+- in `full` mode, a complete chapter JSON draft at the workflow-provided temporary chapter path;
+- in `highlights` mode, a complete scene JSON at the workflow-provided temporary scene path;
 - structured uncertainty notes at the workflow-provided review-notes path.
 
 Do not modify the downloaded source. Do not publish or commit files yourself.
 
 ## Hard requirements
 
-- Represent every unique source start timestamp exactly once.
+- In `full` mode, represent every unique source start timestamp exactly once.
+- In `highlights` mode, represent every source start inside every approved scene exactly once and no source starts outside those scenes.
 - Do not add, remove, shift, round, or reorder start timestamps.
 - Merge duplicate source timestamps before translation, preserving source order.
 - Set every cue end to the next start minus one millisecond; give only the final cue a short positive duration.
@@ -35,6 +37,7 @@ Do not modify the downloaded source. Do not publish or commit files yourself.
 - Never translate `형` as `bro`, `brother`, `big brother`, or `Mr.`. Use `hyung` where relationally relevant.
 - Use canonical PLAVE names and terminology from the glossary.
 - Do not reproduce, reconstruct, transliterate, or translate song lyrics. Preserve all lyric timestamps with brief descriptions.
+- If the user directly supplied and explicitly requested translation of a short compact lyric or fan-call excerpt, translate only that exact supplied unit. Do not extend the exception into adjacent captions or a longer performance.
 - Do not invent speakers, dialogue, jokes, objects, titles, or explanations.
 
 ## Working method
@@ -51,6 +54,10 @@ Do not modify the downloaded source. Do not publish or commit files yourself.
 10. Save progress regularly to the temporary output, while retaining complete timestamp coverage.
 11. Recount timestamps after each major section.
 12. Record broad scene boundaries while translating, then turn them into the chapter JSON draft.
+
+For highlight mode, treat the automated heatmap plan only as discovery input. Read wider context around each peak and replace padded boundaries with complete semantic scenes containing setup, popular moment, and immediate resolution. Do not cut through an exchange or absorb an unrelated later activity.
+
+For resumable scene work, use compact per-scene JSON containing `scene`, `title`, `startSeconds`, `endBoundarySeconds`, timestamp-complete `cues` pairs shaped as `[startSeconds, translation]`, `uncertainties`, and `speakerNotes`. Save long scenes in small progress chunks. Generated assembly summaries must not overwrite final editorial notes.
 
 Clearly independent scenes may be translated in parallel only after their boundaries have been contextually reviewed. Do not parallelize adjacent parts of one call, story, game, joke, role-play, or unresolved speaker exchange. Give every parallel scene the same glossary and known-speaker ledger, preserve contextual overlap, and return its uncertainty notes. After merging in source order, perform a single sequential pass across all scene boundaries. When independence is doubtful, keep the scenes sequential.
 
@@ -69,6 +76,15 @@ Create a concise navigation outline for the entire livestream:
 - for a typical two-hour conversational stream, aim for roughly 10–20 chapters when the content supports them;
 - write natural, compact English titles based only on translated content;
 - do not place lyrics, uncertain proper names, or invented explanations in titles.
+
+In highlight mode, replace the chapter draft with `scenes.json`:
+
+- use `[{"startSeconds": 123, "endSeconds": 456, "title": "..."}]`;
+- make `startSeconds` the first selected source/VTT cue and `endSeconds` the exclusive semantic boundary;
+- keep scenes ordered, non-overlapping, and complete;
+- ensure every selected cue lies in exactly one scene;
+- use a concise recognizable title supported by the scene;
+- keep the Most replayed peak inside the scene without treating heatmap padding as the final boundary.
 
 ## Conversation standard
 
@@ -96,6 +112,8 @@ Replace lyric-only material with descriptions such as:
 
 Use a song title only when it is explicitly and reliably established by supplied material. Translate non-lyrical comments, laughter, and interruptions normally.
 
+The only lyric exception is a short compact excerpt directly supplied by the user and explicitly requested for translation. Record that exact excerpt in the review notes; surrounding lyrics remain descriptions.
+
 ## Completion check
 
-Before finishing, verify programmatically that the temporary VTT contains the same unique start timestamps as the source and no additional ones. Confirm that every chapter start exists in the VTT and that the chapter list is strictly increasing. Then hand the complete VTT, chapter draft, and uncertainty notes to the separate review pass. Do not claim success if any section or timestamp is missing.
+Before finishing, verify programmatically that the temporary VTT has exact timestamp coverage for the selected mode and no additional starts. For full mode, validate chapters; for highlight mode, validate scene coverage against the complete-source timing. Run duration-aware density warnings and shorten unjustified dense cues. Then hand the VTT, boundary draft, and uncertainty notes to the separate review pass. Do not claim success if any required section or timestamp is missing.

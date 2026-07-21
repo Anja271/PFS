@@ -168,13 +168,15 @@ Subtitle creation is deliberately separated into two approval gates so the long 
    ```
 
    Use `--mode full` for a complete livestream or `latest` instead of an ID for the newest finished official stream whose Korean captions are ready.
-2. Codex works only in the ignored `.subtitle-work/VIDEO_ID/` directory, saves resumable progress, performs the required contextual review, and runs all local validators. Clearly independent scenes may be processed in parallel, but connected conversations remain sequential and the merged result receives a unified final review.
+2. Codex works only in the ignored `.subtitle-work/VIDEO_ID/` directory, saves resumable progress in compact scene files, performs the required contextual review, and runs all local validators. In highlight mode, automatic heatmap padding is only a discovery aid: final boundaries are moved to complete semantic scenes containing setup, popular moment, and immediate resolution. Clearly independent scenes may be processed in parallel, but connected conversations remain sequential and the merged result receives a unified final review. Duration-aware warnings identify unusually dense one- and two-second cues for editorial compression.
 3. The local `scripts/finalize_subtitle_job.py VIDEO_ID` check seals the passing files and stops with `ready_for_publication_approval`. It uses no network service and changes nothing public.
 4. After a separate explicit approval, the following command rechecks the seal, copies only the allow-listed output files, rebuilds the static manifests, commits them, and pushes `main`:
 
    ```text
    /Users/anjademmel/.local/pipx/venvs/yt-dlp/bin/python scripts/publish_subtitle_job.py VIDEO_ID --confirm-publication
    ```
+
+   Before changing public files, the publisher verifies all dependencies, requires a clean tracked worktree, fetches `origin/main`, and safely fast-forwards a behind local branch. It refuses ahead/diverged history and restores allow-listed files if a pre-commit step fails. After pushing, check the newest Pages deployment: the update workflow may create a successor data commit and normally cancel the earlier Pages run that it supersedes.
 
 Never grant a blanket approval for arbitrary shell or Python commands. If the Codex approval dialog offers a remembered rule, scope it to these exact repository scripts. The safe default is to approve preparation, leave during translation, and approve publication after returning.
 

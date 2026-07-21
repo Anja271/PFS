@@ -36,6 +36,28 @@ def run(command: list[str], *, capture: bool = False) -> str:
     return completed.stdout.strip() if capture else ""
 
 
+def command_succeeds(command: list[str]) -> bool:
+    return subprocess.run(
+        command, cwd=ROOT, text=True, capture_output=True, check=False
+    ).returncode == 0
+
+
+def synchronize_clean_main() -> None:
+    """Fast-forward a clean local main before any publication files change."""
+
+    run(["git", "fetch", "origin", "main"])
+    local = run(["git", "rev-parse", "HEAD"], capture=True)
+    remote = run(["git", "rev-parse", "origin/main"], capture=True)
+    if local == remote:
+        return
+    if command_succeeds(["git", "merge-base", "--is-ancestor", local, remote]):
+        run(["git", "merge", "--ff-only", "origin/main"])
+        return
+    raise RuntimeError(
+        "local main is ahead of or diverged from origin/main; refusing to publish unrelated commits"
+    )
+
+
 def load_json(path: Path) -> Any:
     return json.loads(path.read_text(encoding="utf-8"))
 
@@ -53,6 +75,29 @@ def atomic_copy(source: Path, destination: Path) -> None:
         os.replace(temporary, destination)
     finally:
         temporary.unlink(missing_ok=True)
+
+
+def atomic_write_bytes(path: Path, payload: bytes) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with tempfile.NamedTemporaryFile(dir=path.parent, prefix=f".{path.name}.", delete=False) as handle:
+        handle.write(payload)
+        temporary = Path(handle.name)
+    try:
+        os.replace(temporary, path)
+    finally:
+        temporary.unlink(missing_ok=True)
+
+
+def snapshot_files(paths: list[Path]) -> dict[Path, bytes | None]:
+    return {path: path.read_bytes() if path.is_file() else None for path in paths}
+
+
+def restore_files(snapshot: dict[Path, bytes | None]) -> None:
+    for path, payload in snapshot.items():
+        if payload is None:
+            path.unlink(missing_ok=True)
+        else:
+            atomic_write_bytes(path, payload)
 
 
 def atomic_write_json(path: Path, value: Any) -> None:
@@ -99,6 +144,7 @@ def main() -> int:
     tracked_changes = run(["git", "status", "--porcelain", "--untracked-files=no"], capture=True)
     if tracked_changes:
         raise RuntimeError("tracked repository changes exist; review or commit them before publication")
+    synchronize_clean_main()
 
     work = WORK_ROOT / args.video_id
     seal = load_json(work / "approval-ready.json")
@@ -128,18 +174,12 @@ def main() -> int:
             boundary: ROOT / "highlights" / f"{args.video_id}.json",
         }
     destinations[metadata] = ROOT / "metadata" / f"{args.video_id}.json"
-    for source, destination in destinations.items():
-        atomic_copy(source, destination)
-
-    merge_prepared_heatmap(work, args.video_id)
-
+    # Import every publication dependency before changing public files. The
+    # manifest helpers are intentionally dependency-light, so this preflight
+    # does not require yt-dlp or network access.
     sys.path.insert(0, str(ROOT / "scripts"))
     from update_highlights import main as update_highlights  # pylint: disable=import-outside-toplevel
     from update_videos import update_chapter_manifest, update_subtitle_manifest  # pylint: disable=import-outside-toplevel
-
-    update_subtitle_manifest()
-    update_chapter_manifest()
-    update_highlights()
 
     public_paths = [str(path.relative_to(ROOT)) for path in destinations.values()]
     generated_paths = [
@@ -149,16 +189,39 @@ def main() -> int:
         "data/highlights.json",
         "data/heatmaps.json",
     ]
-    run(["git", "add", "--", *public_paths, *generated_paths])
-    staged = run(["git", "diff", "--cached", "--name-only"], capture=True).splitlines()
-    allowed = set(public_paths + generated_paths)
-    if not staged:
-        raise RuntimeError("publication produced no changes")
-    if any(path not in allowed for path in staged):
-        raise RuntimeError("staging contains a path outside the publication allow-list")
-    label = "English fan subtitles" if mode == "full" else "English fan-subtitled highlights"
-    run(["git", "commit", "-m", f"Add {label} for {args.video_id}"])
-    run(["git", "push", "origin", "main"])
+    mutable_paths = list(destinations.values()) + [ROOT / path for path in generated_paths]
+    snapshot = snapshot_files(mutable_paths)
+    committed = False
+    try:
+        for source, destination in destinations.items():
+            atomic_copy(source, destination)
+        merge_prepared_heatmap(work, args.video_id)
+        update_subtitle_manifest()
+        update_chapter_manifest()
+        update_highlights()
+
+        run(["git", "add", "--", *public_paths, *generated_paths])
+        staged = run(["git", "diff", "--cached", "--name-only"], capture=True).splitlines()
+        allowed = set(public_paths + generated_paths)
+        if not staged:
+            raise RuntimeError("publication produced no changes")
+        if any(path not in allowed for path in staged):
+            raise RuntimeError("staging contains a path outside the publication allow-list")
+        label = "English fan subtitles" if mode == "full" else "English fan-subtitled highlights"
+        run(["git", "commit", "-m", f"Add {label} for {args.video_id}"])
+        committed = True
+        run(["git", "push", "origin", "main"])
+    except Exception:
+        if not committed:
+            subprocess.run(
+                ["git", "restore", "--staged", "--", *public_paths, *generated_paths],
+                cwd=ROOT,
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+            restore_files(snapshot)
+        raise
 
     state_path = work / "job-state.json"
     state = load_json(state_path)
@@ -167,8 +230,12 @@ def main() -> int:
         {
             "status": "published",
             "publishedAt": now,
+            "publishedCommit": run(["git", "rev-parse", "HEAD"], capture=True),
             "publicationApproved": True,
-            "nextAction": "Confirm the update workflow and Pages deployment.",
+            "nextAction": (
+                "Confirm the update workflow and the newest successor Pages deployment; "
+                "an earlier Pages run may be cancelled when the update workflow pushes a follow-up commit."
+            ),
         }
     )
     state_path.write_text(json.dumps(state, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")

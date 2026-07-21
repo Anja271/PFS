@@ -26,6 +26,15 @@ Technical or copyright failures block publication. Linguistic uncertainty must b
 - Build from a structured intermediate representation so missing timestamps can be detected mechanically.
 - Use PLAVE reference material only to resolve spellings, terminology, relationships, and plausible references. Never insert a fact merely because it appears in reference material.
 
+## Full-stream and highlight modes
+
+- A **full-stream** job translates every unique source timestamp and uses `chapters.json` for broad navigation.
+- A **highlight** job translates every source timestamp inside each approved scene and no timestamps outside those scenes. It uses `scenes.json` objects with exactly `startSeconds`, `endSeconds`, and `title`.
+- In highlight mode, cue end times still come from the following timestamp in the complete source, not merely the next translated cue.
+- A heatmap range plus automatic padding is discovery input only. Read wider context, then replace it with semantic boundaries that contain the setup, popular moment, and immediate resolution.
+- Do not cut through a question and answer, running joke, call, story, game round, role-play, performance and reaction, or unresolved speaker exchange.
+- Do not extend a highlight through an unrelated later activity merely to create a large continuous range.
+
 ## Immutable timing rules
 
 - Every unique source start timestamp must appear exactly once in the final VTT.
@@ -105,6 +114,8 @@ Do not create a polished but unsupported replacement line. If a name, title, obj
 - romanize a spoken wordplay when translation would destroy it;
 - or use a short neutral description.
 
+When a wordplay cannot be made natural in English without inventing a new joke, use a concise description such as `[They make a Korean pun on “highlighter” and “fan”]`. Record the original terms and the lost sound relationship in the review report rather than forcing an unfunny literal translation.
+
 Record material uncertainty with timestamp, Korean source, chosen English, and reason in the review report. Bracketed uncertainty such as `[unclear]` should be rare and used only when even a neutral rendering would mislead.
 
 ## Songs and music
@@ -117,6 +128,8 @@ Copyrighted lyrics must not be reconstructed, completed, transliterated, or tran
 - Never guess a song title from damaged lyrics.
 - Translate non-lyrical laughter, comments, interruptions, and spoken reactions during music normally.
 - If someone quotes or alludes to a lyric during conversation, describe the action without reproducing the lyric, for example `[Noah quotes a lyric about affectionate nagging]`.
+
+Narrow exception: when the user directly supplies a short, compact lyric or fan-call excerpt and explicitly requests its translation, translate only that supplied unit. Do not extend it with neighboring caption text, reconstruct a longer verse, or treat it as permission to translate the whole performance. Identify the exact translated excerpt and the user-supplied exception in the review report.
 
 ## Sound descriptions
 
@@ -137,6 +150,8 @@ Translate `[콧방귀]` contextually as `[Snorts]` or `[Chuckles]`, or omit it i
 - Use no more than two text lines per cue.
 - Prefer natural phrase boundaries for line breaks.
 - Keep the English short enough for the cue duration; very short cues may require substantial but faithful compression.
+- Run duration-aware density checks in addition to the two-line check. Dense one- and two-second cues must be shortened or explicitly confirmed as justified rapid chants, repetitions, names, or sound descriptions.
+- Treat density findings as editorial warnings rather than blind failures: rapid call-and-response can be correct even when ordinary prose at the same length would be unreadable.
 - Preserve essential meaning before conversational filler.
 - Avoid long explanatory text inside subtitles. Put explanations in the review report.
 - Use plain punctuation and readable international English.
@@ -153,6 +168,8 @@ The long translation and review phase must not require the user to remain presen
 
 Never publish during preparation, translation, review, or validation. A prompt asking for subtitle creation is not by itself approval to publish.
 
+Before publication changes any public file, the publisher must preflight every required import and generator, require a clean tracked worktree, fetch `origin/main`, and fast-forward only when local `main` is strictly behind. Local-ahead or diverged history requires inspection instead of silently pushing unrelated commits. If a failure occurs before commit, restore every allow-listed file to its pre-publication state.
+
 ### Limited parallel scene work
 
 Independent scenes may be translated in parallel only when doing so cannot break conversation continuity.
@@ -162,6 +179,8 @@ Independent scenes may be translated in parallel only when doing so cannot break
 - Adjacent fragments of the same conversation are never independent merely because a heatmap or chapter boundary separates them.
 - Record the shared glossary, known speakers, unresolved identities, song ranges, and terminology decisions before parallel work begins.
 - Each worker must return timestamp-complete scene output plus uncertainties and speaker evidence.
+- Use one compact scene artifact with `scene`, `title`, `startSeconds`, `endBoundarySeconds`, `cues`, `uncertainties`, and `speakerNotes`. Store cues as `[startSeconds, translation]` pairs to reduce fragile large writes.
+- Save long scene artifacts in small progress chunks so a stalled write does not discard a completed translation.
 - Merge scenes in source order, then perform one sequential editorial pass across every boundary and one global terminology/pronoun/song audit.
 - If independence is uncertain, process the scenes sequentially.
 
@@ -180,6 +199,7 @@ Independent scenes may be translated in parallel only when doing so cannot break
 - Recheck song boundaries and remove any surviving lyric fragments.
 - Tighten cues that are too long for their duration.
 - Correct the VTT directly; do not merely list defects.
+- Keep generated coverage/validation summaries separate from editorial notes, or merge them without overwriting reviewed uncertainty and terminology decisions.
 
 ## Chapter navigation
 
@@ -213,6 +233,15 @@ Example:
 
 Review the chapter list against the complete translated scene outline. The website manifest generator validates filenames, titles, ordering, and start values before publication.
 
+## Highlight scene navigation
+
+- Create `.subtitle-work/<VIDEO_ID>/scenes.json` for highlight jobs.
+- Each scene must use exactly `startSeconds`, `endSeconds`, and `title`.
+- `startSeconds` must match the first selected VTT/source cue in the scene; `endSeconds` is the exclusive semantic boundary.
+- Scenes must be strictly ordered and non-overlapping. Every translated cue must lie in exactly one scene.
+- Use recognizable natural titles based on the translated scene, not raw heatmap labels or damaged ASR.
+- The Most replayed peak must lie inside the scene, but the peak itself does not determine the final scene boundary.
+
 ## Publication gates
 
 Before a subtitle file can be published, automated validation must confirm:
@@ -227,6 +256,7 @@ Before a subtitle file can be published, automated validation must confirm:
 - each end time after its start and exactly one millisecond before the next start;
 - no overlaps;
 - one or two non-empty text lines per cue;
+- duration-aware warnings for unusually dense short cues, followed by documented editorial review;
 - no HTML or positioning instructions;
 - no forbidden `bro`, `brother`, automatic `Mr.`, or malformed `hyung` forms;
 - no known lyric text from source lyric blocks.
@@ -240,6 +270,15 @@ Chapter validation must also confirm:
 - the first chapter matches the first translated cue;
 - complete high-level coverage without excessively narrow sections;
 - concise, supported titles without lyric text.
+
+Highlight validation must also confirm:
+
+- valid, strictly ordered, non-overlapping semantic scene boundaries;
+- every scene start matches its first selected VTT cue;
+- every translated cue lies inside exactly one declared scene;
+- complete timestamp coverage inside the declared ranges and no timestamps outside them;
+- cue end times follow the complete-source timeline;
+- concise, supported scene titles.
 
 If validation fails, do not replace an existing published VTT. Write to a temporary path first and promote the file only after every gate passes.
 
@@ -256,6 +295,9 @@ For each video, retain a concise Markdown report containing:
 - song-handling decisions;
 - any scene-level speaker inferences;
 - the exact validator command and result.
-- chapter count, first and last chapter, and chapter validation result.
+- for full jobs: chapter count, first and last chapter, and chapter validation result;
+- for highlight jobs: scene count, boundaries, titles, contained heatmap peaks, and partial-coverage validation result.
+
+After pushing, check the newest successor Pages deployment rather than assuming the first run for the publication commit is authoritative. An update workflow may push regenerated data and intentionally supersede or cancel that first Pages run. Require the newest Pages run to succeed, confirm the public manifest includes the video, and verify the public VTT URL is reachable.
 
 Automated fan subtitles should be identified as automated and potentially imperfect when no human review has occurred.

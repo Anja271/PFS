@@ -20,6 +20,10 @@ FORBIDDEN_RE = re.compile(
     re.IGNORECASE,
 )
 MALFORMED_HYUNG_RE = re.compile(r"\b(?:hung|hyoung|hyong|Junhyung|Ye-hyung)\b", re.IGNORECASE)
+SHORT_CUE_MILLISECONDS = 1250
+MEDIUM_CUE_MILLISECONDS = 2250
+SHORT_CUE_CHARACTER_LIMIT = 42
+MEDIUM_CUE_CHARACTER_LIMIT = 58
 
 
 def milliseconds(groups: tuple[str, ...]) -> int:
@@ -65,6 +69,40 @@ def parse_vtt(path: Path) -> list[dict[str, object]]:
             raise ValueError(f"cue {number}: end time is not after start time")
         cues.append({"start": start, "end": end, "text": subtitle})
     return cues
+
+
+def readability_warnings(cues: list[dict[str, object]]) -> list[str]:
+    """Return non-blocking warnings for unusually dense short cues.
+
+    Rapid chants, deliberate repetitions, and sound descriptions sometimes
+    justify dense timing, so these warnings require editorial review rather
+    than failing an otherwise valid package automatically.
+    """
+
+    warnings: list[str] = []
+    for number, cue in enumerate(cues, start=1):
+        duration = int(cue["end"]) - int(cue["start"]) + 1
+        characters = len(re.sub(r"\s+", " ", str(cue["text"])).strip())
+        limit = None
+        if duration <= SHORT_CUE_MILLISECONDS:
+            limit = SHORT_CUE_CHARACTER_LIMIT
+        elif duration <= MEDIUM_CUE_MILLISECONDS:
+            limit = MEDIUM_CUE_CHARACTER_LIMIT
+        if limit is not None and characters > limit:
+            warnings.append(
+                f"cue {number}: {characters} characters in {duration / 1000:.3f}s "
+                f"(review compression or confirm a justified rapid delivery)"
+            )
+    return warnings
+
+
+def print_readability_warnings(warnings: list[str]) -> None:
+    if not warnings:
+        return
+    for warning in warnings[:10]:
+        print(f"WARNING: readability: {warning}")
+    if len(warnings) > 10:
+        print(f"WARNING: readability: {len(warnings) - 10} additional dense cue(s)")
 
 
 def validate_timing(cues: list[dict[str, object]], source: list[dict[str, object]]) -> None:
@@ -139,9 +177,11 @@ def main() -> int:
         validate_timing(cues, source)
         validate_source_music(cues, source)
         chapters = validate_chapters(args.chapters, cues)
+        warnings = readability_warnings(cues)
     except (ValueError, json.JSONDecodeError, KeyError, TypeError) as error:
         print(f"FAILED: {error}", file=sys.stderr)
         return 1
+    print_readability_warnings(warnings)
     print(
         "PASS: "
         f"{len(cues)} cues, complete source coverage, strict timing, no overlaps, "

@@ -1,6 +1,6 @@
-# Task: Review and correct a complete PLAVE livestream translation
+# Task: Review and correct a complete or highlight-only PLAVE livestream translation
 
-Perform a second, independent editorial and technical review of the complete English VTT for YouTube video `<VIDEO_ID>`. Correct the VTT directly. Do not merely describe problems, and do not stop after spot-checking a small excerpt.
+Perform a second, independent editorial and technical review of the workflow-selected English VTT coverage for YouTube video `<VIDEO_ID>`. Correct the VTT directly. Do not merely describe problems, and do not stop after spot-checking selected cues.
 
 ## Required inputs
 
@@ -11,7 +11,7 @@ Read completely:
 3. the structured Korean source for `<VIDEO_ID>`
 4. the complete temporary English VTT
 5. the translation pass's uncertainty notes
-6. the complete temporary chapter JSON
+6. the complete temporary `chapters.json` for full mode or `scenes.json` for highlight mode
 7. any explicitly supplied video-specific context
 
 Treat the Korean ASR as fallible evidence. Treat the source timestamps as immutable.
@@ -21,7 +21,8 @@ Treat the Korean ASR as fallible evidence. Treat the source timestamps as immuta
 ### 1. Completeness and timing
 
 - Count raw and unique source timestamps.
-- Confirm exactly one VTT cue for every unique source timestamp.
+- For full mode, confirm exactly one VTT cue for every unique source timestamp.
+- For highlight mode, confirm exactly one VTT cue for every source timestamp inside the declared scenes, no cues outside them, and end times derived from the complete source.
 - Confirm there are no invented start timestamps.
 - Confirm strict order, valid `HH:MM:SS.mmm` formatting, positive durations, next-start-minus-one-millisecond endings, and no overlap.
 - Confirm `WEBVTT`, the required blank line, valid UTF-8, and at most two text lines per cue.
@@ -70,6 +71,7 @@ Inspect every source occurrence of `형`, every English occurrence of `hyung`, a
 - Remove guessed song titles.
 - Retain clearly non-lyrical comments and reactions.
 - Describe conversational lyric quotations without reproducing them.
+- Preserve only a short compact lyric or fan-call excerpt that the user directly supplied and explicitly requested. Confirm the translation does not extend beyond that supplied unit and record the exception in the report.
 
 ### 6. ASR uncertainty audit
 
@@ -88,12 +90,13 @@ Add all material uncertainty to the review report with timestamp, Korean source,
 - Keep no more than two lines per cue.
 - Break lines at natural phrase boundaries.
 - Shorten text that cannot realistically be read in its cue duration without losing essential meaning.
+- Review every duration-aware density warning. Shorten ordinary prose; explicitly retain only justified rapid chants, repetitions, names, or sound descriptions.
 - Remove unnecessary explanation and literal Korean clause stacking.
 - Use natural international English and consistent punctuation.
 
-### 8. Chapter audit
+### 8. Boundary audit
 
-- Confirm the chapter file is a non-empty JSON list using only `startSeconds` and `title`.
+- In full mode, confirm the chapter file is a non-empty JSON list using only `startSeconds` and `title`.
 - Confirm every start is a non-negative integer and exactly matches a VTT cue start.
 - Confirm starts are strictly increasing and the first chapter begins at the first translated cue.
 - Confirm the outline covers the stream through its closing section.
@@ -101,6 +104,14 @@ Add all material uncertainty to the review report with timestamp, Korean source,
 - Correct titles that are vague, overly long, unsupported, or based on damaged ASR.
 - Remove song lyrics and guessed titles from chapter names.
 - Keep established segment or song titles only when the supplied material identifies them reliably.
+
+In highlight mode:
+
+- Confirm `scenes.json` uses exactly `startSeconds`, `endSeconds`, and `title`.
+- Confirm scenes are ordered, non-overlapping semantic units and every scene start matches its first VTT cue.
+- Confirm each scene contains its intended heatmap peak plus enough setup and immediate resolution.
+- Correct automatic padded boundaries that cut through an exchange or include an unrelated activity.
+- Confirm every selected cue lies in exactly one scene and no unselected cue appears.
 
 ## Required final validation
 
@@ -112,19 +123,21 @@ Run the repository's deterministic VTT validator. It must verify at minimum:
 4. Strictly increasing starts.
 5. Positive cue duration.
 6. No overlap.
-7. Every source start represented.
-8. No additional starts.
+7. Exact source-start coverage for the selected mode.
+8. No starts outside the selected full or highlight coverage.
 9. Duplicate source starts merged.
-10. Cue count equals unique source timestamp count.
+10. Cue count equals the expected unique timestamp count for the selected mode.
 11. At most two text lines per cue.
 12. Terminology lint rejects forbidden `bro`, `brother`, automatic `Mr.`, and malformed `hyung` forms.
 13. Chapter JSON structure, ordering, VTT-start matching, first-cue alignment, and title validity.
+
+For highlight mode, replace item 13 with scene structure, semantic boundaries, ordering, non-overlap, complete selected-source coverage, full-source end timing, VTT-start matching, and title validity.
 
 If validation reports any failure, correct the VTT and rerun it. Do not replace a previously published subtitle file unless the temporary candidate passes every check.
 
 If the translation used parallel scene work, the review must additionally read every merged boundary sequentially with cues on both sides. Confirm that speaker identity, addressee, pronouns, topic, jokes, and terminology remain continuous. Parallel scene completion is not a substitute for this unified final pass.
 
-After validation succeeds, run the local finalization step to seal the exact reviewed files. Stop at `ready_for_publication_approval`; publication requires a new explicit user approval.
+Keep machine-generated validation summaries separate from editorial notes, or merge without overwriting reviewed uncertainty, wordplay, speaker, and lyric decisions. After validation succeeds, run the local finalization step to seal the exact reviewed files. Stop at `ready_for_publication_approval`; publication requires a new explicit user approval.
 
 ## Review report output
 
@@ -139,6 +152,7 @@ Create a Markdown report containing:
 - song-handling decisions;
 - the validator command and exact result;
 - whether the file received human review or automated review only.
-- chapter count, first and last chapter, and chapter validation result.
+- for full mode: chapter count, first and last chapter, and chapter validation result;
+- for highlight mode: scene count, boundaries, titles, heatmap containment, and partial-coverage validation result.
 
-Finish only after the complete corrected VTT, chapter JSON, and review report exist and all validation passes.
+Finish only after the corrected VTT, mode-appropriate boundary JSON, and review report exist and all validation passes.

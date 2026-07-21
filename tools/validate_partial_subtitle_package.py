@@ -8,7 +8,13 @@ import json
 import sys
 from pathlib import Path
 
-from validate_subtitle_package import load_utf8, parse_vtt, validate_source_music
+from validate_subtitle_package import (
+    load_utf8,
+    parse_vtt,
+    print_readability_warnings,
+    readability_warnings,
+    validate_source_music,
+)
 
 
 def main() -> int:
@@ -81,10 +87,12 @@ def main() -> int:
             for start in actual_starts
         ):
             raise ValueError("a VTT cue lies outside the declared scenes")
+        warnings = readability_warnings(cues)
     except (ValueError, OSError, UnicodeDecodeError, json.JSONDecodeError, KeyError, TypeError) as error:
         print(f"FAILED: {error}", file=sys.stderr)
         return 1
 
+    print_readability_warnings(warnings)
     print(
         "PASS: "
         f"{len(cues)} partial cues across {len(scenes)} scene(s), complete selected-source coverage, "

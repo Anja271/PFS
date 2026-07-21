@@ -229,7 +229,12 @@ def scene_plan(points: list[dict[str, float]], cues: list[dict[str, Any]]) -> li
                 "peakValue": round(cluster["peakValue"], 6),
                 "independenceStatus": "requires-context-review",
                 "parallelEligible": False,
-                "note": "Set parallelEligible only after confirming that no conversation, call, game, story, or running joke crosses this boundary.",
+                "note": (
+                    "This padded heatmap range is discovery input, not a final subtitle boundary. "
+                    "Read wider context and replace it with complete semantic scene boundaries. "
+                    "Set parallelEligible only after confirming that no conversation, call, game, "
+                    "story, role-play, question-answer exchange, or running joke crosses it."
+                ),
             }
         )
     return plan
