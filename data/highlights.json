@@ -143,5 +143,29 @@
         "peakValue": 0.588484
       }
     ]
+  },
+  {
+    "youtubeId": "HyQyd6czf7I",
+    "date": "2024-01-19",
+    "displayTitle": "Wait a Moment—You’ll Come Back, Right? PLAVE’s Main Vocalist Tears Up the Rap 💙❤️🖤",
+    "originalTitle": "🤚잠깐 기다리면⏰ 돌아오겠찌? 플레이브 메보는 랩을 찢어💙❤️🖤 | #플레이브 PLAVE | Yejun & Eunho & Hamin Live Full Ver.",
+    "coverage": "highlights",
+    "subtitlePath": "highlight-subtitles/HyQyd6czf7I.vtt",
+    "scenes": [
+      {
+        "startSeconds": 4171,
+        "endSeconds": 4459,
+        "title": "Yejun's Legendary Homework Rap",
+        "peakSeconds": 4345,
+        "peakValue": 1.0
+      },
+      {
+        "startSeconds": 6039,
+        "endSeconds": 6258,
+        "title": "A Ghost Jumpscares Yejun",
+        "peakSeconds": 6202,
+        "peakValue": 0.959906
+      }
+    ]
   }
 ]
