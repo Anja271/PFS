@@ -21,6 +21,8 @@
     activeCueKey: null,
     pollTimer: null,
     initialStartSeconds: 0,
+    initialEndSeconds: 0,
+    highlightEnded: false,
     returnToHighlights: false
   };
 
@@ -331,7 +333,17 @@
     const startSeconds = requestedStart && /^\d+$/.test(requestedStart)
       ? Number(requestedStart)
       : 0;
-    showPlayerView(video, startSeconds, params.get("from") === "highlights");
+    const requestedEnd = params.get("end");
+    const parsedEnd = requestedEnd && /^\d+$/.test(requestedEnd)
+      ? Number(requestedEnd)
+      : 0;
+    const coverageRange = state.subtitleCoverage.get(video.youtubeId)?.ranges.find(
+      (range) => range.startSeconds === startSeconds
+    );
+    const endSeconds = Number.isSafeInteger(parsedEnd) && parsedEnd > startSeconds
+      ? parsedEnd
+      : coverageRange?.endSeconds || 0;
+    showPlayerView(video, startSeconds, params.get("from") === "highlights", endSeconds);
   }
 
   function showListView() {
@@ -350,6 +362,8 @@
     resetSubtitleDisplay("Fan subtitles are off.");
     state.selectedVideo = null;
     state.initialStartSeconds = 0;
+    state.initialEndSeconds = 0;
+    state.highlightEnded = false;
     state.returnToHighlights = false;
     elements.backLink.href = "./";
     elements.backLink.textContent = "← Back to livestreams";
@@ -361,10 +375,14 @@
     document.title = "PLAVE Lives with English Fan Subtitles";
   }
 
-  async function showPlayerView(video, startSeconds, returnToHighlights) {
+  async function showPlayerView(video, startSeconds, returnToHighlights, endSeconds) {
     showListView();
     state.selectedVideo = video;
     state.initialStartSeconds = Number.isSafeInteger(startSeconds) && startSeconds >= 0 ? startSeconds : 0;
+    state.initialEndSeconds = Number.isSafeInteger(endSeconds) && endSeconds > state.initialStartSeconds
+      ? endSeconds
+      : 0;
+    state.highlightEnded = false;
     state.returnToHighlights = returnToHighlights;
     elements.listView.hidden = true;
     elements.playerView.hidden = false;
@@ -379,7 +397,7 @@
     elements.playerMessage.hidden = true;
     elements.highlightStart.hidden = state.initialStartSeconds === 0;
     elements.highlightStart.textContent = state.initialStartSeconds > 0
-      ? `Preparing scene at ${formatChapterTime(state.initialStartSeconds)}…`
+      ? `Preparing subtitled scene ${formatHighlightRange()}…`
       : "";
     elements.subtitleToggle.className = state.initialStartSeconds > 0
       ? "button button-secondary"
@@ -467,7 +485,7 @@
           disableYouTubeCaptions();
           if (startSeconds > 0) {
             prepareHighlightedScene();
-            elements.highlightStart.textContent = `Ready at ${formatChapterTime(startSeconds)} — tap Play in the YouTube video`;
+            elements.highlightStart.textContent = `Ready for subtitled scene ${formatHighlightRange()} — tap Play in the YouTube video`;
           }
         },
         onStateChange: handlePlayerStateChange,
@@ -520,7 +538,7 @@
       && event.data === window.YT.PlayerState.PLAYING
     ) {
       disableYouTubeCaptions();
-      elements.highlightStart.hidden = true;
+      if (!state.highlightEnded) elements.highlightStart.hidden = true;
     }
   }
 
@@ -662,6 +680,13 @@
     return `${minutes}:${String(seconds).padStart(2, "0")}`;
   }
 
+  function formatHighlightRange() {
+    const start = formatChapterTime(state.initialStartSeconds);
+    return state.initialEndSeconds > state.initialStartSeconds
+      ? `${start}–${formatChapterTime(state.initialEndSeconds)}`
+      : `at ${start}`;
+  }
+
   function setChapterButtonsDisabled(disabled) {
     elements.chapterList.querySelectorAll("button").forEach((button) => {
       button.disabled = disabled;
@@ -764,6 +789,27 @@
   function updateSubtitles() {
     if (!state.subtitlesEnabled || !state.player || typeof state.player.getCurrentTime !== "function") return;
     const currentTime = state.player.getCurrentTime();
+    if (state.initialEndSeconds > state.initialStartSeconds && currentTime >= state.initialEndSeconds) {
+      if (!state.highlightEnded) {
+        state.highlightEnded = true;
+        if (typeof state.player.pauseVideo === "function") state.player.pauseVideo();
+      }
+      const endedKey = `highlight-ended:${state.initialEndSeconds}`;
+      if (state.activeCueKey !== endedKey) {
+        state.activeCueKey = endedKey;
+        elements.subtitleOverlay.textContent = "";
+        elements.subtitleOverlay.classList.remove("has-text");
+        elements.subtitleFallback.textContent = "End of this subtitled highlight. Choose another Most replayed scene, or press Play again to continue without fan subtitles.";
+      }
+      elements.highlightStart.textContent = "End of this subtitled highlight — choose another scene or press Play again to continue.";
+      elements.highlightStart.hidden = false;
+      return;
+    }
+    if (state.highlightEnded) {
+      state.highlightEnded = false;
+      elements.highlightStart.hidden = true;
+      state.activeCueKey = null;
+    }
     const active = state.cues.filter((cue) => currentTime >= cue.start && currentTime < cue.end);
     const key = active.map((cue) => `${cue.start}:${cue.end}:${cue.text}`).join("|");
     if (key === state.activeCueKey) return;

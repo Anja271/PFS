@@ -74,6 +74,7 @@
     randomScenes = highlights.flatMap((stream) => stream.scenes.map((scene) => ({
       youtubeId: stream.youtubeId,
       startSeconds: scene.startSeconds,
+      endSeconds: scene.endSeconds,
       title: scene.title
     })));
     elements.randomButton.disabled = randomScenes.length === 0;
@@ -108,7 +109,7 @@
 
     elements.randomButton.disabled = true;
     elements.randomButton.textContent = "Opening random scene…";
-    window.location.assign(sceneUrl(selected.youtubeId, selected.startSeconds));
+    window.location.assign(sceneUrl(selected.youtubeId, selected.startSeconds, selected.endSeconds));
   }
 
   function readLastRandomScene() {
@@ -123,8 +124,8 @@
     return `${scene.youtubeId}:${scene.startSeconds}`;
   }
 
-  function sceneUrl(youtubeId, startSeconds) {
-    return `./?v=${encodeURIComponent(youtubeId)}&t=${startSeconds}&from=highlights`;
+  function sceneUrl(youtubeId, startSeconds, endSeconds) {
+    return `./?v=${encodeURIComponent(youtubeId)}&t=${startSeconds}&end=${endSeconds}&from=highlights`;
   }
 
   function createStreamGroup(stream) {
@@ -157,7 +158,7 @@
       const item = document.createElement("li");
       const link = document.createElement("a");
       link.className = "highlight-scene-link";
-      link.href = sceneUrl(stream.youtubeId, scene.startSeconds);
+      link.href = sceneUrl(stream.youtubeId, scene.startSeconds, scene.endSeconds);
 
       const time = document.createElement("span");
       time.className = "highlight-scene-time";
