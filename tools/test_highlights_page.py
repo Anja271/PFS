@@ -24,10 +24,13 @@ def main() -> int:
     assert "window.sessionStorage.setItem" in javascript
     assert "from=highlights" in javascript
     assert "endSeconds: scene.endSeconds" in javascript
+    assert "coverage: stream.coverage" in javascript
     assert "&end=${endSeconds}" in javascript
+    assert 'coverage === "highlights"' in javascript
     assert "link.href = sceneUrl" in javascript
     app_javascript = (ROOT / "app.js").read_text(encoding="utf-8")
     assert "coverageRange?.endSeconds" in app_javascript
+    assert 'getSubtitleCoverage(video.youtubeId) === "highlights"' in app_javascript
     assert "state.player.pauseVideo()" in app_javascript
     assert "End of this subtitled highlight" in app_javascript
     assert "#random-highlight { width: 100%; }" in stylesheet

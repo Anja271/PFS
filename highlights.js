@@ -75,6 +75,7 @@
       youtubeId: stream.youtubeId,
       startSeconds: scene.startSeconds,
       endSeconds: scene.endSeconds,
+      coverage: stream.coverage,
       title: scene.title
     })));
     elements.randomButton.disabled = randomScenes.length === 0;
@@ -109,7 +110,12 @@
 
     elements.randomButton.disabled = true;
     elements.randomButton.textContent = "Opening random scene…";
-    window.location.assign(sceneUrl(selected.youtubeId, selected.startSeconds, selected.endSeconds));
+    window.location.assign(sceneUrl(
+      selected.youtubeId,
+      selected.startSeconds,
+      selected.endSeconds,
+      selected.coverage
+    ));
   }
 
   function readLastRandomScene() {
@@ -124,8 +130,9 @@
     return `${scene.youtubeId}:${scene.startSeconds}`;
   }
 
-  function sceneUrl(youtubeId, startSeconds, endSeconds) {
-    return `./?v=${encodeURIComponent(youtubeId)}&t=${startSeconds}&end=${endSeconds}&from=highlights`;
+  function sceneUrl(youtubeId, startSeconds, endSeconds, coverage) {
+    const endParameter = coverage === "highlights" ? `&end=${endSeconds}` : "";
+    return `./?v=${encodeURIComponent(youtubeId)}&t=${startSeconds}${endParameter}&from=highlights`;
   }
 
   function createStreamGroup(stream) {
@@ -158,7 +165,12 @@
       const item = document.createElement("li");
       const link = document.createElement("a");
       link.className = "highlight-scene-link";
-      link.href = sceneUrl(stream.youtubeId, scene.startSeconds, scene.endSeconds);
+      link.href = sceneUrl(
+        stream.youtubeId,
+        scene.startSeconds,
+        scene.endSeconds,
+        stream.coverage
+      );
 
       const time = document.createElement("span");
       time.className = "highlight-scene-time";

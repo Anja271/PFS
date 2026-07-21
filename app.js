@@ -340,9 +340,10 @@
     const coverageRange = state.subtitleCoverage.get(video.youtubeId)?.ranges.find(
       (range) => range.startSeconds === startSeconds
     );
-    const endSeconds = Number.isSafeInteger(parsedEnd) && parsedEnd > startSeconds
+    const isHighlightOnly = getSubtitleCoverage(video.youtubeId) === "highlights";
+    const endSeconds = isHighlightOnly && Number.isSafeInteger(parsedEnd) && parsedEnd > startSeconds
       ? parsedEnd
-      : coverageRange?.endSeconds || 0;
+      : isHighlightOnly ? coverageRange?.endSeconds || 0 : 0;
     showPlayerView(video, startSeconds, params.get("from") === "highlights", endSeconds);
   }
 
