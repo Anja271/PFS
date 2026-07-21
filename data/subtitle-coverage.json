@@ -82,6 +82,24 @@
       }
     ]
   },
+  "jYVVjJP1grw": {
+    "coverage": "highlights",
+    "subtitlePath": "highlight-subtitles/jYVVjJP1grw.vtt",
+    "ranges": [
+      {
+        "startSeconds": 3432,
+        "endSeconds": 3477
+      },
+      {
+        "startSeconds": 3497,
+        "endSeconds": 3769
+      },
+      {
+        "startSeconds": 7088,
+        "endSeconds": 7489
+      }
+    ]
+  },
   "y1KuyYaGcW8": {
     "coverage": "highlights",
     "subtitlePath": "highlight-subtitles/y1KuyYaGcW8.vtt",
