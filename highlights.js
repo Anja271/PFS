@@ -2,14 +2,18 @@
   "use strict";
 
   const VIDEO_ID_PATTERN = /^[A-Za-z0-9_-]{6,20}$/;
+  const LAST_RANDOM_SCENE_KEY = "pfs-last-random-highlight";
+  let randomScenes = [];
   const elements = {
     message: document.getElementById("highlights-message"),
-    groups: document.getElementById("highlight-groups")
+    groups: document.getElementById("highlight-groups"),
+    randomButton: document.getElementById("random-highlight")
   };
 
   document.addEventListener("DOMContentLoaded", init);
 
   async function init() {
+    elements.randomButton.addEventListener("click", openRandomHighlight);
     try {
       const response = await fetch("data/highlights.json", { cache: "no-cache" });
       if (!response.ok) throw new Error("Highlights request failed");
@@ -67,6 +71,12 @@
 
   function renderHighlights(highlights) {
     elements.groups.replaceChildren();
+    randomScenes = highlights.flatMap((stream) => stream.scenes.map((scene) => ({
+      youtubeId: stream.youtubeId,
+      startSeconds: scene.startSeconds,
+      title: scene.title
+    })));
+    elements.randomButton.disabled = randomScenes.length === 0;
     if (!highlights.length) {
       showMessage(
         "No subtitled Most replayed scenes are available yet. New highlights will appear here as they are prepared.",
@@ -78,6 +88,43 @@
     const fragment = document.createDocumentFragment();
     highlights.forEach((stream) => fragment.appendChild(createStreamGroup(stream)));
     elements.groups.appendChild(fragment);
+  }
+
+  function openRandomHighlight() {
+    if (!randomScenes.length) return;
+
+    const previousKey = readLastRandomScene();
+    const choices = randomScenes.length > 1
+      ? randomScenes.filter((scene) => sceneKey(scene) !== previousKey)
+      : randomScenes;
+    const selected = choices[Math.floor(Math.random() * choices.length)];
+    const selectedKey = sceneKey(selected);
+
+    try {
+      window.sessionStorage.setItem(LAST_RANDOM_SCENE_KEY, selectedKey);
+    } catch (error) {
+      // Random navigation still works when Safari blocks session storage.
+    }
+
+    elements.randomButton.disabled = true;
+    elements.randomButton.textContent = "Opening random scene…";
+    window.location.assign(sceneUrl(selected.youtubeId, selected.startSeconds));
+  }
+
+  function readLastRandomScene() {
+    try {
+      return window.sessionStorage.getItem(LAST_RANDOM_SCENE_KEY) || "";
+    } catch (error) {
+      return "";
+    }
+  }
+
+  function sceneKey(scene) {
+    return `${scene.youtubeId}:${scene.startSeconds}`;
+  }
+
+  function sceneUrl(youtubeId, startSeconds) {
+    return `./?v=${encodeURIComponent(youtubeId)}&t=${startSeconds}&from=highlights`;
   }
 
   function createStreamGroup(stream) {
@@ -110,7 +157,7 @@
       const item = document.createElement("li");
       const link = document.createElement("a");
       link.className = "highlight-scene-link";
-      link.href = `./?v=${encodeURIComponent(stream.youtubeId)}&t=${scene.startSeconds}&from=highlights`;
+      link.href = sceneUrl(stream.youtubeId, scene.startSeconds);
 
       const time = document.createElement("span");
       time.className = "highlight-scene-time";
