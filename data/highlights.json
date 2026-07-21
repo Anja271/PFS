@@ -119,5 +119,29 @@
         "peakValue": 0.692932
       }
     ]
+  },
+  {
+    "youtubeId": "UEEXMtY9P5o",
+    "date": "2025-06-19",
+    "displayTitle": "A Light Met Across the Milky Way ✨ PLLI’s 2nd Birthday 🎂 Camping Live 💙💜🩷❤️🖤",
+    "originalTitle": "은하수를 건너 마주친 빛✨ 플리 2살 생일🎂 캠핑 라이브💙💜🩷❤️🖤 | #플레이브 PLAVE | PLAVE Live Full Ver.",
+    "coverage": "highlights",
+    "subtitlePath": "highlight-subtitles/UEEXMtY9P5o.vtt",
+    "scenes": [
+      {
+        "startSeconds": 6381,
+        "endSeconds": 6889,
+        "title": "PLLI Surprises PLAVE with “12:32”",
+        "peakSeconds": 6395,
+        "peakValue": 1.0
+      },
+      {
+        "startSeconds": 8065,
+        "endSeconds": 8421,
+        "title": "Listening to PLLI’s “12:32” Again",
+        "peakSeconds": 8174,
+        "peakValue": 0.588484
+      }
+    ]
   }
 ]

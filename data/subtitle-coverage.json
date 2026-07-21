@@ -53,5 +53,19 @@
         "endSeconds": 6231
       }
     ]
+  },
+  "UEEXMtY9P5o": {
+    "coverage": "highlights",
+    "subtitlePath": "highlight-subtitles/UEEXMtY9P5o.vtt",
+    "ranges": [
+      {
+        "startSeconds": 6381,
+        "endSeconds": 6889
+      },
+      {
+        "startSeconds": 8065,
+        "endSeconds": 8421
+      }
+    ]
   }
 }
