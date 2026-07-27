@@ -139,7 +139,7 @@ def main() -> int:
         raise RuntimeError("publication requires --confirm-publication")
     if not VIDEO_ID_RE.fullmatch(args.video_id):
         raise RuntimeError("invalid YouTube video ID")
-    if run(["git", "branch", "--show-current"], capture=True) != "main":
+    if run(["git", "symbolic-ref", "--short", "HEAD"], capture=True) != "main":
         raise RuntimeError("publication is allowed only from main")
     tracked_changes = run(["git", "status", "--porcelain", "--untracked-files=no"], capture=True)
     if tracked_changes:
