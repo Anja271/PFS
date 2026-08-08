@@ -48,6 +48,13 @@ Hard prohibition: never render `형` as `bro`, `brother`, `big brother`, or `Mr.
 | 486 | 486 | Pager code for `사랑해`; explain only when the speaker does. |
 | 1004 | 1004 / angel | Preserve the number and translate its spoken interpretation when present. |
 | 43 봉구 | 43 Bonggu | Running joke connected with a future-CEO fortune; never insert the explanation unless the scene supplies it. |
+| standalone `자` in hosting/teasing speech | `ja` | Preserve the Korean sound itself, including every deliberate repetition (`자, 자` → `ja, ja...`). Bamby uses it repeatedly while moderating and the members imitate it as a running gag. Never flatten it to `all right`, `now`, or `okay`; exclude only `자` occurring as part of another word. |
+| invented verb + `-hamin` / `-min` | romanized coined form plus a short first-use gloss | Callback to Bamby's Hamin catchphrase, for example `neomeoga-min--move on`. Preserve later repetitions without repeatedly explaining them. Apply only when context confirms intentional wordplay, not to ordinary grammar or Hamin's name. |
+| 두두한다 / 두도한다 / 두한다 and conjugations | `duduhanda` / `dudu-ing` / `to dudu` | Yejun's tone-dependent catch-all verb. Preserve visible `dudu` in every verbal callback. Express a supported contextual function around it, but keep it ambiguous when tone or ASR does not establish whether it means sulking, scolding, threatening, pleading, promising, or something else. Do not confuse it with a game handle named Dudu, which still remains `Dudu`. |
+| 봉국 / 봉극 and close variants | `Bonguk` | Bonggu-based greeting/catchphrase coined in the stream. Explain the Bonggu connection at first use and preserve later references. |
+| 봉구스 / 벙커스 / 벙크스 and close ASR variants | `Bongus` | Related Bamby/Bonggu catchphrase variant used during hosting and teasing. Keep it distinct from `Bonguk` when the spoken/ASR form supports the `-s` ending. |
+| 봉끝 | `Bong-kkeut` / `Bong-end` | Transparent extension of the catchphrase family using Korean `kkeut` (`end`). Retain `Bong-kkeut` and gloss it briefly rather than flattening the pun. |
+| 은호롭다 | `Eunhoropda` | PLLI-coined wordplay combining Eunho's name with the adjective-forming Korean `-ropda`, roughly “Eunho-like,” while echoing `eunhyeropda` (“gracious”). At first explanation, briefly preserve both layers; when the dialogue mentions it, retain that PLLI coined it and Eunho praised their creativity. |
 
 ## Translation lessons from video `99nR8UeN76M`
 

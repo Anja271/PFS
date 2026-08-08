@@ -150,10 +150,50 @@ def main() -> int:
     assert validator.readability_warnings(
         [{"start": 0, "end": 999, "text": "short text"}]
     ) == []
+    validator.validate_standalone_ja(
+        [{"text": "Ja, ja... Next topic."}],
+        [{"source": "자, 자, 다음 주제"}],
+    )
+    try:
+        validator.validate_standalone_ja(
+            [{"text": "All right. Next topic."}],
+            [{"source": "자, 다음 주제"}],
+        )
+    except ValueError as error:
+        assert "자/ja count differs" in str(error)
+    else:
+        raise AssertionError("standalone 자 must survive as romanized ja")
+    validator.validate_duduhanda(
+        [{"text": "I'll dudu--the tone makes the meaning clear."}],
+        [{"source": "나 두두할 거야"}],
+    )
+    try:
+        validator.validate_duduhanda(
+            [{"text": "I'll do it."}],
+            [{"source": "나 두두할 거야"}],
+        )
+    except ValueError as error:
+        assert "duduhanda form" in str(error)
+    else:
+        raise AssertionError("duduhanda conjugations must retain visible dudu")
+    validator.validate_bong_catchphrase(
+        [{"text": "Bongus--Bonggu's hosting catchphrase."}],
+        [{"source": "벙커스"}],
+    )
+    try:
+        validator.validate_bong_catchphrase(
+            [{"text": "All right, next topic."}],
+            [{"source": "벙커스"}],
+        )
+    except ValueError as error:
+        assert "catchphrase reference" in str(error)
+    else:
+        raise AssertionError("Bonguk/Bongus callbacks must remain visible")
     print(
         "PASS: two-gate scripts parse; cue merging, semantic scene planning, "
         "single-file resumable progress, dependency-light publication, remote preflight, "
-        "rollback, and density warnings work."
+        "rollback, density warnings, standalone ja preservation, duduhanda retention, "
+        "and Bong catchphrase preservation work."
     )
     return 0
 

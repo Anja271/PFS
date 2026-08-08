@@ -39,6 +39,10 @@ Do not modify the downloaded source. Do not publish or commit files yourself.
 - Do not reproduce, reconstruct, transliterate, or translate song lyrics. Preserve all lyric timestamps with brief descriptions.
 - If the user directly supplied and explicitly requested translation of a short compact lyric or fan-call excerpt, translate only that exact supplied unit. Do not extend the exception into adjacent captions or a longer performance.
 - Do not invent speakers, dialogue, jokes, objects, titles, or explanations.
+- Preserve every standalone spoken `자` as romanized `ja`, with the exact repetition count and recognizable rhythm. This includes other members imitating Bamby's MC habit. Never translate these occurrences away as `all right`, `now`, or `okay`; ignore only the syllable `자` when it belongs inside another word.
+- When the members deliberately turn a verb into a callback ending in `-hamin` or a similar `-min`, preserve the romanized coined form and add a short English gloss on first use. Keep later teasing repetitions recognizable; do not flatten them into an ordinary English verb.
+- Preserve every verbal use or conjugation of Yejun's `duduhanda` with visible `dudu` in English. Convey the tone-supported meaning while retaining the coined verb; if the meaning is uncertain, use ambiguous `dudu-ing`/`to dudu` instead of inventing one. Distinguish verbal uses from the Dudu game handle by scene context.
+- Preserve Bamby/Bonggu's `Bonguk`, `Bongus`, and related `Bong-` catchphrase references as recognizable romanized forms. Explain the Bonggu-based greeting/catchphrase on first use, distinguish supported variants instead of normalizing all of them, and gloss transparent later puns such as `Bong-kkeut` (`Bong-end`).
 
 ## Working method
 

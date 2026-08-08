@@ -43,6 +43,10 @@ Review every conversation continuously, especially phone calls, stories, games, 
 - Use later identification to repair earlier ambiguity when justified.
 - Correct unnatural literal translations that obscure the actual conversational move.
 - Preserve intentional jokes and repetition, but remove pure ASR duplication.
+- Audit every standalone source `자` against English `ja`. Preserve the exact number and order, including members teasing Bamby's repeated MC habit; never dismiss these as ASR duplication or replace them with generic English filler.
+- Search later dialogue for deliberate verb forms ending in `-hamin` or a similar `-min`. When reactions or repetition confirm the callback, retain the romanized invented form, verify that its first occurrence has a concise English gloss, and do not normalize subsequent repetitions into plain English.
+- Audit every source conjugation of `duduhanda` and its common ASR variants. The English cue must retain visible `dudu`; confirm that any assigned meaning is supported by tone and conversation, and restore productive ambiguity where it is not. Separately identify uses of Dudu as a game handle.
+- Audit all later references to the Bamby/Bonggu `Bong-` catchphrase family, including ASR variants of `Bonguk`, `Bongus`, and `Bong-kkeut`. Keep supported variants distinct, provide a concise first-use explanation, and restore any reference that was flattened into generic hosting language.
 
 Do not infer a speaker solely from a hobby, catchphrase, or expected personality. These are supporting clues only.
 

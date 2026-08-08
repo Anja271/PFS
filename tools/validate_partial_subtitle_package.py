@@ -14,6 +14,9 @@ from validate_subtitle_package import (
     print_readability_warnings,
     readability_warnings,
     validate_source_music,
+    validate_standalone_ja,
+    validate_duduhanda,
+    validate_bong_catchphrase,
 )
 
 
@@ -77,6 +80,9 @@ def main() -> int:
                 rule = "a six-second final duration" if index + 1 >= len(source_starts) else "the following full-source start minus 1 ms"
                 raise ValueError(f"cue {number}: end does not use {rule}")
         validate_source_music(cues, expected)
+        validate_standalone_ja(cues, expected)
+        validate_duduhanda(cues, expected)
+        validate_bong_catchphrase(cues, expected)
 
         for number, scene in enumerate(scenes, start=1):
             contained = [start // 1000 for start in actual_starts if scene["startSeconds"] <= start // 1000 < scene["endSeconds"]]
@@ -96,7 +102,7 @@ def main() -> int:
     print(
         "PASS: "
         f"{len(cues)} partial cues across {len(scenes)} scene(s), complete selected-source coverage, "
-        "strict full-source timing, no overlaps, UTF-8, line-count/terminology/song checks."
+        "strict full-source timing, no overlaps, UTF-8, line-count/terminology/song/ja/duduhanda/Bong checks."
     )
     return 0
 

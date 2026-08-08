@@ -20,6 +20,12 @@ FORBIDDEN_RE = re.compile(
     re.IGNORECASE,
 )
 MALFORMED_HYUNG_RE = re.compile(r"\b(?:hung|hyoung|hyong|Junhyung|Ye-hyung)\b", re.IGNORECASE)
+STANDALONE_JA_RE = re.compile(r"(?<![가-힣])자(?![가-힣])")
+ROMANIZED_JA_RE = re.compile(r"\bja\b", re.IGNORECASE)
+DUDU_VERB_RE = re.compile(r"(?:(?:두두|두도)(?:하|해|한|할|합)|두(?:하|한다|할|합))")
+DUDU_ENGLISH_RE = re.compile(r"\bdudu(?:handa|-ing)?\b", re.IGNORECASE)
+BONG_CATCHPHRASE_RE = re.compile(r"(?:봉국|봉극|벙커스|벙크스|벙크|봉끝)")
+BONG_CATCHPHRASE_ENGLISH_RE = re.compile(r"\bBong(?:uk|us|-kkeut)\b", re.IGNORECASE)
 SHORT_CUE_MILLISECONDS = 1250
 MEDIUM_CUE_MILLISECONDS = 2250
 SHORT_CUE_CHARACTER_LIMIT = 42
@@ -135,6 +141,39 @@ def validate_source_music(cues: list[dict[str, object]], source: list[dict[str, 
             raise ValueError(f"cue {index}: source music marker lacks an approved description")
 
 
+def validate_standalone_ja(cues: list[dict[str, object]], source: list[dict[str, object]]) -> None:
+    """Preserve Bamby's MC `자` sound and the members' imitations cue by cue."""
+
+    for index, (translated, original) in enumerate(zip(cues, source), start=1):
+        expected = len(STANDALONE_JA_RE.findall(str(original.get("source", ""))))
+        actual = len(ROMANIZED_JA_RE.findall(str(translated["text"])))
+        if actual != expected:
+            raise ValueError(
+                f"cue {index}: standalone 자/ja count differs "
+                f"(source={expected}, English={actual})"
+            )
+
+
+def validate_duduhanda(cues: list[dict[str, object]], source: list[dict[str, object]]) -> None:
+    """Prevent Yejun's coined catch-all verb from being flattened away."""
+
+    for index, (translated, original) in enumerate(zip(cues, source), start=1):
+        if not DUDU_VERB_RE.search(str(original.get("source", ""))):
+            continue
+        if not DUDU_ENGLISH_RE.search(str(translated["text"])):
+            raise ValueError(f"cue {index}: verbal duduhanda form was not preserved in English")
+
+
+def validate_bong_catchphrase(cues: list[dict[str, object]], source: list[dict[str, object]]) -> None:
+    """Keep Bamby/Bonggu's coined Bong-forms visible across later callbacks."""
+
+    for index, (translated, original) in enumerate(zip(cues, source), start=1):
+        if not BONG_CATCHPHRASE_RE.search(str(original.get("source", ""))):
+            continue
+        if not BONG_CATCHPHRASE_ENGLISH_RE.search(str(translated["text"])):
+            raise ValueError(f"cue {index}: Bonguk/Bongus catchphrase reference was lost")
+
+
 def validate_chapters(path: Path, cues: list[dict[str, object]]) -> list[dict[str, object]]:
     try:
         chapters = json.loads(load_utf8(path))
@@ -176,6 +215,9 @@ def main() -> int:
         cues = parse_vtt(args.vtt)
         validate_timing(cues, source)
         validate_source_music(cues, source)
+        validate_standalone_ja(cues, source)
+        validate_duduhanda(cues, source)
+        validate_bong_catchphrase(cues, source)
         chapters = validate_chapters(args.chapters, cues)
         warnings = readability_warnings(cues)
     except (ValueError, json.JSONDecodeError, KeyError, TypeError) as error:
@@ -185,7 +227,7 @@ def main() -> int:
     print(
         "PASS: "
         f"{len(cues)} cues, complete source coverage, strict timing, no overlaps, "
-        f"UTF-8, line-count/terminology/song checks, and {len(chapters)} valid chapters."
+        f"UTF-8, line-count/terminology/song/ja/duduhanda/Bong checks, and {len(chapters)} valid chapters."
     )
     return 0
 
