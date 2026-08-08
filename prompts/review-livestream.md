@@ -10,7 +10,7 @@ Read completely:
 2. `docs/plave-glossary.md`
 3. the structured Korean source for `<VIDEO_ID>`
 4. the complete temporary English VTT
-5. the translation pass's uncertainty notes
+5. the single `translation-progress.json` containing the translation pass's uncertainty notes, speaker evidence, and resumable scene/batch state
 6. the complete temporary `chapters.json` for full mode or `scenes.json` for highlight mode
 7. any explicitly supplied video-specific context
 

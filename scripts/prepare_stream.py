@@ -248,6 +248,43 @@ def normalized_date(info: dict[str, Any]) -> str:
     return ""
 
 
+def initialize_translation_progress(
+    work: Path, video_id: str, mode: str, source_cue_count: int, now: str
+) -> Path:
+    """Create the one resumable translation state without overwriting prior work."""
+
+    path = work / "translation-progress.json"
+    if path.exists():
+        try:
+            progress = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, UnicodeDecodeError, json.JSONDecodeError) as error:
+            raise RuntimeError("translation-progress.json is not readable valid JSON") from error
+        if not isinstance(progress, dict) or progress.get("youtubeId") != video_id:
+            raise RuntimeError("translation-progress.json belongs to a different job")
+        if progress.get("mode") not in (None, mode):
+            raise RuntimeError("translation-progress.json uses a different job mode")
+        if progress.get("sourceCueCount") not in (None, source_cue_count):
+            raise RuntimeError("translation-progress.json uses a different source cue count")
+        for key in ("cues", "chunks", "uncertainties", "speakerNotes"):
+            if not isinstance(progress.get(key), list):
+                raise RuntimeError(f"translation-progress.json field {key} must be a list")
+        return path
+
+    progress = {
+        "version": 1,
+        "youtubeId": video_id,
+        "mode": mode,
+        "sourceCueCount": source_cue_count,
+        "updatedAt": now,
+        "cues": [],
+        "chunks": [],
+        "uncertainties": [],
+        "speakerNotes": [],
+    }
+    atomic_write_json(path, progress)
+    return path
+
+
 def prepare(video_id: str, info: dict[str, Any], ydl: YoutubeDL, mode: str) -> Path:
     track = korean_json3_track(info)
     if track is None:
@@ -279,6 +316,7 @@ def prepare(video_id: str, info: dict[str, Any], ydl: YoutubeDL, mode: str) -> P
     plan = scene_plan(heatmap, cues) if mode == "highlights" else []
     atomic_write_json(work / "scene-plan.json", plan)
     now = datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+    progress_path = initialize_translation_progress(work, video_id, mode, len(cues), now)
     state = {
         "version": 1,
         "youtubeId": video_id,
@@ -287,6 +325,7 @@ def prepare(video_id: str, info: dict[str, Any], ydl: YoutubeDL, mode: str) -> P
         "preparedAt": now,
         "sourceCueCount": len(cues),
         "scenePlanCount": len(plan),
+        "translationProgressFile": progress_path.name,
         "networkPreparationComplete": True,
         "publicationApproved": False,
         "nextAction": "Translate locally, run the independent context review, then finalize locally.",
@@ -320,7 +359,8 @@ def main() -> int:
                 work = prepare(video_id, info, ydl, args.mode)
                 print(
                     f"Prepared {video_id} in {work.relative_to(ROOT)}: "
-                    f"metadata, Korean captions, source cues, heatmap, and job state."
+                    f"metadata, Korean captions, source cues, heatmap, single translation state, "
+                    f"and job state."
                 )
                 return 0
             except Exception as error:

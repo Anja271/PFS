@@ -51,13 +51,13 @@ Do not modify the downloaded source. Do not publish or commit files yourself.
 7. Mark every restored omitted subject, object, or addressee as confirmed, strongly supported, or unclear. Do not use pauses or caption boundaries as sufficient speaker evidence.
 8. For damaged ASR, check grammar, surrounding questions and answers, repeated expressions, and the glossary. Use the narrowest supported interpretation.
 9. Record every material uncertainty instead of silently inventing a polished answer.
-10. Save progress regularly to the temporary output, while retaining complete timestamp coverage.
+10. Save progress regularly by atomically updating the single `.subtitle-work/<VIDEO_ID>/translation-progress.json`, while retaining complete timestamp coverage. Never create numbered or per-batch progress files.
 11. Recount timestamps after each major section.
 12. Record broad scene boundaries while translating, then turn them into the chapter JSON draft.
 
 For highlight mode, treat the automated heatmap plan only as discovery input. Read wider context around each peak and replace padded boundaries with complete semantic scenes containing setup, popular moment, and immediate resolution. Do not cut through an exchange or absorb an unrelated later activity.
 
-For resumable scene work, use compact per-scene JSON containing `scene`, `title`, `startSeconds`, `endBoundarySeconds`, timestamp-complete `cues` pairs shaped as `[startSeconds, translation]`, `uncertainties`, and `speakerNotes`. Save long scenes in small progress chunks. Generated assembly summaries must not overwrite final editorial notes.
+For resumable scene work, store compact scene records inside the single `translation-progress.json` object. Each record may contain `scene`, `title`, `startSeconds`, `endBoundarySeconds`, timestamp-complete `cues` pairs shaped as `[startSeconds, translation]`, `uncertainties`, and `speakerNotes`. Save long scenes as small logical batches by atomically replacing that same file. Do not create `progress-001.json`, later numbered variants, or separate scene-translation files. Generated assembly summaries must not overwrite final editorial notes.
 
 Clearly independent scenes may be translated in parallel only after their boundaries have been contextually reviewed. Do not parallelize adjacent parts of one call, story, game, joke, role-play, or unresolved speaker exchange. Give every parallel scene the same glossary and known-speaker ledger, preserve contextual overlap, and return its uncertainty notes. After merging in source order, perform a single sequential pass across all scene boundaries. When independence is doubtful, keep the scenes sequential.
 

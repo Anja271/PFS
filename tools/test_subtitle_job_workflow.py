@@ -5,7 +5,9 @@ from __future__ import annotations
 
 import ast
 import importlib.util
+import json
 import sys
+import tempfile
 from pathlib import Path
 
 
@@ -68,6 +70,45 @@ def main() -> int:
     assert all(scene["independenceStatus"] == "requires-context-review" for scene in plan)
     assert all("discovery input" in scene["note"] for scene in plan)
 
+    with tempfile.TemporaryDirectory() as directory:
+        work = Path(directory)
+        progress_path = preparer.initialize_translation_progress(
+            work, "abc123XYZ", "full", 3, "2026-08-08T00:00:00Z"
+        )
+        progress = json.loads(progress_path.read_text(encoding="utf-8"))
+        assert progress_path.name == "translation-progress.json"
+        assert progress["youtubeId"] == "abc123XYZ"
+        assert progress["sourceCueCount"] == 3
+        progress["cues"].append([1, "Translated cue"])
+        progress_path.write_text(json.dumps(progress), encoding="utf-8")
+        preparer.initialize_translation_progress(
+            work, "abc123XYZ", "full", 3, "2026-08-08T00:01:00Z"
+        )
+        resumed = json.loads(progress_path.read_text(encoding="utf-8"))
+        assert resumed["cues"] == [[1, "Translated cue"]]
+        assert list(work.glob("progress-*.json")) == []
+
+        finalizer = load_module(
+            "scripts/finalize_subtitle_job.py", "finalize_subtitle_job_progress_test"
+        )
+        state = {"translationProgressFile": "translation-progress.json"}
+        finalizer.validate_single_translation_progress(work, state, "abc123XYZ")
+        (work / "progress-001.json").write_text("{}", encoding="utf-8")
+        try:
+            finalizer.validate_single_translation_progress(work, state, "abc123XYZ")
+        except RuntimeError as error:
+            assert "forbidden" in str(error)
+        else:
+            raise AssertionError("numbered progress files must block finalization")
+        (work / "progress-001.json").unlink()
+        (work / "scene-1-translation.json").write_text("{}", encoding="utf-8")
+        try:
+            finalizer.validate_single_translation_progress(work, state, "abc123XYZ")
+        except RuntimeError as error:
+            assert "forbidden" in str(error)
+        else:
+            raise AssertionError("per-scene progress files must block finalization")
+
     update_path = ROOT / "scripts" / "update_videos.py"
     update_tree = ast.parse(update_path.read_text(encoding="utf-8"))
     top_level_imports = [
@@ -111,7 +152,8 @@ def main() -> int:
     ) == []
     print(
         "PASS: two-gate scripts parse; cue merging, semantic scene planning, "
-        "dependency-light publication, remote preflight, rollback, and density warnings work."
+        "single-file resumable progress, dependency-light publication, remote preflight, "
+        "rollback, and density warnings work."
     )
     return 0
 

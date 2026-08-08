@@ -163,12 +163,14 @@ Translate `[콧방귀]` contextually as `[Snorts]` or `[Chuckles]`, or omit it i
 The long translation and review phase must not require the user to remain present.
 
 1. **Preparation approval:** run `scripts/prepare_stream.py` once. This is the only network-bearing source-preparation step. It stores metadata, Korean captions, heatmap data, normalized cues, a scene plan, and resumable job state under `.subtitle-work/<VIDEO_ID>/`.
-2. **Unattended local work:** translate, review, correct, and validate using only the prepared files. Do not make additional network requests merely to repeat information already present in the work directory. Save progress in the work directory so an interrupted job resumes rather than restarts.
+2. **Unattended local work:** translate, review, correct, and validate using only the prepared files. Do not make additional network requests merely to repeat information already present in the work directory. Save all resumable translation state in exactly one atomically updated `.subtitle-work/<VIDEO_ID>/translation-progress.json` so an interrupted job resumes rather than restarts. Do not create numbered or per-batch artifacts such as `progress-001.json`, `progress-002.json`, or `scene-1-translation.json`; logical batches belong inside the single state file and must not trigger additional user approvals.
 3. **Publication approval:** after `scripts/finalize_subtitle_job.py` has sealed a passing package, stop and request a separate explicit approval. Only then may `scripts/publish_subtitle_job.py --confirm-publication` copy, commit, and push it.
 
 Never publish during preparation, translation, review, or validation. A prompt asking for subtitle creation is not by itself approval to publish.
 
 Before publication changes any public file, the publisher must preflight every required import and generator, require a clean tracked worktree, fetch `origin/main`, and fast-forward only when local `main` is strictly behind. Local-ahead or diverged history requires inspection instead of silently pushing unrelated commits. If a failure occurs before commit, restore every allow-listed file to its pre-publication state.
+
+For jobs prepared under the single-state workflow, finalization must require the declared `translation-progress.json` and reject numbered or per-scene progress artifacts. This turns the one-file rule into a deterministic gate rather than relying on memory alone.
 
 ### Limited parallel scene work
 
@@ -179,8 +181,8 @@ Independent scenes may be translated in parallel only when doing so cannot break
 - Adjacent fragments of the same conversation are never independent merely because a heatmap or chapter boundary separates them.
 - Record the shared glossary, known speakers, unresolved identities, song ranges, and terminology decisions before parallel work begins.
 - Each worker must return timestamp-complete scene output plus uncertainties and speaker evidence.
-- Use one compact scene artifact with `scene`, `title`, `startSeconds`, `endBoundarySeconds`, `cues`, `uncertainties`, and `speakerNotes`. Store cues as `[startSeconds, translation]` pairs to reduce fragile large writes.
-- Save long scene artifacts in small progress chunks so a stalled write does not discard a completed translation.
+- Store every compact scene record inside the one `translation-progress.json` state object with `scene`, `title`, `startSeconds`, `endBoundarySeconds`, `cues`, `uncertainties`, and `speakerNotes`. Store cues as `[startSeconds, translation]` pairs to reduce fragile large writes.
+- Save long scenes as small logical batches by atomically replacing that same state file. Never create a new file per scene or batch.
 - Merge scenes in source order, then perform one sequential editorial pass across every boundary and one global terminology/pronoun/song audit.
 - If independence is uncertain, process the scenes sequentially.
 

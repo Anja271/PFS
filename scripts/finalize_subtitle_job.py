@@ -49,6 +49,33 @@ def validate_metadata(path: Path, video_id: str) -> None:
             raise RuntimeError(f"publish metadata {key} must be non-empty text")
 
 
+def validate_single_translation_progress(work: Path, state: dict[str, Any], video_id: str) -> None:
+    """Enforce one resumable state file for jobs prepared under the new workflow."""
+
+    declared = state.get("translationProgressFile")
+    if declared is None:
+        return
+    if declared != "translation-progress.json":
+        raise RuntimeError("job state must declare translation-progress.json")
+    progress_path = work / declared
+    progress = load_json(progress_path)
+    if not isinstance(progress, dict) or progress.get("youtubeId") != video_id:
+        raise RuntimeError("missing or mismatched translation-progress.json")
+    for key in ("cues", "chunks", "uncertainties", "speakerNotes"):
+        if not isinstance(progress.get(key), list):
+            raise RuntimeError(f"translation-progress.json field {key} must be a list")
+    forbidden = sorted(
+        path.name
+        for path in work.glob("*.json")
+        if re.fullmatch(r"progress-\d+\.json|scene-\d+(?:-translation)?\.json", path.name)
+    )
+    if forbidden:
+        raise RuntimeError(
+            "numbered or per-scene progress files are forbidden; merge them into "
+            f"translation-progress.json ({', '.join(forbidden)})"
+        )
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("video_id")
@@ -63,6 +90,7 @@ def main() -> int:
     mode = state.get("mode")
     if mode not in {"full", "highlights"}:
         raise RuntimeError("job mode must be full or highlights")
+    validate_single_translation_progress(work, state, args.video_id)
 
     candidate = work / "candidate.vtt"
     source = work / "source-cues.json"
