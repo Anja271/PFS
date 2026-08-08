@@ -17,6 +17,7 @@ from validate_subtitle_package import (
     validate_standalone_ja,
     validate_duduhanda,
     validate_bong_catchphrase,
+    validate_hamin_wordplay,
 )
 
 
@@ -83,6 +84,7 @@ def main() -> int:
         validate_standalone_ja(cues, expected)
         validate_duduhanda(cues, expected)
         validate_bong_catchphrase(cues, expected)
+        validate_hamin_wordplay(cues, expected)
 
         for number, scene in enumerate(scenes, start=1):
             contained = [start // 1000 for start in actual_starts if scene["startSeconds"] <= start // 1000 < scene["endSeconds"]]
@@ -102,7 +104,7 @@ def main() -> int:
     print(
         "PASS: "
         f"{len(cues)} partial cues across {len(scenes)} scene(s), complete selected-source coverage, "
-        "strict full-source timing, no overlaps, UTF-8, line-count/terminology/song/ja/duduhanda/Bong checks."
+        "strict full-source timing, no overlaps, UTF-8, line-count/terminology/song/ja/duduhanda/Bong/Hamin checks."
     )
     return 0
 

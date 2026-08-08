@@ -189,11 +189,40 @@ def main() -> int:
         assert "catchphrase reference" in str(error)
     else:
         raise AssertionError("Bonguk/Bongus callbacks must remain visible")
+    validator.validate_hamin_wordplay(
+        [
+            {"text": "Geuman-Hamin..."},
+            {"text": "What are you saying?"},
+            {"text": '"Geuman-Hamin." Then, "geuman-min."'},
+        ],
+        [
+            {"source": "그만 하면"},
+            {"source": "뭐라는 거야?"},
+            {"source": "그만하민 그만민"},
+        ],
+    )
+    try:
+        validator.validate_hamin_wordplay(
+            [
+                {"text": "Stop it..."},
+                {"text": "What are you saying?"},
+                {"text": "Stop it."},
+            ],
+            [
+                {"source": "그만 하면"},
+                {"source": "뭐라는 거야?"},
+                {"source": "그만하민 그만민"},
+            ],
+        )
+    except ValueError as error:
+        assert "-Hamin/-min wordplay" in str(error)
+    else:
+        raise AssertionError("the split-ASR first Geuman-Hamin coinage must remain visible")
     print(
         "PASS: two-gate scripts parse; cue merging, semantic scene planning, "
         "single-file resumable progress, dependency-light publication, remote preflight, "
         "rollback, density warnings, standalone ja preservation, duduhanda retention, "
-        "and Bong catchphrase preservation work."
+        "Bong catchphrase preservation, and Hamin-wordplay retention work."
     )
     return 0
 

@@ -26,6 +26,9 @@ DUDU_VERB_RE = re.compile(r"(?:(?:두두|두도)(?:하|해|한|할|합)|두(?:�
 DUDU_ENGLISH_RE = re.compile(r"\bdudu(?:handa|-ing)?\b", re.IGNORECASE)
 BONG_CATCHPHRASE_RE = re.compile(r"(?:봉국|봉극|벙커스|벙크스|벙크|봉끝)")
 BONG_CATCHPHRASE_ENGLISH_RE = re.compile(r"\bBong(?:uk|us|-kkeut)\b", re.IGNORECASE)
+HAMIN_PUN_RE = re.compile(r"(?:그만하민|그만민|마민|마인|넘어가민|넘어가미)")
+SPLIT_GEUMAN_HAMIN_RE = re.compile(r"그만\s+하면")
+HAMIN_PUN_ENGLISH_RE = re.compile(r"\b(?:[A-Za-z]+-)+(?:Hamin|min)\b", re.IGNORECASE)
 SHORT_CUE_MILLISECONDS = 1250
 MEDIUM_CUE_MILLISECONDS = 2250
 SHORT_CUE_CHARACTER_LIMIT = 42
@@ -174,6 +177,22 @@ def validate_bong_catchphrase(cues: list[dict[str, object]], source: list[dict[s
             raise ValueError(f"cue {index}: Bonguk/Bongus catchphrase reference was lost")
 
 
+def validate_hamin_wordplay(cues: list[dict[str, object]], source: list[dict[str, object]]) -> None:
+    """Keep intentional -Hamin/-min verbs, including a split-ASR first coinage."""
+
+    sources = [str(original.get("source", "")) for original in source]
+    for index, (translated, original) in enumerate(zip(cues, source), start=1):
+        source_text = str(original.get("source", ""))
+        explicit_wordplay = bool(HAMIN_PUN_RE.search(source_text))
+        split_first_coinage = bool(SPLIT_GEUMAN_HAMIN_RE.search(source_text)) and any(
+            "그만하민" in following for following in sources[index : index + 8]
+        )
+        if not explicit_wordplay and not split_first_coinage:
+            continue
+        if not HAMIN_PUN_ENGLISH_RE.search(str(translated["text"])):
+            raise ValueError(f"cue {index}: -Hamin/-min wordplay was not preserved in English")
+
+
 def validate_chapters(path: Path, cues: list[dict[str, object]]) -> list[dict[str, object]]:
     try:
         chapters = json.loads(load_utf8(path))
@@ -218,6 +237,7 @@ def main() -> int:
         validate_standalone_ja(cues, source)
         validate_duduhanda(cues, source)
         validate_bong_catchphrase(cues, source)
+        validate_hamin_wordplay(cues, source)
         chapters = validate_chapters(args.chapters, cues)
         warnings = readability_warnings(cues)
     except (ValueError, json.JSONDecodeError, KeyError, TypeError) as error:
@@ -227,7 +247,7 @@ def main() -> int:
     print(
         "PASS: "
         f"{len(cues)} cues, complete source coverage, strict timing, no overlaps, "
-        f"UTF-8, line-count/terminology/song/ja/duduhanda/Bong checks, and {len(chapters)} valid chapters."
+        f"UTF-8, line-count/terminology/song/ja/duduhanda/Bong/Hamin checks, and {len(chapters)} valid chapters."
     )
     return 0
 
