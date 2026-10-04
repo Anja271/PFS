@@ -81,21 +81,21 @@
         "endSeconds": 3225,
         "title": "Discovering Yejun's habits",
         "peakSeconds": 2825,
-        "peakValue": 0.560596
+        "peakValue": 0.563492
       },
       {
         "startSeconds": 3225,
         "endSeconds": 3738,
         "title": "Discovering Noah's habits",
         "peakSeconds": 3363,
-        "peakValue": 0.704646
+        "peakValue": 0.712541
       },
       {
         "startSeconds": 3738,
         "endSeconds": 4231,
         "title": "Discovering Bamby's habits",
         "peakSeconds": 3811,
-        "peakValue": 0.687649
+        "peakValue": 0.684213
       },
       {
         "startSeconds": 4231,
@@ -109,14 +109,14 @@
         "endSeconds": 7091,
         "title": "The missing disk and the moon mission",
         "peakSeconds": 7040,
-        "peakValue": 0.639897
+        "peakValue": 0.619075
       },
       {
         "startSeconds": 7091,
         "endSeconds": 7465,
         "title": "Discovering PLLI's surprise cover",
         "peakSeconds": 7130,
-        "peakValue": 0.692932
+        "peakValue": 0.669047
       }
     ]
   },
