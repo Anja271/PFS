@@ -38,11 +38,18 @@ def main() -> int:
     for relative in (
         "scripts/prepare_stream.py",
         "scripts/finalize_subtitle_job.py",
+        "scripts/finalize_vlast_caption_job.py",
         "scripts/publish_subtitle_job.py",
     ):
         ast.parse((ROOT / relative).read_text(encoding="utf-8"))
 
     preparer = load_preparer()
+    known = [{"youtubeId": "known123"}]
+    assert preparer.parse_target("latest", known) == ["known123"]
+    assert preparer.parse_target("new456XYZ", known) == ["new456XYZ"]
+    assert preparer.parse_target(
+        "https://www.youtube.com/live/2Y-McTC9PBg?si=test", known
+    ) == ["2Y-McTC9PBg"]
     cues = preparer.source_cues(
         {
             "events": [
@@ -109,6 +116,76 @@ def main() -> int:
         else:
             raise AssertionError("per-scene progress files must block finalization")
 
+    with tempfile.TemporaryDirectory() as directory:
+        assisted = Path(directory)
+        video_id = "abc123XYZ"
+        overrides = [{"startMs": 1000, "replacement": "YJ: Revised"}]
+        fixtures = {
+            "translation-progress.json": {
+                "youtubeId": video_id,
+                "status": "review-complete",
+                "reviewSamples": overrides,
+                "uncertainties": [],
+            },
+            "quality-audit.json": {
+                "youtubeId": video_id,
+                "pendingIssueCount": 0,
+                "reviewChunks": [
+                    {"status": "reviewed", "reviewPasses": 2},
+                    {"status": "reviewed", "reviewPasses": 2},
+                ],
+            },
+            "pilot-report.json": {
+                "youtubeId": video_id,
+                "pilotCueCount": 2,
+                "appliedKoreanLedEditorialOverrides": 1,
+                "replacedLyricEvents": 1,
+            },
+            "pilot-metadata.json": {
+                "youtubeId": video_id,
+                "mediaDownloaded": False,
+                "publicationApproved": False,
+            },
+            "editorial-overrides.json": overrides,
+            "confirmed-song-ranges.json": [{"startMs": 1000, "endMs": 2000}],
+        }
+        for name, value in fixtures.items():
+            (assisted / name).write_text(json.dumps(value), encoding="utf-8")
+        assisted_finalizer = load_module(
+            "scripts/finalize_vlast_caption_job.py", "finalize_vlast_caption_job_test"
+        )
+        summary = assisted_finalizer.validate_review_state(assisted, video_id)
+        assert summary["reviewedContextChunks"] == 2
+        assert summary["editorialOverrideCount"] == 1
+        fixtures["quality-audit.json"]["reviewChunks"][0]["reviewPasses"] = 1
+        (assisted / "quality-audit.json").write_text(
+            json.dumps(fixtures["quality-audit.json"]), encoding="utf-8"
+        )
+        try:
+            assisted_finalizer.validate_review_state(assisted, video_id)
+        except RuntimeError as error:
+            assert "two completed review passes" in str(error)
+        else:
+            raise AssertionError("a one-pass assisted review must not be sealable")
+
+        candidate = assisted / "candidate.vtt"
+        candidate.write_text(
+            "WEBVTT\n\n00:00:01.250 --> 00:00:02.000\nYejun: First\n\n"
+            "00:00:03.500 --> 00:00:04.000\nNoah: Second\n",
+            encoding="utf-8",
+        )
+        chapters = assisted / "chapters.json"
+        chapters.write_text(
+            json.dumps(
+                [
+                    {"startSeconds": 1, "title": "Opening"},
+                    {"startSeconds": 3, "title": "Conversation"},
+                ]
+            ),
+            encoding="utf-8",
+        )
+        assert len(assisted_finalizer.validate_chapters(chapters, candidate)) == 2
+
     update_path = ROOT / "scripts" / "update_videos.py"
     update_tree = ast.parse(update_path.read_text(encoding="utf-8"))
     top_level_imports = [
@@ -136,6 +213,12 @@ def main() -> int:
     )
     assert "snapshot_files(mutable_paths)" in publish_source
     assert "restore_files(snapshot)" in publish_source
+    publish_module = load_module(
+        "scripts/publish_subtitle_job.py", "publish_subtitle_job_heatmap_test"
+    )
+    with tempfile.TemporaryDirectory() as directory:
+        # Assisted jobs do not have a replay heatmap; that is a valid no-op.
+        publish_module.merge_prepared_heatmap(Path(directory), "abc123XYZ")
 
     tools_path = str(ROOT / "tools")
     if tools_path not in sys.path:
@@ -220,7 +303,7 @@ def main() -> int:
         raise AssertionError("the split-ASR first Geuman-Hamin coinage must remain visible")
     print(
         "PASS: two-gate scripts parse; cue merging, semantic scene planning, "
-        "single-file resumable progress, dependency-light publication, remote preflight, "
+        "single-file resumable progress, two-pass assisted sealing, dependency-light publication, remote preflight, "
         "rollback, density warnings, standalone ja preservation, duduhanda retention, "
         "Bong catchphrase preservation, and Hamin-wordplay retention work."
     )

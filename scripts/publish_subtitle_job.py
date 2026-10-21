@@ -112,7 +112,12 @@ def atomic_write_json(path: Path, value: Any) -> None:
 
 
 def merge_prepared_heatmap(work: Path, video_id: str) -> None:
-    prepared = load_json(work / "heatmap.json")
+    heatmap_path = work / "heatmap.json"
+    # VLAST-assisted jobs intentionally have no YouTube replay-heatmap source.
+    # Absence means there is nothing to merge; it is not a caption failure.
+    if not heatmap_path.is_file():
+        return
+    prepared = load_json(heatmap_path)
     if not isinstance(prepared, list) or not prepared:
         return
     manifest_path = ROOT / "data" / "heatmaps.json"

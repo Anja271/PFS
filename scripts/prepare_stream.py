@@ -63,12 +63,13 @@ def load_official_videos() -> list[dict[str, Any]]:
 def parse_target(value: str, videos: list[dict[str, Any]]) -> list[str]:
     if value == "latest":
         return [str(item["youtubeId"]) for item in videos]
-    match = re.search(r"(?:v=|youtu\.be/)([A-Za-z0-9_-]{6,20})", value)
+    match = re.search(r"(?:v=|youtu\.be/|youtube\.com/live/)([A-Za-z0-9_-]{6,20})", value)
     video_id = match.group(1) if match else value
     if not VIDEO_ID_RE.fullmatch(video_id):
         raise RuntimeError("target is not a valid YouTube video ID or URL")
-    if video_id not in {str(item["youtubeId"]) for item in videos}:
-        raise RuntimeError("target is not listed in the official PLAVE /streams data")
+    # Explicit targets may be newer than the periodically generated local
+    # videos manifest. extract_info() remains the authoritative safety check:
+    # it rejects anything outside the official PLAVE channel before preparing.
     return [video_id]
 
 
