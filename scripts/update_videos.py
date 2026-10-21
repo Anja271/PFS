@@ -135,6 +135,12 @@ def update_subtitle_manifest() -> None:
 
 
 def update_chapter_manifest() -> None:
+    """Validate segment navigation independent of subtitle/VTT availability.
+
+    A segment start is an editorial navigation point and may intentionally lead
+    a topic change by a few seconds. It therefore no longer has to equal a VTT
+    cue start, and new streams do not need a published fan-subtitle file.
+    """
     manifest: dict[str, list[dict[str, Any]]] = {}
     for path in sorted(CHAPTERS_DIR.glob("*.json")):
         if not path.is_file() or not VIDEO_ID_RE.fullmatch(path.stem):
@@ -145,22 +151,6 @@ def update_chapter_manifest() -> None:
             raise RuntimeError(f"Invalid chapter file {path.relative_to(ROOT)}: {error}") from error
         if not isinstance(raw_chapters, list) or not raw_chapters:
             raise RuntimeError(f"Chapter file {path.relative_to(ROOT)} must be a non-empty list")
-
-        subtitle_path = SUBTITLES_DIR / f"{path.stem}.vtt"
-        try:
-            subtitle_text = subtitle_path.read_text(encoding="utf-8")
-        except OSError as error:
-            raise RuntimeError(
-                f"Chapter file {path.relative_to(ROOT)} has no readable matching subtitle file"
-            ) from error
-        cue_starts = {
-            int(hours) * 3600 + int(minutes) * 60 + int(seconds)
-            for hours, minutes, seconds in re.findall(
-                r"^(\d{2}):(\d{2}):(\d{2})\.000\s+-->", subtitle_text, flags=re.MULTILINE
-            )
-        }
-        if not cue_starts:
-            raise RuntimeError(f"Matching subtitle file {subtitle_path.relative_to(ROOT)} has no whole-second cues")
 
         chapters: list[dict[str, Any]] = []
         previous_start = -1
@@ -180,14 +170,6 @@ def update_chapter_manifest() -> None:
                 )
             if not isinstance(title, str) or not title.strip() or len(title.strip()) > 120:
                 raise RuntimeError(f"Chapter {index} in {path.relative_to(ROOT)} has an invalid title")
-            if start_seconds not in cue_starts:
-                raise RuntimeError(
-                    f"Chapter {index} in {path.relative_to(ROOT)} does not match a VTT cue start"
-                )
-            if index == 1 and start_seconds != min(cue_starts):
-                raise RuntimeError(
-                    f"First chapter in {path.relative_to(ROOT)} must match the first VTT cue"
-                )
             previous_start = start_seconds
             chapters.append({"startSeconds": start_seconds, "title": title.strip()})
         manifest[path.stem] = chapters
