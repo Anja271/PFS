@@ -219,6 +219,23 @@ def main() -> int:
     with tempfile.TemporaryDirectory() as directory:
         # Assisted jobs do not have a replay heatmap; that is a valid no-op.
         publish_module.merge_prepared_heatmap(Path(directory), "abc123XYZ")
+    with tempfile.TemporaryDirectory() as directory:
+        temporary = Path(directory)
+        source = temporary / "scenes.json"
+        destination = temporary / "published.json"
+        source.write_text(
+            json.dumps([{"startSeconds": 10, "endSeconds": 20, "title": "Scene"}]),
+            encoding="utf-8",
+        )
+        publish_module.publish_highlight_boundaries(source, destination)
+        published = json.loads(destination.read_text(encoding="utf-8"))
+        assert published == [{
+            "startSeconds": 10,
+            "endSeconds": 20,
+            "title": "Scene",
+            "legendary": False,
+            "everMostReplayed": True,
+        }]
 
     tools_path = str(ROOT / "tools")
     if tools_path not in sys.path:

@@ -21,7 +21,7 @@
       renderHighlights(highlights);
     } catch (error) {
       showMessage(
-        "The legendary scenes could not be loaded. Please try again later.",
+        "The highlight archive could not be loaded. Please try again later.",
         true
       );
     }
@@ -60,7 +60,9 @@
           startSeconds,
           endSeconds,
           title,
-          currentlyMostReplayed: scene?.currentlyMostReplayed === true
+          currentlyMostReplayed: scene?.currentlyMostReplayed === true,
+          everMostReplayed: scene?.everMostReplayed === true,
+          legendary: scene?.legendary === true
         };
       });
       if (!scenes.length) throw new Error("Empty highlight stream");
@@ -85,7 +87,7 @@
     elements.randomButton.disabled = randomScenes.length === 0;
     if (!highlights.length) {
       showMessage(
-        "No subtitled legendary scenes are available yet. New highlights will appear here after review.",
+        "No subtitled highlights are available yet. New scenes will appear here after review.",
         false
       );
       return;
@@ -175,9 +177,13 @@
 
       const badge = document.createElement("span");
       badge.className = "chapter-hot-badge";
-      badge.textContent = scene.currentlyMostReplayed
-        ? "🔥 Most replayed"
-        : "⭐ Legendary";
+      if (scene.currentlyMostReplayed) {
+        badge.textContent = "🔥 Most replayed";
+      } else if (scene.legendary) {
+        badge.textContent = "⭐ Legendary";
+      } else {
+        badge.textContent = "↻ Previously most replayed";
+      }
 
       link.append(time, sceneTitle, badge);
       item.appendChild(link);

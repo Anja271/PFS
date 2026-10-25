@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build static subtitle coverage and the append-only legendary-scene archive."""
+"""Build subtitle coverage and the append-only reviewed highlight archive."""
 
 from __future__ import annotations
 
@@ -94,15 +94,18 @@ def normalize_curated_scenes(
         raise RuntimeError(f"highlights/{video_id}.json must be a non-empty list")
     scenes: list[dict[str, Any]] = []
     previous_end = -1
+    required_keys = {"startSeconds", "endSeconds", "title", "legendary", "everMostReplayed"}
     for index, scene in enumerate(raw, start=1):
-        if not isinstance(scene, dict) or set(scene) != {"startSeconds", "endSeconds", "title"}:
+        if not isinstance(scene, dict) or set(scene) != required_keys:
             raise RuntimeError(
                 f"Scene {index} in highlights/{video_id}.json must use exactly "
-                "startSeconds, endSeconds, and title"
+                "startSeconds, endSeconds, title, legendary, and everMostReplayed"
             )
         start = scene["startSeconds"]
         end = scene["endSeconds"]
         title = scene["title"]
+        legendary = scene["legendary"]
+        ever_most_replayed = scene["everMostReplayed"]
         if (
             isinstance(start, bool)
             or isinstance(end, bool)
@@ -115,6 +118,14 @@ def normalize_curated_scenes(
             raise RuntimeError(f"Scene {index} in highlights/{video_id}.json has invalid boundaries")
         if not isinstance(title, str) or not title.strip() or len(title.strip()) > 120:
             raise RuntimeError(f"Scene {index} in highlights/{video_id}.json has an invalid title")
+        if not isinstance(legendary, bool) or not isinstance(ever_most_replayed, bool):
+            raise RuntimeError(
+                f"Scene {index} in highlights/{video_id}.json has invalid archive flags"
+            )
+        if not legendary and not ever_most_replayed:
+            raise RuntimeError(
+                f"Scene {index} in highlights/{video_id}.json needs an archive reason"
+            )
         contained = [(cue_start, cue_end) for cue_start, cue_end in cue_ranges if start <= cue_start < end]
         if not contained or contained[0][0] != start:
             raise RuntimeError(
@@ -122,7 +133,15 @@ def normalize_curated_scenes(
             )
         if any(cue_end > end for _, cue_end in contained):
             raise RuntimeError(f"A cue crosses scene {index}'s declared end in highlights/{video_id}.json")
-        scenes.append({"startSeconds": start, "endSeconds": end, "title": title.strip()})
+        scenes.append(
+            {
+                "startSeconds": start,
+                "endSeconds": end,
+                "title": title.strip(),
+                "legendary": legendary,
+                "everMostReplayed": ever_most_replayed,
+            }
+        )
         previous_end = end
     if require_complete_coverage and any(
         not any(scene["startSeconds"] <= start < scene["endSeconds"] for scene in scenes)
@@ -217,6 +236,25 @@ def require_append_only_archive(previous: Any, current: Any) -> None:
         raise RuntimeError(
             "refusing to remove previously published legendary scene(s): " + preview
         )
+    previous_by_key = {
+        (stream["youtubeId"], scene["startSeconds"], scene["endSeconds"]): scene
+        for stream in previous if isinstance(stream, dict)
+        for scene in stream.get("scenes", []) if isinstance(scene, dict)
+        if isinstance(scene.get("startSeconds"), int) and isinstance(scene.get("endSeconds"), int)
+    } if isinstance(previous, list) else {}
+    current_by_key = {
+        (stream["youtubeId"], scene["startSeconds"], scene["endSeconds"]): scene
+        for stream in current if isinstance(stream, dict)
+        for scene in stream.get("scenes", []) if isinstance(scene, dict)
+        if isinstance(scene.get("startSeconds"), int) and isinstance(scene.get("endSeconds"), int)
+    } if isinstance(current, list) else {}
+    for key, old_scene in previous_by_key.items():
+        new_scene = current_by_key.get(key, {})
+        for flag in ("legendary", "everMostReplayed"):
+            if old_scene.get(flag) is True and new_scene.get(flag) is not True:
+                raise RuntimeError(
+                    f"refusing to remove archived {flag} evidence from {key[0]}:{key[1]}-{key[2]}"
+                )
 
 
 def main() -> int:
@@ -269,7 +307,7 @@ def main() -> int:
     missing_coverage = sorted(curated_ids - set(coverage))
     if missing_coverage:
         raise RuntimeError(
-            "curated legendary scenes have no published subtitle coverage: "
+            "curated highlight scenes have no published subtitle coverage: "
             + ", ".join(missing_coverage)
         )
 
@@ -278,7 +316,7 @@ def main() -> int:
         coverage_entry = coverage[video_id]
         video = videos_by_id.get(video_id)
         if not video:
-            raise RuntimeError(f"curated legendary stream is missing from data/videos.json: {video_id}")
+            raise RuntimeError(f"curated highlight stream is missing from data/videos.json: {video_id}")
         if coverage_entry["coverage"] == "highlights":
             scenes = partial_scenes[video_id]
         else:

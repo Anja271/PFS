@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Regression checks for the permanent legendary-scene archive page."""
+"""Regression checks for the permanent reviewed highlight archive page."""
 
 from __future__ import annotations
 
@@ -17,8 +17,8 @@ def main() -> int:
     highlights = json.loads((ROOT / "data" / "highlights.json").read_text(encoding="utf-8"))
 
     assert 'id="random-highlight"' in html
-    assert "🎲 Random legendary scene" in html
-    assert "A permanent archive" in html
+    assert "🎲 Random highlight" in html
+    assert "every reviewed scene ever identified as Most replayed" in html
     assert 'class="button button-primary"' in html
     assert "randomButton.addEventListener(\"click\", openRandomHighlight)" in javascript
     assert "highlights.flatMap" in javascript
@@ -29,6 +29,7 @@ def main() -> int:
     assert "link.href = sceneUrl" in javascript
     assert '"🔥 Most replayed"' in javascript
     assert '"⭐ Legendary"' in javascript
+    assert '"↻ Previously most replayed"' in javascript
     app_javascript = (ROOT / "app.js").read_text(encoding="utf-8")
     assert "coverageRange?.endSeconds" in app_javascript
     assert 'params.get("from") === "highlights"' in app_javascript
@@ -39,7 +40,7 @@ def main() -> int:
     assert sum(len(stream.get("scenes", [])) for stream in highlights) > 1
 
     print(
-        "PASS: the Random legendary-scene button is present, uses the fan-subtitle "
+        "PASS: the Random highlight button is present, uses the fan-subtitle "
         "scene route with explicit end boundaries for both partial and fully "
         "subtitled streams, avoids immediate repeats, and has a mobile-width rule."
     )

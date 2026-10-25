@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-07-20T22:01:49Z",
+  "updatedAt": "2026-10-25T15:55:05Z",
   "retryAfterDays": 30,
   "videos": {
     "x7qic07HViw": {
@@ -274,6 +274,246 @@
           "endSeconds": 7217,
           "peakSeconds": 7021,
           "peakValue": 0.632554
+        }
+      ]
+    },
+    "y1KuyYaGcW8": {
+      "status": "published",
+      "title": "플레이브는 Born Savage!😈 Caligo Pt.2 🚨컴백 라이브💙💜🩷❤️🖤 | #플레이브 PLAVE | Caligo Pt.2 COMEBACK Live Full Ver.",
+      "publishedAt": "",
+      "subtitleCoverage": "highlights",
+      "checkedAt": "2026-10-25T15:55:05Z"
+    },
+    "UEEXMtY9P5o": {
+      "status": "published",
+      "title": "은하수를 건너 마주친 빛✨ 플리 2살 생일🎂 캠핑 라이브💙💜🩷❤️🖤 | #플레이브 PLAVE | PLAVE Live Full Ver.",
+      "publishedAt": "",
+      "subtitleCoverage": "highlights",
+      "checkedAt": "2026-10-25T15:55:05Z"
+    },
+    "jYVVjJP1grw": {
+      "status": "published",
+      "title": "플레이브 작곡즈🎹의 마라맛 고백송❤️‍🔥 만들기💙💜❤️ | #플레이브 PLAVE | PLAVE Yejun & Noah & Eunho Live Full Ver.",
+      "publishedAt": "",
+      "subtitleCoverage": "highlights",
+      "checkedAt": "2026-10-25T15:55:05Z"
+    },
+    "HyQyd6czf7I": {
+      "status": "published",
+      "title": "🤚잠깐 기다리면⏰ 돌아오겠찌? 플레이브 메보는 랩을 찢어💙❤️🖤 | #플레이브 PLAVE | Yejun & Eunho & Hamin Live Full Ver.",
+      "publishedAt": "",
+      "subtitleCoverage": "highlights",
+      "checkedAt": "2026-10-25T15:55:05Z"
+    },
+    "77q4q-nFbtk": {
+      "status": "ready",
+      "checkedAt": "2026-10-25T15:55:05Z",
+      "title": "플레이브 쫄보즈의 대환장 코믹&공포 게임 라이브 풀버전 (feat. 슈퍼 버니맨, 파피 플레이타임)｜#플레이브 PLAVE｜Yejun & Bamby Live Full Ver.",
+      "publishedAt": "2023-01-17",
+      "subtitleCoverage": "none",
+      "hasKoreanCaptions": true,
+      "hasOfficialEnglishCaptions": false,
+      "suggestedSourceWorkflow": "korean-only",
+      "heatmapPoints": 100,
+      "hotClusters": [
+        {
+          "startSeconds": 7254,
+          "endSeconds": 7342,
+          "peakSeconds": 7298,
+          "peakValue": 1.0
+        },
+        {
+          "startSeconds": 7866,
+          "endSeconds": 7953,
+          "peakSeconds": 7910,
+          "peakValue": 0.668834
+        }
+      ]
+    },
+    "al0Af_vgWLg": {
+      "status": "ready",
+      "checkedAt": "2026-10-25T15:55:05Z",
+      "title": "두 남자의 자존심이 걸린 춤 서열 4위 결정전💙❤🖤 | #플레이브  PLAVE | Yejun & Eunho & Hamin Live Full Ver.",
+      "publishedAt": "2023-06-26",
+      "subtitleCoverage": "none",
+      "hasKoreanCaptions": true,
+      "hasOfficialEnglishCaptions": true,
+      "suggestedSourceWorkflow": "vlast-assisted",
+      "heatmapPoints": 100,
+      "hotClusters": [
+        {
+          "startSeconds": 722,
+          "endSeconds": 794,
+          "peakSeconds": 758,
+          "peakValue": 0.600572
+        },
+        {
+          "startSeconds": 1660,
+          "endSeconds": 1733,
+          "peakSeconds": 1696,
+          "peakValue": 0.732184
+        },
+        {
+          "startSeconds": 1805,
+          "endSeconds": 1877,
+          "peakSeconds": 1841,
+          "peakValue": 0.638838
+        },
+        {
+          "startSeconds": 2094,
+          "endSeconds": 2166,
+          "peakSeconds": 2130,
+          "peakValue": 0.531622
+        },
+        {
+          "startSeconds": 2310,
+          "endSeconds": 2454,
+          "peakSeconds": 2418,
+          "peakValue": 0.706774
+        },
+        {
+          "startSeconds": 2599,
+          "endSeconds": 2743,
+          "peakSeconds": 2635,
+          "peakValue": 1.0
+        },
+        {
+          "startSeconds": 3032,
+          "endSeconds": 3104,
+          "peakSeconds": 3068,
+          "peakValue": 0.522229
+        },
+        {
+          "startSeconds": 3610,
+          "endSeconds": 3682,
+          "peakSeconds": 3646,
+          "peakValue": 0.653714
+        },
+        {
+          "startSeconds": 5775,
+          "endSeconds": 5847,
+          "peakSeconds": 5811,
+          "peakValue": 0.554857
+        },
+        {
+          "startSeconds": 5992,
+          "endSeconds": 6064,
+          "peakSeconds": 6028,
+          "peakValue": 0.853302
+        },
+        {
+          "startSeconds": 6353,
+          "endSeconds": 6425,
+          "peakSeconds": 6389,
+          "peakValue": 0.745417
+        }
+      ]
+    },
+    "akz0LgKV1Bw": {
+      "status": "no_heatmap",
+      "checkedAt": "2026-10-25T15:55:05Z",
+      "title": "지금부터 Star Trace!🌠 플레이브 미니 5집🏎️ 컴백 라이브💙💜🩷❤️🖤 | #플레이브 PLAVE | HYPERDRIVE COMEBACK Live Full Ver.",
+      "publishedAt": "2026-10-12",
+      "subtitleCoverage": "none",
+      "hasKoreanCaptions": true,
+      "hasOfficialEnglishCaptions": true,
+      "suggestedSourceWorkflow": "vlast-assisted"
+    },
+    "Y37mtUScCZc": {
+      "status": "ready",
+      "checkedAt": "2026-10-25T15:55:05Z",
+      "title": "투명하고 뻔뻔한 🙄 외계인들 👽 라이어게임 & 마피아게임 💙💜🩷❤️🖤 | #플레이브 PLAVE | PLAVE Live Full Ver.",
+      "publishedAt": "2024-02-07",
+      "subtitleCoverage": "none",
+      "hasKoreanCaptions": true,
+      "hasOfficialEnglishCaptions": true,
+      "suggestedSourceWorkflow": "vlast-assisted",
+      "heatmapPoints": 100,
+      "hotClusters": [
+        {
+          "startSeconds": 3069,
+          "endSeconds": 3148,
+          "peakSeconds": 3109,
+          "peakValue": 0.53858
+        },
+        {
+          "startSeconds": 3227,
+          "endSeconds": 3305,
+          "peakSeconds": 3266,
+          "peakValue": 0.779301
+        },
+        {
+          "startSeconds": 4879,
+          "endSeconds": 4958,
+          "peakSeconds": 4919,
+          "peakValue": 0.511667
+        },
+        {
+          "startSeconds": 5273,
+          "endSeconds": 5430,
+          "peakSeconds": 5391,
+          "peakValue": 1.0
+        },
+        {
+          "startSeconds": 5902,
+          "endSeconds": 5981,
+          "peakSeconds": 5942,
+          "peakValue": 0.544818
+        },
+        {
+          "startSeconds": 6768,
+          "endSeconds": 6847,
+          "peakSeconds": 6808,
+          "peakValue": 0.703594
+        }
+      ]
+    },
+    "XGPFGClyQQk": {
+      "status": "ready",
+      "checkedAt": "2026-10-25T15:55:05Z",
+      "title": "🐈‍⬛하민이를 만나 행복했어🌱 행복 1101% 🎂 생일 라이브🖤 | #플레이브 PLAVE | PLAVE Hamin Birthday Live Full Ver.",
+      "publishedAt": "2023-11-01",
+      "subtitleCoverage": "none",
+      "hasKoreanCaptions": true,
+      "hasOfficialEnglishCaptions": true,
+      "suggestedSourceWorkflow": "vlast-assisted",
+      "heatmapPoints": 100,
+      "hotClusters": [
+        {
+          "startSeconds": 80,
+          "endSeconds": 241,
+          "peakSeconds": 121,
+          "peakValue": 0.965461
+        },
+        {
+          "startSeconds": 322,
+          "endSeconds": 402,
+          "peakSeconds": 362,
+          "peakValue": 0.659095
+        },
+        {
+          "startSeconds": 1769,
+          "endSeconds": 1850,
+          "peakSeconds": 1809,
+          "peakValue": 1.0
+        },
+        {
+          "startSeconds": 2171,
+          "endSeconds": 2252,
+          "peakSeconds": 2212,
+          "peakValue": 0.590322
+        },
+        {
+          "startSeconds": 2573,
+          "endSeconds": 2654,
+          "peakSeconds": 2614,
+          "peakValue": 0.538086
+        },
+        {
+          "startSeconds": 5710,
+          "endSeconds": 5790,
+          "peakSeconds": 5750,
+          "peakValue": 0.603971
         }
       ]
     }

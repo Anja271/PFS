@@ -2,11 +2,15 @@
   {
     "startSeconds": 4171,
     "endSeconds": 4459,
-    "title": "Yejun's Legendary Homework Rap"
+    "title": "Yejun's Legendary Homework Rap",
+    "legendary": true,
+    "everMostReplayed": true
   },
   {
     "startSeconds": 6039,
     "endSeconds": 6258,
-    "title": "A Ghost Jumpscares Yejun"
+    "title": "A Ghost Jumpscares Yejun",
+    "legendary": true,
+    "everMostReplayed": true
   }
 ]

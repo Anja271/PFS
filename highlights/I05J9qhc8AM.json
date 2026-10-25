@@ -2,11 +2,15 @@
   {
     "startSeconds": 3900,
     "endSeconds": 4598,
-    "title": "The one-breath “PLAVE Island” challenge"
+    "title": "The one-breath “PLAVE Island” challenge",
+    "legendary": true,
+    "everMostReplayed": true
   },
   {
     "startSeconds": 5926,
     "endSeconds": 6231,
-    "title": "Learning and performing “The Road to Me”"
+    "title": "Learning and performing “The Road to Me”",
+    "legendary": true,
+    "everMostReplayed": true
   }
 ]

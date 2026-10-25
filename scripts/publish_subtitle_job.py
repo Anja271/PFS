@@ -111,6 +111,26 @@ def atomic_write_json(path: Path, value: Any) -> None:
     os.replace(temporary, path)
 
 
+def publish_highlight_boundaries(source: Path, destination: Path) -> None:
+    """Add permanent discovery evidence without changing the sealed job schema."""
+
+    scenes = load_json(source)
+    if not isinstance(scenes, list) or not scenes:
+        raise RuntimeError("sealed highlight boundary file is invalid")
+    archived = []
+    for scene in scenes:
+        if not isinstance(scene, dict) or set(scene) != {"startSeconds", "endSeconds", "title"}:
+            raise RuntimeError("sealed highlight scene has an invalid schema")
+        archived.append(
+            {
+                **scene,
+                "legendary": False,
+                "everMostReplayed": True,
+            }
+        )
+    atomic_write_json(destination, archived)
+
+
 def merge_prepared_heatmap(work: Path, video_id: str) -> None:
     heatmap_path = work / "heatmap.json"
     # VLAST-assisted jobs intentionally have no YouTube replay-heatmap source.
@@ -199,7 +219,10 @@ def main() -> int:
     committed = False
     try:
         for source, destination in destinations.items():
-            atomic_copy(source, destination)
+            if mode == "highlights" and source == boundary:
+                publish_highlight_boundaries(source, destination)
+            else:
+                atomic_copy(source, destination)
         merge_prepared_heatmap(work, args.video_id)
         update_subtitle_manifest()
         update_chapter_manifest()

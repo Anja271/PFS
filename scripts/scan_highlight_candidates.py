@@ -345,6 +345,7 @@ def build_candidates(videos: list[dict[str, str]], state_entries: dict[str, Any]
                 "checkedAt": str(entry.get("checkedAt") or ""),
                 "heatmapPoints": int(entry.get("heatmapPoints") or 0),
                 "hotClusters": entry.get("hotClusters") if isinstance(entry.get("hotClusters"), list) else [],
+                "everMostReplayed": True,
                 "suggestedSourceWorkflow": (
                     str(entry.get("suggestedSourceWorkflow"))
                     if entry.get("suggestedSourceWorkflow") in {"vlast-assisted", "korean-only"}

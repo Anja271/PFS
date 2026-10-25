@@ -2,31 +2,43 @@
   {
     "startSeconds": 2693,
     "endSeconds": 3225,
-    "title": "Discovering Yejun's habits"
+    "title": "Discovering Yejun's habits",
+    "legendary": true,
+    "everMostReplayed": true
   },
   {
     "startSeconds": 3225,
     "endSeconds": 3738,
-    "title": "Discovering Noah's habits"
+    "title": "Discovering Noah's habits",
+    "legendary": true,
+    "everMostReplayed": true
   },
   {
     "startSeconds": 3738,
     "endSeconds": 4231,
-    "title": "Discovering Bamby's habits"
+    "title": "Discovering Bamby's habits",
+    "legendary": true,
+    "everMostReplayed": true
   },
   {
     "startSeconds": 4231,
     "endSeconds": 4916,
-    "title": "Discovering Eunho's habits"
+    "title": "Discovering Eunho's habits",
+    "legendary": true,
+    "everMostReplayed": true
   },
   {
     "startSeconds": 6599,
     "endSeconds": 7091,
-    "title": "The missing disk and the moon mission"
+    "title": "The missing disk and the moon mission",
+    "legendary": true,
+    "everMostReplayed": true
   },
   {
     "startSeconds": 7091,
     "endSeconds": 7465,
-    "title": "Discovering PLLI's surprise cover"
+    "title": "Discovering PLLI's surprise cover",
+    "legendary": true,
+    "everMostReplayed": true
   }
 ]
