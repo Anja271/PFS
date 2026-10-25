@@ -12,14 +12,16 @@
         "endSeconds": 4598,
         "title": "The one-breath “PLAVE Island” challenge",
         "peakSeconds": 4208,
-        "peakValue": 0.533615
+        "peakValue": 0.533615,
+        "currentlyMostReplayed": true
       },
       {
         "startSeconds": 5926,
         "endSeconds": 6231,
         "title": "Learning and performing “The Road to Me”",
         "peakSeconds": 6212,
-        "peakValue": 1.0
+        "peakValue": 1.0,
+        "currentlyMostReplayed": true
       }
     ]
   },
@@ -36,35 +38,40 @@
         "endSeconds": 3372,
         "title": "The random-play dance challenge begins",
         "peakSeconds": 2914,
-        "peakValue": 0.800394
+        "peakValue": 0.800394,
+        "currentlyMostReplayed": true
       },
       {
         "startSeconds": 3671,
         "endSeconds": 4068,
         "title": "A whirlwind of classic K-pop dances",
         "peakSeconds": 3799,
-        "peakValue": 0.661071
+        "peakValue": 0.661071,
+        "currentlyMostReplayed": true
       },
       {
         "startSeconds": 4276,
         "endSeconds": 4725,
         "title": "PLLI chooses the encore dances",
         "peakSeconds": 4463,
-        "peakValue": 0.559762
+        "peakValue": 0.559762,
+        "currentlyMostReplayed": true
       },
       {
         "startSeconds": 4725,
         "endSeconds": 5153,
         "title": "Throwback requests and forgotten choreography",
         "peakSeconds": 4906,
-        "peakValue": 0.97222
+        "peakValue": 0.97222,
+        "currentlyMostReplayed": true
       },
       {
         "startSeconds": 6752,
         "endSeconds": 7003,
         "title": "Defeating the game boss and screenshot time",
         "peakSeconds": 6971,
-        "peakValue": 1.0
+        "peakValue": 1.0,
+        "currentlyMostReplayed": true
       }
     ]
   },
@@ -81,42 +88,48 @@
         "endSeconds": 3225,
         "title": "Discovering Yejun's habits",
         "peakSeconds": 2825,
-        "peakValue": 0.563492
+        "peakValue": 0.563492,
+        "currentlyMostReplayed": true
       },
       {
         "startSeconds": 3225,
         "endSeconds": 3738,
         "title": "Discovering Noah's habits",
         "peakSeconds": 3363,
-        "peakValue": 0.712541
+        "peakValue": 0.712541,
+        "currentlyMostReplayed": true
       },
       {
         "startSeconds": 3738,
         "endSeconds": 4231,
         "title": "Discovering Bamby's habits",
         "peakSeconds": 3811,
-        "peakValue": 0.684213
+        "peakValue": 0.684213,
+        "currentlyMostReplayed": true
       },
       {
         "startSeconds": 4231,
         "endSeconds": 4916,
         "title": "Discovering Eunho's habits",
         "peakSeconds": 4349,
-        "peakValue": 1.0
+        "peakValue": 1.0,
+        "currentlyMostReplayed": true
       },
       {
         "startSeconds": 6599,
         "endSeconds": 7091,
         "title": "The missing disk and the moon mission",
         "peakSeconds": 7040,
-        "peakValue": 0.619075
+        "peakValue": 0.619075,
+        "currentlyMostReplayed": true
       },
       {
         "startSeconds": 7091,
         "endSeconds": 7465,
         "title": "Discovering PLLI's surprise cover",
         "peakSeconds": 7130,
-        "peakValue": 0.669047
+        "peakValue": 0.669047,
+        "currentlyMostReplayed": true
       }
     ]
   },
@@ -133,28 +146,32 @@
         "endSeconds": 1896,
         "title": "Testing PLAVE's new powers",
         "peakSeconds": 1781,
-        "peakValue": 0.550154
+        "peakValue": 0.550154,
+        "currentlyMostReplayed": true
       },
       {
         "startSeconds": 5441,
         "endSeconds": 5650,
         "title": "A chaotic Born Savage choreography preview",
         "peakSeconds": 5605,
-        "peakValue": 1.0
+        "peakValue": 1.0,
+        "currentlyMostReplayed": true
       },
       {
         "startSeconds": 6285,
         "endSeconds": 6544,
         "title": "Bamby's never-ending Lunar Hearts retakes",
         "peakSeconds": 6474,
-        "peakValue": 0.618727
+        "peakValue": 0.618727,
+        "currentlyMostReplayed": true
       },
       {
         "startSeconds": 8365,
         "endSeconds": 8431,
         "title": "The maknaes' 'honey' nickname",
         "peakSeconds": 8386,
-        "peakValue": 0.682032
+        "peakValue": 0.682032,
+        "currentlyMostReplayed": true
       }
     ]
   },
@@ -171,14 +188,16 @@
         "endSeconds": 6889,
         "title": "PLLI Surprises PLAVE with “12:32”",
         "peakSeconds": 6395,
-        "peakValue": 1.0
+        "peakValue": 1.0,
+        "currentlyMostReplayed": true
       },
       {
         "startSeconds": 8065,
         "endSeconds": 8421,
         "title": "Listening to PLLI’s “12:32” Again",
         "peakSeconds": 8174,
-        "peakValue": 0.588484
+        "peakValue": 0.588484,
+        "currentlyMostReplayed": true
       }
     ]
   },
@@ -191,18 +210,26 @@
     "subtitlePath": "highlight-subtitles/jYVVjJP1grw.vtt",
     "scenes": [
       {
+        "startSeconds": 3432,
+        "endSeconds": 3477,
+        "title": "The Fine Print for Joining Noline",
+        "currentlyMostReplayed": false
+      },
+      {
         "startSeconds": 3497,
         "endSeconds": 3769,
         "title": "The Producer Line Commits to Making a Song Live",
         "peakSeconds": 3676,
-        "peakValue": 0.678962
+        "peakValue": 0.678962,
+        "currentlyMostReplayed": true
       },
       {
         "startSeconds": 7088,
         "endSeconds": 7489,
         "title": "The Future ‘Pump Up The Volume!’ Clicks Into Place",
         "peakSeconds": 7309,
-        "peakValue": 1.0
+        "peakValue": 1.0,
+        "currentlyMostReplayed": true
       }
     ]
   },
@@ -219,14 +246,16 @@
         "endSeconds": 4459,
         "title": "Yejun's Legendary Homework Rap",
         "peakSeconds": 4345,
-        "peakValue": 1.0
+        "peakValue": 1.0,
+        "currentlyMostReplayed": true
       },
       {
         "startSeconds": 6039,
         "endSeconds": 6258,
         "title": "A Ghost Jumpscares Yejun",
         "peakSeconds": 6202,
-        "peakValue": 0.959906
+        "peakValue": 0.959906,
+        "currentlyMostReplayed": true
       }
     ]
   }

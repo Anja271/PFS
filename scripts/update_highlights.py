@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
-"""Build static subtitle-coverage and Most replayed manifests."""
+"""Build static subtitle coverage and the append-only legendary-scene archive."""
 
 from __future__ import annotations
 
 import json
-import math
 import os
 import re
 import tempfile
@@ -14,7 +13,6 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 VIDEOS_PATH = ROOT / "data" / "videos.json"
-CHAPTERS_PATH = ROOT / "data" / "chapters.json"
 HEATMAPS_PATH = ROOT / "data" / "heatmaps.json"
 HIGHLIGHTS_PATH = ROOT / "data" / "highlights.json"
 COVERAGE_PATH = ROOT / "data" / "subtitle-coverage.json"
@@ -85,7 +83,13 @@ def parse_vtt_ranges(path: Path) -> list[tuple[float, float]]:
     return ranges
 
 
-def normalize_partial_scenes(video_id: str, raw: Any, cue_ranges: list[tuple[float, float]]) -> list[dict[str, Any]]:
+def normalize_curated_scenes(
+    video_id: str,
+    raw: Any,
+    cue_ranges: list[tuple[float, float]],
+    *,
+    require_complete_coverage: bool,
+) -> list[dict[str, Any]]:
     if not isinstance(raw, list) or not raw:
         raise RuntimeError(f"highlights/{video_id}.json must be a non-empty list")
     scenes: list[dict[str, Any]] = []
@@ -120,9 +124,22 @@ def normalize_partial_scenes(video_id: str, raw: Any, cue_ranges: list[tuple[flo
             raise RuntimeError(f"A cue crosses scene {index}'s declared end in highlights/{video_id}.json")
         scenes.append({"startSeconds": start, "endSeconds": end, "title": title.strip()})
         previous_end = end
-    if any(not any(scene["startSeconds"] <= start < scene["endSeconds"] for scene in scenes) for start, _ in cue_ranges):
+    if require_complete_coverage and any(
+        not any(scene["startSeconds"] <= start < scene["endSeconds"] for scene in scenes)
+        for start, _ in cue_ranges
+    ):
         raise RuntimeError(f"highlight-subtitles/{video_id}.vtt contains cues outside declared scenes")
     return scenes
+
+
+def normalize_partial_scenes(
+    video_id: str, raw: Any, cue_ranges: list[tuple[float, float]]
+) -> list[dict[str, Any]]:
+    """Validate that a partial VTT contains exactly its curated scene coverage."""
+
+    return normalize_curated_scenes(
+        video_id, raw, cue_ranges, require_complete_coverage=True
+    )
 
 
 def load_metadata(video_id: str, video: dict[str, Any]) -> dict[str, str]:
@@ -145,65 +162,69 @@ def midpoint(point: dict[str, Any]) -> float:
     return float(point["startSeconds"]) + (float(point["endSeconds"]) - float(point["startSeconds"])) / 2
 
 
-def hot_scenes_from_chapters(
-    chapters: list[dict[str, Any]], heatmap: list[dict[str, Any]]
+def annotate_curated_scenes(
+    scenes: list[dict[str, Any]], heatmap: list[dict[str, Any]] | None
 ) -> list[dict[str, Any]]:
-    if not chapters or not heatmap:
-        return []
-    duration = math.ceil(max(float(point["endSeconds"]) for point in heatmap))
-    scenes: list[dict[str, Any]] = []
-    for index, chapter in enumerate(chapters):
-        start = int(chapter["startSeconds"])
-        end = int(chapters[index + 1]["startSeconds"]) if index + 1 < len(chapters) else duration
-        matching = [point for point in heatmap if start <= midpoint(point) < end]
-        if not matching:
-            continue
-        hottest = max(matching, key=lambda point: float(point["value"]))
-        if float(hottest["value"]) < HOT_THRESHOLD:
-            continue
-        scenes.append(
-            {
-                "startSeconds": start,
-                "endSeconds": end,
-                "title": str(chapter["title"]).strip(),
-                "peakSeconds": round(midpoint(hottest)),
-                "peakValue": round(float(hottest["value"]), 6),
-            }
-        )
-    return scenes
+    """Keep every published scene and attach current heatmap evidence when present."""
 
-
-def hot_partial_scenes(
-    scenes: list[dict[str, Any]], heatmap: list[dict[str, Any]]
-) -> list[dict[str, Any]]:
     output: list[dict[str, Any]] = []
     for scene in scenes:
         matching = [
             point
-            for point in heatmap
+            for point in (heatmap or [])
             if scene["startSeconds"] <= midpoint(point) < scene["endSeconds"]
         ]
         if not matching:
+            output.append({**scene, "currentlyMostReplayed": False})
             continue
         hottest = max(matching, key=lambda point: float(point["value"]))
-        if float(hottest["value"]) < HOT_THRESHOLD:
-            continue
         output.append(
             {
                 **scene,
                 "peakSeconds": round(midpoint(hottest)),
                 "peakValue": round(float(hottest["value"]), 6),
+                "currentlyMostReplayed": float(hottest["value"]) >= HOT_THRESHOLD,
             }
         )
     return output
 
 
+def scene_keys(manifest: Any) -> set[tuple[str, int, int]]:
+    keys: set[tuple[str, int, int]] = set()
+    if not isinstance(manifest, list):
+        return keys
+    for stream in manifest:
+        if not isinstance(stream, dict):
+            continue
+        video_id = stream.get("youtubeId")
+        if not isinstance(video_id, str) or not VIDEO_ID_RE.fullmatch(video_id):
+            continue
+        for scene in stream.get("scenes", []):
+            if not isinstance(scene, dict):
+                continue
+            start, end = scene.get("startSeconds"), scene.get("endSeconds")
+            if isinstance(start, int) and not isinstance(start, bool) and isinstance(end, int) and not isinstance(end, bool):
+                keys.add((video_id, start, end))
+    return keys
+
+
+def require_append_only_archive(previous: Any, current: Any) -> None:
+    """Refuse any automatic rebuild that would drop a published scene."""
+
+    missing = sorted(scene_keys(previous) - scene_keys(current))
+    if missing:
+        preview = ", ".join(f"{video_id}:{start}-{end}" for video_id, start, end in missing[:5])
+        raise RuntimeError(
+            "refusing to remove previously published legendary scene(s): " + preview
+        )
+
+
 def main() -> int:
     videos = load_json(VIDEOS_PATH, [])
-    chapters = load_json(CHAPTERS_PATH, {})
     heatmaps = load_json(HEATMAPS_PATH, {})
-    if not isinstance(videos, list) or not isinstance(chapters, dict) or not isinstance(heatmaps, dict):
-        raise RuntimeError("Generated video, chapter, or heatmap data is invalid")
+    previous_highlights = load_json(HIGHLIGHTS_PATH, [])
+    if not isinstance(videos, list) or not isinstance(heatmaps, dict):
+        raise RuntimeError("Generated video or heatmap data is invalid")
     videos_by_id = {
         str(video.get("youtubeId")): video
         for video in videos
@@ -240,21 +261,38 @@ def main() -> int:
             ],
         }
 
+    curated_ids = {
+        path.stem
+        for path in PARTIAL_SCENES_DIR.glob("*.json")
+        if path.is_file() and VIDEO_ID_RE.fullmatch(path.stem)
+    }
+    missing_coverage = sorted(curated_ids - set(coverage))
+    if missing_coverage:
+        raise RuntimeError(
+            "curated legendary scenes have no published subtitle coverage: "
+            + ", ".join(missing_coverage)
+        )
+
     highlights: list[dict[str, Any]] = []
-    for video_id, coverage_entry in coverage.items():
+    for video_id in sorted(curated_ids):
+        coverage_entry = coverage[video_id]
         video = videos_by_id.get(video_id)
-        points = heatmaps.get(video_id)
-        if not video or not isinstance(points, list) or not points:
-            continue
-        if coverage_entry["coverage"] == "full":
-            video_chapters = chapters.get(video_id)
-            if not isinstance(video_chapters, list):
-                continue
-            scenes = hot_scenes_from_chapters(video_chapters, points)
+        if not video:
+            raise RuntimeError(f"curated legendary stream is missing from data/videos.json: {video_id}")
+        if coverage_entry["coverage"] == "highlights":
+            scenes = partial_scenes[video_id]
         else:
-            scenes = hot_partial_scenes(partial_scenes[video_id], points)
-        if not scenes:
-            continue
+            cue_ranges = parse_vtt_ranges(SUBTITLES_DIR / f"{video_id}.vtt")
+            scenes = normalize_curated_scenes(
+                video_id,
+                load_json(PARTIAL_SCENES_DIR / f"{video_id}.json", None),
+                cue_ranges,
+                require_complete_coverage=False,
+            )
+        points = heatmaps.get(video_id)
+        scenes = annotate_curated_scenes(
+            scenes, points if isinstance(points, list) else None
+        )
         metadata = load_metadata(video_id, video)
         highlights.append(
             {
@@ -270,6 +308,7 @@ def main() -> int:
 
     video_order = {str(video.get("youtubeId")): index for index, video in enumerate(videos) if isinstance(video, dict)}
     highlights.sort(key=lambda item: video_order.get(item["youtubeId"], len(video_order)))
+    require_append_only_archive(previous_highlights, highlights)
     atomic_write_json(COVERAGE_PATH, coverage)
     atomic_write_json(HIGHLIGHTS_PATH, highlights)
     print(f"Updated {COVERAGE_PATH.relative_to(ROOT)} for {len(coverage)} video(s).")

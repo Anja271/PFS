@@ -17,6 +17,29 @@ SPEC.loader.exec_module(MODULE)
 
 
 class ScannerTests(unittest.TestCase):
+    def test_source_workflow_uses_vlast_only_for_channel_supplied_english(self) -> None:
+        korean_only = {
+            "subtitles": {
+                "ko": [{"ext": "json3", "url": "https://example.test/ko"}],
+            },
+            "automatic_captions": {
+                "en": [{"ext": "json3", "url": "https://example.test/auto-en"}],
+            },
+        }
+        self.assertTrue(MODULE.has_korean_captions(korean_only))
+        self.assertFalse(MODULE.has_channel_english_captions(korean_only))
+        self.assertEqual(MODULE.suggested_source_workflow(korean_only, True), "korean-only")
+
+        assisted = {
+            **korean_only,
+            "subtitles": {
+                **korean_only["subtitles"],
+                "en-vlast": [{"ext": "json3", "url": "https://example.test/vlast-en"}],
+            },
+        }
+        self.assertTrue(MODULE.has_channel_english_captions(assisted))
+        self.assertEqual(MODULE.suggested_source_workflow(assisted, True), "vlast-assisted")
+
     def test_normalizes_and_groups_hot_points(self) -> None:
         points = MODULE.normalize_heatmap(
             [
@@ -46,6 +69,41 @@ class ScannerTests(unittest.TestCase):
             )
         )
 
+    def test_fresh_priority_preview_reorders_without_dropping_videos(self) -> None:
+        videos = [
+            {"youtubeId": "newest1", "title": "Newest", "publishedAt": ""},
+            {"youtubeId": "middle2", "title": "Middle", "publishedAt": ""},
+            {"youtubeId": "archive3", "title": "Archive", "publishedAt": ""},
+        ]
+        now = datetime(2026, 10, 25, tzinfo=timezone.utc)
+        preview = {
+            "generatedAt": "2026-10-24T00:00:00Z",
+            "modifiesLiveQueue": False,
+            "entries": [{"youtubeId": "archive3"}, {"youtubeId": "newest1"}],
+        }
+        ordered, active = MODULE.apply_recent_priority_preview(videos, preview, now)
+        self.assertTrue(active)
+        self.assertEqual(
+            [video["youtubeId"] for video in ordered],
+            ["archive3", "newest1", "middle2"],
+        )
+
+    def test_stale_priority_preview_falls_back_to_newest_first(self) -> None:
+        videos = [
+            {"youtubeId": "newest1", "title": "Newest", "publishedAt": ""},
+            {"youtubeId": "archive3", "title": "Archive", "publishedAt": ""},
+        ]
+        preview = {
+            "generatedAt": "2026-07-21T00:00:00Z",
+            "modifiesLiveQueue": False,
+            "entries": [{"youtubeId": "archive3"}],
+        }
+        ordered, active = MODULE.apply_recent_priority_preview(
+            videos, preview, datetime(2026, 10, 25, tzinfo=timezone.utc)
+        )
+        self.assertFalse(active)
+        self.assertEqual(ordered, videos)
+
     def test_retry_window_and_terminal_states(self) -> None:
         now = datetime(2026, 7, 20, tzinfo=timezone.utc)
         recent = {"status": "no_heatmap", "checkedAt": "2026-07-19T00:00:00Z"}
@@ -54,6 +112,19 @@ class ScannerTests(unittest.TestCase):
         self.assertTrue(MODULE.should_scan(old, now, timedelta(days=30), False))
         self.assertFalse(MODULE.should_scan({"status": "ready"}, now, timedelta(days=30), False))
         self.assertTrue(MODULE.should_scan({"status": "ready"}, now, timedelta(days=30), True))
+
+    def test_korean_only_candidate_remains_ready_without_vlast(self) -> None:
+        video = {"youtubeId": "abc123XYZ", "title": "Older stream", "publishedAt": "2023-01-01"}
+        info = {
+            "title": "Older stream",
+            "subtitles": {
+                "ko": [{"ext": "json3", "url": "https://example.test/ko"}],
+            },
+            "heatmap": [{"start_time": 0, "end_time": 10, "value": 0.8}],
+        }
+        result = MODULE.classify(video, info, "2026-10-25T00:00:00Z")
+        self.assertEqual(result["status"], "ready")
+        self.assertEqual(result["suggestedSourceWorkflow"], "korean-only")
 
 
 if __name__ == "__main__":

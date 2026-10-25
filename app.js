@@ -389,7 +389,7 @@
     elements.playerView.hidden = false;
     elements.backLink.href = returnToHighlights ? "highlights.html" : "./";
     elements.backLink.textContent = returnToHighlights
-      ? "← Back to Most replayed scenes"
+      ? "← Back to legendary scenes"
       : "← Back to livestreams";
     elements.playerTitle.textContent = video.title;
     setStatus(elements.playerStatus, video.youtubeId);
@@ -800,7 +800,7 @@
         state.activeCueKey = endedKey;
         elements.subtitleOverlay.textContent = "";
         elements.subtitleOverlay.classList.remove("has-text");
-        elements.subtitleFallback.textContent = "End of this subtitled highlight. Choose another Most replayed scene, or press Play again to continue without fan subtitles.";
+        elements.subtitleFallback.textContent = "End of this subtitled highlight. Choose another legendary scene, or press Play again to continue without fan subtitles.";
       }
       elements.highlightStart.textContent = "End of this subtitled highlight — choose another scene or press Play again to continue.";
       elements.highlightStart.hidden = false;

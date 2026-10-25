@@ -33,11 +33,13 @@ VIDEOS_PATH = ROOT / "data" / "videos.json"
 HIGHLIGHTS_PATH = ROOT / "data" / "highlights.json"
 STATE_PATH = ROOT / "data" / "highlight-scan-state.json"
 CANDIDATES_PATH = ROOT / "data" / "highlight-candidates.json"
+PRIORITY_PREVIEW_PATH = ROOT / "data" / "stream-priority-preview.json"
 SUBTITLES_DIR = ROOT / "subtitles"
 PARTIAL_SUBTITLES_DIR = ROOT / "highlight-subtitles"
 VIDEO_ID_RE = re.compile(r"^[A-Za-z0-9_-]{6,20}$")
 HOT_THRESHOLD = 0.5
 RETRYABLE_STATUSES = {"no_heatmap", "no_korean_captions", "processing", "error"}
+PRIORITY_PREVIEW_MAX_AGE = timedelta(days=14)
 
 
 def utc_now() -> datetime:
@@ -85,6 +87,37 @@ def load_videos() -> list[dict[str, str]]:
     if not videos:
         raise RuntimeError("data/videos.json contains no valid video IDs")
     return videos
+
+
+def apply_recent_priority_preview(
+    videos: list[dict[str, str]], preview: Any, now: datetime
+) -> tuple[list[dict[str, str]], bool]:
+    """Use intelligent ranking only while its one-request snapshot is fresh."""
+
+    if not isinstance(preview, dict) or preview.get("modifiesLiveQueue") is not False:
+        return videos, False
+    generated_at = parse_checked_at(preview.get("generatedAt"))
+    if (
+        generated_at is None
+        or generated_at > now + timedelta(minutes=5)
+        or now - generated_at > PRIORITY_PREVIEW_MAX_AGE
+    ):
+        return videos, False
+    entries = preview.get("entries")
+    if not isinstance(entries, list):
+        return videos, False
+    by_id = {video["youtubeId"]: video for video in videos}
+    ordered: list[dict[str, str]] = []
+    seen: set[str] = set()
+    for entry in entries:
+        video_id = str(entry.get("youtubeId") or "") if isinstance(entry, dict) else ""
+        if video_id in by_id and video_id not in seen:
+            ordered.append(by_id[video_id])
+            seen.add(video_id)
+    if not ordered:
+        return videos, False
+    ordered.extend(video for video in videos if video["youtubeId"] not in seen)
+    return ordered, True
 
 
 def normalize_heatmap(raw: Any) -> list[dict[str, float]] | None:
@@ -152,6 +185,32 @@ def has_korean_captions(info: dict[str, Any]) -> bool:
         if any(str(language).lower() == "ko" or str(language).lower().startswith("ko-") for language in tracks):
             return True
     return False
+
+
+def has_channel_english_captions(info: dict[str, Any]) -> bool:
+    """Detect a channel-supplied English draft, excluding automatic translations."""
+
+    tracks = info.get("subtitles")
+    if not isinstance(tracks, dict):
+        return False
+    for language, variants in tracks.items():
+        key = str(language).lower()
+        if key != "en" and not key.startswith("en-"):
+            continue
+        if isinstance(variants, list) and any(
+            isinstance(item, dict)
+            and item.get("ext") == "json3"
+            and isinstance(item.get("url"), str)
+            for item in variants
+        ):
+            return True
+    return False
+
+
+def suggested_source_workflow(info: dict[str, Any], korean_captions: bool) -> str:
+    if not korean_captions:
+        return "unavailable"
+    return "vlast-assisted" if has_channel_english_captions(info) else "korean-only"
 
 
 def normalize_date(info: dict[str, Any], fallback: str) -> str:
@@ -239,13 +298,23 @@ def classify(video: dict[str, str], info: dict[str, Any], checked_at: str) -> di
 
     points = normalize_heatmap(info.get("heatmap"))
     korean_captions = has_korean_captions(info)
+    official_english_captions = has_channel_english_captions(info)
+    source_workflow = suggested_source_workflow(info, korean_captions)
     if not points:
-        return {**base, "status": "no_heatmap", "hasKoreanCaptions": korean_captions}
+        return {
+            **base,
+            "status": "no_heatmap",
+            "hasKoreanCaptions": korean_captions,
+            "hasOfficialEnglishCaptions": official_english_captions,
+            "suggestedSourceWorkflow": source_workflow,
+        }
     if not korean_captions and base["subtitleCoverage"] == "none":
         return {
             **base,
             "status": "no_korean_captions",
             "hasKoreanCaptions": False,
+            "hasOfficialEnglishCaptions": official_english_captions,
+            "suggestedSourceWorkflow": source_workflow,
             "heatmapPoints": len(points),
         }
     clusters = hot_clusters(points)
@@ -253,6 +322,8 @@ def classify(video: dict[str, str], info: dict[str, Any], checked_at: str) -> di
         **base,
         "status": "ready",
         "hasKoreanCaptions": korean_captions,
+        "hasOfficialEnglishCaptions": official_english_captions,
+        "suggestedSourceWorkflow": source_workflow,
         "heatmapPoints": len(points),
         "hotClusters": clusters,
     }
@@ -274,6 +345,11 @@ def build_candidates(videos: list[dict[str, str]], state_entries: dict[str, Any]
                 "checkedAt": str(entry.get("checkedAt") or ""),
                 "heatmapPoints": int(entry.get("heatmapPoints") or 0),
                 "hotClusters": entry.get("hotClusters") if isinstance(entry.get("hotClusters"), list) else [],
+                "suggestedSourceWorkflow": (
+                    str(entry.get("suggestedSourceWorkflow"))
+                    if entry.get("suggestedSourceWorkflow") in {"vlast-assisted", "korean-only"}
+                    else "undetermined"
+                ),
             }
         )
     return candidates
@@ -299,6 +375,11 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="mark newly published highlights and rebuild the queue without YouTube requests",
     )
+    parser.add_argument(
+        "--ignore-priority-preview",
+        action="store_true",
+        help="scan newest-first even when a fresh intelligent priority preview exists",
+    )
     return parser.parse_args()
 
 
@@ -319,6 +400,16 @@ def main() -> int:
     original_entries = copy.deepcopy(entries)
 
     now = utc_now()
+    priority_active = False
+    if not args.ignore_priority_preview:
+        videos, priority_active = apply_recent_priority_preview(
+            videos, load_json(PRIORITY_PREVIEW_PATH, None), now
+        )
+    print(
+        "Scan order: intelligent priority/recent/archive lanes."
+        if priority_active
+        else "Scan order: official newest-first fallback."
+    )
     checked_at = now.isoformat().replace("+00:00", "Z")
     published = published_ids()
     for video in videos:
