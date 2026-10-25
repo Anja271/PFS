@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-25T15:55:05Z",
+  "updatedAt": "2026-10-25T16:09:07Z",
   "retryAfterDays": 30,
   "videos": {
     "x7qic07HViw": {
@@ -202,21 +202,11 @@
       ]
     },
     "QXWEwVWLhU0": {
-      "status": "ready",
-      "checkedAt": "2026-07-20T21:09:30Z",
+      "status": "published",
       "title": "플리야 일단 뛰어!🏃 아스테룸 워터 페스티벌🔫 💙💜🩷❤️🖤 | #플레이브 PLAVE | PLAVE Live Full Ver.",
       "publishedAt": "2026-06-02",
-      "subtitleCoverage": "none",
-      "hasKoreanCaptions": true,
-      "heatmapPoints": 100,
-      "hotClusters": [
-        {
-          "startSeconds": 4911,
-          "endSeconds": 5063,
-          "peakSeconds": 4949,
-          "peakValue": 1.0
-        }
-      ]
+      "subtitleCoverage": "highlights",
+      "checkedAt": "2026-10-25T16:09:07Z"
     },
     "FJgYDi6GwKw": {
       "status": "ready",
@@ -306,29 +296,11 @@
       "checkedAt": "2026-10-25T15:55:05Z"
     },
     "77q4q-nFbtk": {
-      "status": "ready",
-      "checkedAt": "2026-10-25T15:55:05Z",
+      "status": "published",
       "title": "플레이브 쫄보즈의 대환장 코믹&공포 게임 라이브 풀버전 (feat. 슈퍼 버니맨, 파피 플레이타임)｜#플레이브 PLAVE｜Yejun & Bamby Live Full Ver.",
       "publishedAt": "2023-01-17",
-      "subtitleCoverage": "none",
-      "hasKoreanCaptions": true,
-      "hasOfficialEnglishCaptions": false,
-      "suggestedSourceWorkflow": "korean-only",
-      "heatmapPoints": 100,
-      "hotClusters": [
-        {
-          "startSeconds": 7254,
-          "endSeconds": 7342,
-          "peakSeconds": 7298,
-          "peakValue": 1.0
-        },
-        {
-          "startSeconds": 7866,
-          "endSeconds": 7953,
-          "peakSeconds": 7910,
-          "peakValue": 0.668834
-        }
-      ]
+      "subtitleCoverage": "highlights",
+      "checkedAt": "2026-10-25T16:09:07Z"
     },
     "al0Af_vgWLg": {
       "status": "ready",

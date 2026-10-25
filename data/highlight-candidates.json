@@ -1,28 +1,5 @@
 [
   {
-    "youtubeId": "77q4q-nFbtk",
-    "title": "플레이브 쫄보즈의 대환장 코믹&공포 게임 라이브 풀버전 (feat. 슈퍼 버니맨, 파피 플레이타임)｜#플레이브 PLAVE｜Yejun & Bamby Live Full Ver.",
-    "publishedAt": "2023-01-17",
-    "subtitleCoverage": "none",
-    "checkedAt": "2026-10-25T15:55:05Z",
-    "heatmapPoints": 100,
-    "hotClusters": [
-      {
-        "startSeconds": 7254,
-        "endSeconds": 7342,
-        "peakSeconds": 7298,
-        "peakValue": 1.0
-      },
-      {
-        "startSeconds": 7866,
-        "endSeconds": 7953,
-        "peakSeconds": 7910,
-        "peakValue": 0.668834
-      }
-    ],
-    "suggestedSourceWorkflow": "korean-only"
-  },
-  {
     "youtubeId": "al0Af_vgWLg",
     "title": "두 남자의 자존심이 걸린 춤 서열 4위 결정전💙❤🖤 | #플레이브  PLAVE | Yejun & Eunho & Hamin Live Full Ver.",
     "publishedAt": "2023-06-26",
@@ -97,6 +74,7 @@
         "peakValue": 0.745417
       }
     ],
+    "everMostReplayed": true,
     "suggestedSourceWorkflow": "vlast-assisted"
   },
   {
@@ -144,6 +122,7 @@
         "peakValue": 0.703594
       }
     ],
+    "everMostReplayed": true,
     "suggestedSourceWorkflow": "vlast-assisted"
   },
   {
@@ -191,24 +170,8 @@
         "peakValue": 0.603971
       }
     ],
+    "everMostReplayed": true,
     "suggestedSourceWorkflow": "vlast-assisted"
-  },
-  {
-    "youtubeId": "QXWEwVWLhU0",
-    "title": "플리야 일단 뛰어!🏃 아스테룸 워터 페스티벌🔫 💙💜🩷❤️🖤 | #플레이브 PLAVE | PLAVE Live Full Ver.",
-    "publishedAt": "2026-06-02",
-    "subtitleCoverage": "none",
-    "checkedAt": "2026-07-20T21:09:30Z",
-    "heatmapPoints": 100,
-    "hotClusters": [
-      {
-        "startSeconds": 4911,
-        "endSeconds": 5063,
-        "peakSeconds": 4949,
-        "peakValue": 1.0
-      }
-    ],
-    "suggestedSourceWorkflow": "undetermined"
   },
   {
     "youtubeId": "9cJsEa_6YUQ",
@@ -255,6 +218,7 @@
         "peakValue": 0.584478
       }
     ],
+    "everMostReplayed": true,
     "suggestedSourceWorkflow": "undetermined"
   },
   {
@@ -314,6 +278,7 @@
         "peakValue": 0.632554
       }
     ],
+    "everMostReplayed": true,
     "suggestedSourceWorkflow": "undetermined"
   },
   {
@@ -349,6 +314,7 @@
         "peakValue": 0.588969
       }
     ],
+    "everMostReplayed": true,
     "suggestedSourceWorkflow": "undetermined"
   },
   {
@@ -420,6 +386,7 @@
         "peakValue": 0.507704
       }
     ],
+    "everMostReplayed": true,
     "suggestedSourceWorkflow": "undetermined"
   }
 ]
