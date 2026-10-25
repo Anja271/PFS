@@ -326,5 +326,35 @@
         "currentlyMostReplayed": true
       }
     ]
+  },
+  {
+    "youtubeId": "77q4q-nFbtk",
+    "date": "2023-01-17",
+    "displayTitle": "PLAVE’s Coward Line Plays Chaotic Comedy & Horror Games (feat. Super Bunny Man, Poppy Playtime) | Yejun & Bamby Live Full Ver.",
+    "originalTitle": "플레이브 쫄보즈의 대환장 코믹&공포 게임 라이브 풀버전 (feat. 슈퍼 버니맨, 파피 플레이타임)｜#플레이브 PLAVE｜Yejun & Bamby Live Full Ver.",
+    "coverage": "highlights",
+    "subtitlePath": "highlight-subtitles/77q4q-nFbtk.vtt",
+    "scenes": [
+      {
+        "startSeconds": 7089,
+        "endSeconds": 7357,
+        "title": "Following the Power Cable Through the Factory",
+        "legendary": false,
+        "everMostReplayed": true,
+        "peakSeconds": 7298,
+        "peakValue": 1.0,
+        "currentlyMostReplayed": true
+      },
+      {
+        "startSeconds": 7831,
+        "endSeconds": 8039,
+        "title": "The First Monster Chase",
+        "legendary": false,
+        "everMostReplayed": true,
+        "peakSeconds": 7910,
+        "peakValue": 0.668834,
+        "currentlyMostReplayed": true
+      }
+    ]
   }
 ]

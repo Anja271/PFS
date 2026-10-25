@@ -75,6 +75,20 @@
       }
     ]
   },
+  "77q4q-nFbtk": {
+    "coverage": "highlights",
+    "subtitlePath": "highlight-subtitles/77q4q-nFbtk.vtt",
+    "ranges": [
+      {
+        "startSeconds": 7089,
+        "endSeconds": 7357
+      },
+      {
+        "startSeconds": 7831,
+        "endSeconds": 8039
+      }
+    ]
+  },
   "HyQyd6czf7I": {
     "coverage": "highlights",
     "subtitlePath": "highlight-subtitles/HyQyd6czf7I.vtt",
