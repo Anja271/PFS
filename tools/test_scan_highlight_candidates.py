@@ -40,6 +40,11 @@ class ScannerTests(unittest.TestCase):
         self.assertTrue(MODULE.has_channel_english_captions(assisted))
         self.assertEqual(MODULE.suggested_source_workflow(assisted, True), "vlast-assisted")
 
+        self.assertEqual(
+            MODULE.suggested_source_workflow({}, False, "full"),
+            "existing-full-subtitles",
+        )
+
     def test_normalizes_and_groups_hot_points(self) -> None:
         points = MODULE.normalize_heatmap(
             [
@@ -125,6 +130,22 @@ class ScannerTests(unittest.TestCase):
         result = MODULE.classify(video, info, "2026-10-25T00:00:00Z")
         self.assertEqual(result["status"], "ready")
         self.assertEqual(result["suggestedSourceWorkflow"], "korean-only")
+
+    def test_existing_full_subtitles_make_heatmap_candidate_ready(self) -> None:
+        video = {"youtubeId": "abc123XYZ", "title": "Translated stream", "publishedAt": "2026-10-01"}
+        info = {
+            "title": "Translated stream",
+            "heatmap": [{"start_time": 0, "end_time": 10, "value": 0.8}],
+        }
+        original = MODULE.subtitle_coverage
+        MODULE.subtitle_coverage = lambda _video_id: "full"
+        try:
+            result = MODULE.classify(video, info, "2026-10-25T00:00:00Z")
+        finally:
+            MODULE.subtitle_coverage = original
+        self.assertEqual(result["status"], "ready")
+        self.assertEqual(result["subtitleCoverage"], "full")
+        self.assertEqual(result["suggestedSourceWorkflow"], "existing-full-subtitles")
 
 
 if __name__ == "__main__":

@@ -6,6 +6,8 @@ counts are read with one flat yt-dlp request to the official /streams tab. A
 video is compared only with nearby uploads, which limits channel-growth and age
 bias. Editorial legendary evidence, a protected recent-backlog lane, and an
 archive-discovery lane are then combined into a starvation-resistant preview.
+Existing full fan subtitles reduce later work; they do not make a stream
+ineligible for Most replayed discovery.
 """
 
 from __future__ import annotations
@@ -28,6 +30,7 @@ STREAMS_URL = "https://www.youtube.com/@plave_official/streams"
 VIDEOS_PATH = ROOT / "data" / "videos.json"
 LEGENDARY_PATH = ROOT / "data" / "legendary-streams.json"
 SCAN_STATE_PATH = ROOT / "data" / "highlight-scan-state.json"
+HIGHLIGHTS_PATH = ROOT / "data" / "highlights.json"
 OUTPUT_PATH = ROOT / "data" / "stream-priority-preview.json"
 SUBTITLES_DIR = ROOT / "subtitles"
 HIGHLIGHT_SUBTITLES_DIR = ROOT / "highlight-subtitles"
@@ -156,6 +159,18 @@ def coverage(video_id: str) -> str:
     return "none"
 
 
+def published_highlight_ids() -> set[str]:
+    raw = load_json(HIGHLIGHTS_PATH, [])
+    if not isinstance(raw, list):
+        return set()
+    return {
+        str(item.get("youtubeId"))
+        for item in raw
+        if isinstance(item, dict)
+        and VIDEO_ID_RE.fullmatch(str(item.get("youtubeId") or ""))
+    }
+
+
 def ranked_records(
     videos: list[dict[str, Any]], counts: dict[str, int], legendary: dict[str, dict[str, Any]]
 ) -> list[dict[str, Any]]:
@@ -163,12 +178,14 @@ def ranked_records(
     state_videos = state.get("videos", {}) if isinstance(state, dict) else {}
     if not isinstance(state_videos, dict):
         state_videos = {}
+    published = published_highlight_ids()
     total = len(videos)
     records: list[dict[str, Any]] = []
     for index, video in enumerate(videos):
         video_id = video["youtubeId"]
-        if coverage(video_id) != "none":
+        if video_id in published:
             continue
+        subtitle_coverage = coverage(video_id)
         start = max(0, index - COHORT_RADIUS)
         end = min(total, index + COHORT_RADIUS + 1)
         cohort = [
@@ -203,6 +220,12 @@ def ranked_records(
                 "legendaryReason": legend.get("reason", ""),
                 "score": score,
                 "knownScanStatus": scan_status,
+                "subtitleCoverage": subtitle_coverage,
+                "suggestedSourceWorkflow": (
+                    "existing-full-subtitles"
+                    if subtitle_coverage == "full"
+                    else "scan-required"
+                ),
             }
         )
     return records
@@ -270,11 +293,12 @@ def main() -> int:
                 "longTermViewVelocity": 0,
             },
         },
+        "eligibleHighlightStreams": len(ordered),
         "eligibleUntranslatedStreams": len(ordered),
         "entries": ordered,
     }
     atomic_write_json(args.output, result)
-    print(f"Wrote {len(ordered)} untranslated streams to {args.output}")
+    print(f"Wrote {len(ordered)} highlight-eligible streams to {args.output}")
     for item in ordered[:20]:
         print(
             f"{item['previewRank']:>2}. {item['selectionLane']:<17} "

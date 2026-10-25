@@ -126,6 +126,54 @@
     "suggestedSourceWorkflow": "vlast-assisted"
   },
   {
+    "youtubeId": "b4MrhpJB1xw",
+    "title": "🏆아스테룸을 빛낸 별들의 축제🌟2023 플레이브 어워즈 💙💜🩷❤️🖤| #플레이브 PLAVE | 2023 PLAVE AWARDS Live Full Ver.",
+    "publishedAt": "2023-12-29",
+    "subtitleCoverage": "none",
+    "checkedAt": "2026-10-25T16:15:37Z",
+    "heatmapPoints": 100,
+    "hotClusters": [
+      {
+        "startSeconds": 279,
+        "endSeconds": 349,
+        "peakSeconds": 314,
+        "peakValue": 0.548014
+      },
+      {
+        "startSeconds": 1605,
+        "endSeconds": 1675,
+        "peakSeconds": 1640,
+        "peakValue": 1.0
+      },
+      {
+        "startSeconds": 1884,
+        "endSeconds": 1954,
+        "peakSeconds": 1919,
+        "peakValue": 0.551291
+      },
+      {
+        "startSeconds": 2163,
+        "endSeconds": 2233,
+        "peakSeconds": 2198,
+        "peakValue": 0.5306
+      },
+      {
+        "startSeconds": 3140,
+        "endSeconds": 3210,
+        "peakSeconds": 3175,
+        "peakValue": 0.526697
+      },
+      {
+        "startSeconds": 6838,
+        "endSeconds": 6908,
+        "peakSeconds": 6873,
+        "peakValue": 0.792016
+      }
+    ],
+    "everMostReplayed": true,
+    "suggestedSourceWorkflow": "vlast-assisted"
+  },
+  {
     "youtubeId": "XGPFGClyQQk",
     "title": "🐈‍⬛하민이를 만나 행복했어🌱 행복 1101% 🎂 생일 라이브🖤 | #플레이브 PLAVE | PLAVE Hamin Birthday Live Full Ver.",
     "publishedAt": "2023-11-01",
@@ -168,6 +216,84 @@
         "endSeconds": 5790,
         "peakSeconds": 5750,
         "peakValue": 0.603971
+      }
+    ],
+    "everMostReplayed": true,
+    "suggestedSourceWorkflow": "vlast-assisted"
+  },
+  {
+    "youtubeId": "qj4fsjBDbXg",
+    "title": "문학 콘서트🎆 비하인드 들고 플리에게 🏃달려갈게 (츄!)💙💜🩷❤️🖤 | #플레이브 PLAVE | PLAVE Live Full Ver.",
+    "publishedAt": "2026-09-21",
+    "subtitleCoverage": "full",
+    "checkedAt": "2026-10-25T16:15:37Z",
+    "heatmapPoints": 100,
+    "hotClusters": [
+      {
+        "startSeconds": 5895,
+        "endSeconds": 5995,
+        "peakSeconds": 5945,
+        "peakValue": 0.504139
+      },
+      {
+        "startSeconds": 6494,
+        "endSeconds": 6594,
+        "peakSeconds": 6544,
+        "peakValue": 0.509043
+      },
+      {
+        "startSeconds": 8492,
+        "endSeconds": 8592,
+        "peakSeconds": 8542,
+        "peakValue": 0.713273
+      },
+      {
+        "startSeconds": 8992,
+        "endSeconds": 9092,
+        "peakSeconds": 9042,
+        "peakValue": 0.555237
+      },
+      {
+        "startSeconds": 9392,
+        "endSeconds": 9491,
+        "peakSeconds": 9441,
+        "peakValue": 0.624363
+      },
+      {
+        "startSeconds": 9591,
+        "endSeconds": 9691,
+        "peakSeconds": 9641,
+        "peakValue": 1.0
+      },
+      {
+        "startSeconds": 9791,
+        "endSeconds": 9991,
+        "peakSeconds": 9841,
+        "peakValue": 0.911201
+      }
+    ],
+    "everMostReplayed": true,
+    "suggestedSourceWorkflow": "existing-full-subtitles"
+  },
+  {
+    "youtubeId": "HY2EgIaC9ZE",
+    "title": "🎼보컬의 축복이 끝이 없네🎉 수장즈 뮤지컬의 밤💙💜🩷 | #플레이브 PLAVE | Yejun & Noah & Bamby Live Full Ver.",
+    "publishedAt": "2024-01-11",
+    "subtitleCoverage": "none",
+    "checkedAt": "2026-10-25T16:15:37Z",
+    "heatmapPoints": 100,
+    "hotClusters": [
+      {
+        "startSeconds": 2789,
+        "endSeconds": 2857,
+        "peakSeconds": 2823,
+        "peakValue": 1.0
+      },
+      {
+        "startSeconds": 6734,
+        "endSeconds": 6802,
+        "peakSeconds": 6768,
+        "peakValue": 0.627555
       }
     ],
     "everMostReplayed": true,

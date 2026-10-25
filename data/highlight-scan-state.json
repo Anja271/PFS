@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-25T16:09:07Z",
+  "updatedAt": "2026-10-25T16:15:37Z",
   "retryAfterDays": 30,
   "videos": {
     "x7qic07HViw": {
@@ -488,6 +488,156 @@
           "peakValue": 0.603971
         }
       ]
+    },
+    "b4MrhpJB1xw": {
+      "status": "ready",
+      "checkedAt": "2026-10-25T16:15:37Z",
+      "title": "🏆아스테룸을 빛낸 별들의 축제🌟2023 플레이브 어워즈 💙💜🩷❤️🖤| #플레이브 PLAVE | 2023 PLAVE AWARDS Live Full Ver.",
+      "publishedAt": "2023-12-29",
+      "subtitleCoverage": "none",
+      "hasKoreanCaptions": true,
+      "hasOfficialEnglishCaptions": true,
+      "suggestedSourceWorkflow": "vlast-assisted",
+      "heatmapPoints": 100,
+      "hotClusters": [
+        {
+          "startSeconds": 279,
+          "endSeconds": 349,
+          "peakSeconds": 314,
+          "peakValue": 0.548014
+        },
+        {
+          "startSeconds": 1605,
+          "endSeconds": 1675,
+          "peakSeconds": 1640,
+          "peakValue": 1.0
+        },
+        {
+          "startSeconds": 1884,
+          "endSeconds": 1954,
+          "peakSeconds": 1919,
+          "peakValue": 0.551291
+        },
+        {
+          "startSeconds": 2163,
+          "endSeconds": 2233,
+          "peakSeconds": 2198,
+          "peakValue": 0.5306
+        },
+        {
+          "startSeconds": 3140,
+          "endSeconds": 3210,
+          "peakSeconds": 3175,
+          "peakValue": 0.526697
+        },
+        {
+          "startSeconds": 6838,
+          "endSeconds": 6908,
+          "peakSeconds": 6873,
+          "peakValue": 0.792016
+        }
+      ]
+    },
+    "qj4fsjBDbXg": {
+      "status": "ready",
+      "checkedAt": "2026-10-25T16:15:37Z",
+      "title": "문학 콘서트🎆 비하인드 들고 플리에게 🏃달려갈게 (츄!)💙💜🩷❤️🖤 | #플레이브 PLAVE | PLAVE Live Full Ver.",
+      "publishedAt": "2026-09-21",
+      "subtitleCoverage": "full",
+      "hasKoreanCaptions": true,
+      "hasOfficialEnglishCaptions": true,
+      "suggestedSourceWorkflow": "existing-full-subtitles",
+      "heatmapPoints": 100,
+      "hotClusters": [
+        {
+          "startSeconds": 5895,
+          "endSeconds": 5995,
+          "peakSeconds": 5945,
+          "peakValue": 0.504139
+        },
+        {
+          "startSeconds": 6494,
+          "endSeconds": 6594,
+          "peakSeconds": 6544,
+          "peakValue": 0.509043
+        },
+        {
+          "startSeconds": 8492,
+          "endSeconds": 8592,
+          "peakSeconds": 8542,
+          "peakValue": 0.713273
+        },
+        {
+          "startSeconds": 8992,
+          "endSeconds": 9092,
+          "peakSeconds": 9042,
+          "peakValue": 0.555237
+        },
+        {
+          "startSeconds": 9392,
+          "endSeconds": 9491,
+          "peakSeconds": 9441,
+          "peakValue": 0.624363
+        },
+        {
+          "startSeconds": 9591,
+          "endSeconds": 9691,
+          "peakSeconds": 9641,
+          "peakValue": 1.0
+        },
+        {
+          "startSeconds": 9791,
+          "endSeconds": 9991,
+          "peakSeconds": 9841,
+          "peakValue": 0.911201
+        }
+      ]
+    },
+    "HY2EgIaC9ZE": {
+      "status": "ready",
+      "checkedAt": "2026-10-25T16:15:37Z",
+      "title": "🎼보컬의 축복이 끝이 없네🎉 수장즈 뮤지컬의 밤💙💜🩷 | #플레이브 PLAVE | Yejun & Noah & Bamby Live Full Ver.",
+      "publishedAt": "2024-01-11",
+      "subtitleCoverage": "none",
+      "hasKoreanCaptions": true,
+      "hasOfficialEnglishCaptions": true,
+      "suggestedSourceWorkflow": "vlast-assisted",
+      "heatmapPoints": 100,
+      "hotClusters": [
+        {
+          "startSeconds": 2789,
+          "endSeconds": 2857,
+          "peakSeconds": 2823,
+          "peakValue": 1.0
+        },
+        {
+          "startSeconds": 6734,
+          "endSeconds": 6802,
+          "peakSeconds": 6768,
+          "peakValue": 0.627555
+        }
+      ]
+    },
+    "2l2nip8yy0g": {
+      "status": "no_korean_captions",
+      "checkedAt": "2026-10-25T16:15:37Z",
+      "title": "플레이브 공식 유죄인간 연습생 예준의 첫 번째 라이브 풀버전💙｜#플레이브 PLAVE｜Yejun's 1st Live Full Ver.",
+      "publishedAt": "2022-09-15",
+      "subtitleCoverage": "none",
+      "hasKoreanCaptions": false,
+      "hasOfficialEnglishCaptions": false,
+      "suggestedSourceWorkflow": "unavailable",
+      "heatmapPoints": 100
+    },
+    "znWMx57DL20": {
+      "status": "no_heatmap",
+      "checkedAt": "2026-10-25T16:15:37Z",
+      "title": "HYPERDRIVE Start Race!🏁 플레이브의 챌린지는 지금부터!🏎 💙💜🩷❤️🖤 | #플레이브 PLAVE | PLAVE Live Full Ver.",
+      "publishedAt": "2026-10-19",
+      "subtitleCoverage": "full",
+      "hasKoreanCaptions": true,
+      "hasOfficialEnglishCaptions": true,
+      "suggestedSourceWorkflow": "existing-full-subtitles"
     }
   }
 }

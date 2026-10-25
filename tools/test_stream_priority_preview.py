@@ -22,6 +22,7 @@ def main() -> int:
     assert preview["source"] == "https://www.youtube.com/@plave_official/streams"
     assert preview["method"]["scoreWeights"]["longTermViewVelocity"] == 0
     assert len(entries) == preview["eligibleUntranslatedStreams"]
+    assert len(entries) == preview["eligibleHighlightStreams"]
     assert len({entry["youtubeId"] for entry in entries}) == len(entries)
     assert [entry["previewRank"] for entry in entries] == list(
         range(1, len(entries) + 1)
@@ -37,6 +38,13 @@ def main() -> int:
         "recent",
     ]
     assert all(entry["playlistIndex"] < 24 for entry in entries[:30] if entry["selectionLane"] == "recent")
+    assert all(entry["subtitleCoverage"] in {"none", "full"} for entry in entries)
+    assert all(
+        entry["suggestedSourceWorkflow"] == (
+            "existing-full-subtitles" if entry["subtitleCoverage"] == "full" else "scan-required"
+        )
+        for entry in entries
+    )
 
     print(f"Priority preview validation passed for {len(entries)} streams.")
     return 0

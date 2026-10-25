@@ -151,6 +151,30 @@ def merge_prepared_heatmap(work: Path, video_id: str) -> None:
     atomic_write_json(manifest_path, manifest)
 
 
+def verify_existing_highlight_dependencies(
+    work: Path, video_id: str, seal: dict[str, Any]
+) -> None:
+    """Ensure a selection-only seal still points at the reviewed source files."""
+
+    expected = {
+        f"subtitles/{video_id}.vtt": ROOT / "subtitles" / f"{video_id}.vtt",
+        f"metadata/{video_id}.json": ROOT / "metadata" / f"{video_id}.json",
+        "source-cues.json": work / "source-cues.json",
+    }
+    dependencies = seal.get("dependencies")
+    if not isinstance(dependencies, dict) or set(dependencies) != set(expected):
+        raise RuntimeError("selection-only seal has an invalid dependency list")
+    for name, path in expected.items():
+        descriptor = dependencies[name]
+        if (
+            not path.is_file()
+            or not isinstance(descriptor, dict)
+            or sha256(path) != descriptor.get("sha256")
+            or path.stat().st_size != descriptor.get("bytes")
+        ):
+            raise RuntimeError(f"sealed selection dependency changed after validation: {name}")
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("video_id")
@@ -158,6 +182,11 @@ def main() -> int:
         "--confirm-publication",
         action="store_true",
         help="required acknowledgement that this is the separate publication gate",
+    )
+    parser.add_argument(
+        "--existing-full-highlights",
+        action="store_true",
+        help="publish a sealed scene selection that reuses an existing full VTT",
     )
     args = parser.parse_args()
     if not args.confirm_publication:
@@ -172,33 +201,46 @@ def main() -> int:
     synchronize_clean_main()
 
     work = WORK_ROOT / args.video_id
-    seal = load_json(work / "approval-ready.json")
+    seal_name = "highlight-approval-ready.json" if args.existing_full_highlights else "approval-ready.json"
+    seal = load_json(work / seal_name)
     if not isinstance(seal, dict) or seal.get("youtubeId") != args.video_id:
         raise RuntimeError("no matching sealed approval-ready package exists")
     if seal.get("publicationApproved") is not False:
         raise RuntimeError("sealed package has an invalid publication state")
     mode = seal.get("mode")
-    if mode not in {"full", "highlights"}:
+    if mode not in {"full", "highlights", "existing-full-highlights"}:
         raise RuntimeError("sealed package mode is invalid")
+    if args.existing_full_highlights != (mode == "existing-full-highlights"):
+        raise RuntimeError("publication mode does not match the selected seal")
     for name, descriptor in seal.get("files", {}).items():
         path = work / name
         if not path.is_file() or not isinstance(descriptor, dict) or sha256(path) != descriptor.get("sha256"):
             raise RuntimeError(f"sealed file changed after validation: {name}")
 
+    if mode == "existing-full-highlights":
+        verify_existing_highlight_dependencies(work, args.video_id, seal)
+
     candidate = work / "candidate.vtt"
-    boundary = work / ("chapters.json" if mode == "full" else "scenes.json")
+    boundary = work / (
+        "chapters.json"
+        if mode == "full"
+        else "highlight-scenes.json" if mode == "existing-full-highlights" else "scenes.json"
+    )
     metadata = work / "publish-metadata.json"
     if mode == "full":
         destinations = {
             candidate: ROOT / "subtitles" / f"{args.video_id}.vtt",
             boundary: ROOT / "chapters" / f"{args.video_id}.json",
         }
-    else:
+    elif mode == "highlights":
         destinations = {
             candidate: ROOT / "highlight-subtitles" / f"{args.video_id}.vtt",
             boundary: ROOT / "highlights" / f"{args.video_id}.json",
         }
-    destinations[metadata] = ROOT / "metadata" / f"{args.video_id}.json"
+    else:
+        destinations = {boundary: ROOT / "highlights" / f"{args.video_id}.json"}
+    if mode != "existing-full-highlights":
+        destinations[metadata] = ROOT / "metadata" / f"{args.video_id}.json"
     # Import every publication dependency before changing public files. The
     # manifest helpers are intentionally dependency-light, so this preflight
     # does not require yt-dlp or network access.
@@ -219,7 +261,7 @@ def main() -> int:
     committed = False
     try:
         for source, destination in destinations.items():
-            if mode == "highlights" and source == boundary:
+            if mode in {"highlights", "existing-full-highlights"} and source == boundary:
                 publish_highlight_boundaries(source, destination)
             else:
                 atomic_copy(source, destination)
@@ -235,7 +277,13 @@ def main() -> int:
             raise RuntimeError("publication produced no changes")
         if any(path not in allowed for path in staged):
             raise RuntimeError("staging contains a path outside the publication allow-list")
-        label = "English fan subtitles" if mode == "full" else "English fan-subtitled highlights"
+        label = (
+            "English fan subtitles"
+            if mode == "full"
+            else "Most-replayed highlight selection"
+            if mode == "existing-full-highlights"
+            else "English fan-subtitled highlights"
+        )
         run(["git", "commit", "-m", f"Add {label} for {args.video_id}"])
         committed = True
         run(["git", "push", "origin", "main"])
@@ -251,7 +299,9 @@ def main() -> int:
             restore_files(snapshot)
         raise
 
-    state_path = work / "job-state.json"
+    state_path = work / (
+        "highlight-selection-state.json" if mode == "existing-full-highlights" else "job-state.json"
+    )
     state = load_json(state_path)
     now = datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
     state.update(

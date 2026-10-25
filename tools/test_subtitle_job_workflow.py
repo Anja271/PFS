@@ -213,6 +213,8 @@ def main() -> int:
     )
     assert "snapshot_files(mutable_paths)" in publish_source
     assert "restore_files(snapshot)" in publish_source
+    assert '"existing-full-highlights"' in publish_source
+    assert "verify_existing_highlight_dependencies" in publish_source
     publish_module = load_module(
         "scripts/publish_subtitle_job.py", "publish_subtitle_job_heatmap_test"
     )

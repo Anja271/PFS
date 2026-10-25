@@ -147,13 +147,21 @@ Do not edit `data/subtitle-coverage.json` or `data/highlights.json` manually. Th
 
 The controlled back-catalogue process inspects the next five unprocessed livestreams from `data/videos.json`, always following the official Live-tab order from newest to oldest. `scripts/scan_highlight_candidates.py` downloads no video or audio. It reads only per-video metadata, Korean caption availability, and YouTube's optional replay heatmap.
 
-The resumable results are stored in `data/highlight-scan-state.json`. A normal missing heatmap or missing Korean auto-caption result is retried after 30 days; extraction errors can be retried after one day. A temporary failure is recorded separately and never treated as proof that no heatmap exists. Already published highlights are skipped. `data/highlight-candidates.json` contains only streams that currently have usable source captions (or existing English fan subtitles) and a valid heatmap, including contiguous heat clusters at the same `0.5` threshold used by the website.
+The resumable results are stored in `data/highlight-scan-state.json`. A normal missing heatmap or missing Korean auto-caption result is retried after 30 days; extraction errors can be retried after one day. A temporary failure is recorded separately and never treated as proof that no heatmap exists. Already published highlights are skipped. Complete fan subtitles do not exclude a stream: they make it a lower-cost `existing-full-subtitles` candidate whose reviewed VTT can be reused without translating it again. `data/highlight-candidates.json` contains only streams that currently have usable source captions (or existing English fan subtitles) and a valid heatmap, including contiguous heat clusters at the same `0.5` threshold used by the website.
 
 Candidates are **not** shown on the public Highlights page. They first need reviewed scene boundaries, English fan subtitles, and the normal validation described above. This separation prevents raw heatmap peaks or untranslated material from appearing on the website. To run the next five-video batch locally, use:
 
 ```sh
 python scripts/scan_highlight_candidates.py --limit 5
 ```
+
+For `existing-full-subtitles`, the Korean source remains the semantic reference while the existing reviewed English VTT supplies the published text. Save only reviewed semantic boundaries and titles, then seal them with:
+
+```sh
+python scripts/finalize_existing_subtitle_highlights.py VIDEO_ID
+```
+
+After the separate publication approval, publish that sealed selection with `scripts/publish_subtitle_job.py VIDEO_ID --confirm-publication --existing-full-highlights`. The validator requires two context passes and proves that every saved heatmap peak is covered; publication leaves the full VTT unchanged.
 
 Public GitHub-hosted runners are frequently stopped by YouTube's anti-bot check during repeated per-video requests. The scanner therefore does not run in the scheduled GitHub Action and requires no account cookies or repository secrets. Run it locally—or ask Codex to process the next batch—and commit the two queue files afterward. Use `--force` only for an intentional immediate recheck. Use `--retry-errors` to retry only temporary extraction errors immediately. After publishing a candidate, `--sync-only` removes it from the candidate queue without making any YouTube request.
 

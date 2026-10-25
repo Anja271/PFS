@@ -207,7 +207,11 @@ def has_channel_english_captions(info: dict[str, Any]) -> bool:
     return False
 
 
-def suggested_source_workflow(info: dict[str, Any], korean_captions: bool) -> str:
+def suggested_source_workflow(
+    info: dict[str, Any], korean_captions: bool, subtitle_coverage_value: str = "none"
+) -> str:
+    if subtitle_coverage_value == "full":
+        return "existing-full-subtitles"
     if not korean_captions:
         return "unavailable"
     return "vlast-assisted" if has_channel_english_captions(info) else "korean-only"
@@ -299,7 +303,9 @@ def classify(video: dict[str, str], info: dict[str, Any], checked_at: str) -> di
     points = normalize_heatmap(info.get("heatmap"))
     korean_captions = has_korean_captions(info)
     official_english_captions = has_channel_english_captions(info)
-    source_workflow = suggested_source_workflow(info, korean_captions)
+    source_workflow = suggested_source_workflow(
+        info, korean_captions, base["subtitleCoverage"]
+    )
     if not points:
         return {
             **base,
@@ -348,7 +354,8 @@ def build_candidates(videos: list[dict[str, str]], state_entries: dict[str, Any]
                 "everMostReplayed": True,
                 "suggestedSourceWorkflow": (
                     str(entry.get("suggestedSourceWorkflow"))
-                    if entry.get("suggestedSourceWorkflow") in {"vlast-assisted", "korean-only"}
+                    if entry.get("suggestedSourceWorkflow")
+                    in {"vlast-assisted", "korean-only", "existing-full-subtitles"}
                     else "undetermined"
                 ),
             }
