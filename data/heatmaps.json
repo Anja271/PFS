@@ -1,4 +1,506 @@
 {
+  "287Wg1m8me8": [
+    {
+      "startSeconds": 0.0,
+      "endSeconds": 90.96,
+      "value": 0.0
+    },
+    {
+      "startSeconds": 90.96,
+      "endSeconds": 181.92,
+      "value": 0.061601
+    },
+    {
+      "startSeconds": 181.92,
+      "endSeconds": 272.88,
+      "value": 0.317401
+    },
+    {
+      "startSeconds": 272.88,
+      "endSeconds": 363.84,
+      "value": 0.118695
+    },
+    {
+      "startSeconds": 363.84,
+      "endSeconds": 454.8,
+      "value": 0.077982
+    },
+    {
+      "startSeconds": 454.8,
+      "endSeconds": 545.76,
+      "value": 0.112653
+    },
+    {
+      "startSeconds": 545.76,
+      "endSeconds": 636.72,
+      "value": 0.063139
+    },
+    {
+      "startSeconds": 636.72,
+      "endSeconds": 727.68,
+      "value": 0.050932
+    },
+    {
+      "startSeconds": 727.68,
+      "endSeconds": 818.64,
+      "value": 0.161721
+    },
+    {
+      "startSeconds": 818.64,
+      "endSeconds": 909.6,
+      "value": 0.082898
+    },
+    {
+      "startSeconds": 909.6,
+      "endSeconds": 1000.56,
+      "value": 0.069416
+    },
+    {
+      "startSeconds": 1000.56,
+      "endSeconds": 1091.52,
+      "value": 0.108216
+    },
+    {
+      "startSeconds": 1091.52,
+      "endSeconds": 1182.48,
+      "value": 0.027832
+    },
+    {
+      "startSeconds": 1182.48,
+      "endSeconds": 1273.44,
+      "value": 0.051073
+    },
+    {
+      "startSeconds": 1273.44,
+      "endSeconds": 1364.4,
+      "value": 0.113701
+    },
+    {
+      "startSeconds": 1364.4,
+      "endSeconds": 1455.36,
+      "value": 0.074624
+    },
+    {
+      "startSeconds": 1455.36,
+      "endSeconds": 1546.32,
+      "value": 1.0
+    },
+    {
+      "startSeconds": 1546.32,
+      "endSeconds": 1637.28,
+      "value": 0.662091
+    },
+    {
+      "startSeconds": 1637.28,
+      "endSeconds": 1728.24,
+      "value": 0.584118
+    },
+    {
+      "startSeconds": 1728.24,
+      "endSeconds": 1819.2,
+      "value": 0.804841
+    },
+    {
+      "startSeconds": 1819.2,
+      "endSeconds": 1910.16,
+      "value": 0.134082
+    },
+    {
+      "startSeconds": 1910.16,
+      "endSeconds": 2001.12,
+      "value": 0.198302
+    },
+    {
+      "startSeconds": 2001.12,
+      "endSeconds": 2092.08,
+      "value": 0.274184
+    },
+    {
+      "startSeconds": 2092.08,
+      "endSeconds": 2183.04,
+      "value": 0.113523
+    },
+    {
+      "startSeconds": 2183.04,
+      "endSeconds": 2274.0,
+      "value": 0.102702
+    },
+    {
+      "startSeconds": 2274.0,
+      "endSeconds": 2364.96,
+      "value": 0.054375
+    },
+    {
+      "startSeconds": 2364.96,
+      "endSeconds": 2455.92,
+      "value": 0.083451
+    },
+    {
+      "startSeconds": 2455.92,
+      "endSeconds": 2546.88,
+      "value": 0.168314
+    },
+    {
+      "startSeconds": 2546.88,
+      "endSeconds": 2637.84,
+      "value": 0.434601
+    },
+    {
+      "startSeconds": 2637.84,
+      "endSeconds": 2728.8,
+      "value": 0.28374
+    },
+    {
+      "startSeconds": 2728.8,
+      "endSeconds": 2819.76,
+      "value": 0.334316
+    },
+    {
+      "startSeconds": 2819.76,
+      "endSeconds": 2910.72,
+      "value": 0.243817
+    },
+    {
+      "startSeconds": 2910.72,
+      "endSeconds": 3001.68,
+      "value": 0.113786
+    },
+    {
+      "startSeconds": 3001.68,
+      "endSeconds": 3092.64,
+      "value": 0.178425
+    },
+    {
+      "startSeconds": 3092.64,
+      "endSeconds": 3183.6,
+      "value": 0.128831
+    },
+    {
+      "startSeconds": 3183.6,
+      "endSeconds": 3274.56,
+      "value": 0.09744
+    },
+    {
+      "startSeconds": 3274.56,
+      "endSeconds": 3365.52,
+      "value": 0.063523
+    },
+    {
+      "startSeconds": 3365.52,
+      "endSeconds": 3456.48,
+      "value": 0.085326
+    },
+    {
+      "startSeconds": 3456.48,
+      "endSeconds": 3547.44,
+      "value": 0.080714
+    },
+    {
+      "startSeconds": 3547.44,
+      "endSeconds": 3638.4,
+      "value": 0.091555
+    },
+    {
+      "startSeconds": 3638.4,
+      "endSeconds": 3729.36,
+      "value": 0.149648
+    },
+    {
+      "startSeconds": 3729.36,
+      "endSeconds": 3820.32,
+      "value": 0.100983
+    },
+    {
+      "startSeconds": 3820.32,
+      "endSeconds": 3911.28,
+      "value": 0.151645
+    },
+    {
+      "startSeconds": 3911.28,
+      "endSeconds": 4002.24,
+      "value": 0.396864
+    },
+    {
+      "startSeconds": 4002.24,
+      "endSeconds": 4093.2,
+      "value": 0.168952
+    },
+    {
+      "startSeconds": 4093.2,
+      "endSeconds": 4184.16,
+      "value": 0.122492
+    },
+    {
+      "startSeconds": 4184.16,
+      "endSeconds": 4275.12,
+      "value": 0.140381
+    },
+    {
+      "startSeconds": 4275.12,
+      "endSeconds": 4366.08,
+      "value": 0.521865
+    },
+    {
+      "startSeconds": 4366.08,
+      "endSeconds": 4457.04,
+      "value": 0.343347
+    },
+    {
+      "startSeconds": 4457.04,
+      "endSeconds": 4548.0,
+      "value": 0.160072
+    },
+    {
+      "startSeconds": 4548.0,
+      "endSeconds": 4638.96,
+      "value": 0.089363
+    },
+    {
+      "startSeconds": 4638.96,
+      "endSeconds": 4729.92,
+      "value": 0.08023
+    },
+    {
+      "startSeconds": 4729.92,
+      "endSeconds": 4820.88,
+      "value": 0.116157
+    },
+    {
+      "startSeconds": 4820.88,
+      "endSeconds": 4911.84,
+      "value": 0.261196
+    },
+    {
+      "startSeconds": 4911.84,
+      "endSeconds": 5002.8,
+      "value": 0.554902
+    },
+    {
+      "startSeconds": 5002.8,
+      "endSeconds": 5093.76,
+      "value": 0.715398
+    },
+    {
+      "startSeconds": 5093.76,
+      "endSeconds": 5184.72,
+      "value": 0.256298
+    },
+    {
+      "startSeconds": 5184.72,
+      "endSeconds": 5275.68,
+      "value": 0.207051
+    },
+    {
+      "startSeconds": 5275.68,
+      "endSeconds": 5366.64,
+      "value": 0.198671
+    },
+    {
+      "startSeconds": 5366.64,
+      "endSeconds": 5457.6,
+      "value": 0.206842
+    },
+    {
+      "startSeconds": 5457.6,
+      "endSeconds": 5548.56,
+      "value": 0.102983
+    },
+    {
+      "startSeconds": 5548.56,
+      "endSeconds": 5639.52,
+      "value": 0.121144
+    },
+    {
+      "startSeconds": 5639.52,
+      "endSeconds": 5730.48,
+      "value": 0.132379
+    },
+    {
+      "startSeconds": 5730.48,
+      "endSeconds": 5821.44,
+      "value": 0.216816
+    },
+    {
+      "startSeconds": 5821.44,
+      "endSeconds": 5912.4,
+      "value": 0.12256
+    },
+    {
+      "startSeconds": 5912.4,
+      "endSeconds": 6003.36,
+      "value": 0.245512
+    },
+    {
+      "startSeconds": 6003.36,
+      "endSeconds": 6094.32,
+      "value": 0.366803
+    },
+    {
+      "startSeconds": 6094.32,
+      "endSeconds": 6185.28,
+      "value": 0.215288
+    },
+    {
+      "startSeconds": 6185.28,
+      "endSeconds": 6276.24,
+      "value": 0.182701
+    },
+    {
+      "startSeconds": 6276.24,
+      "endSeconds": 6367.2,
+      "value": 0.326613
+    },
+    {
+      "startSeconds": 6367.2,
+      "endSeconds": 6458.16,
+      "value": 0.206911
+    },
+    {
+      "startSeconds": 6458.16,
+      "endSeconds": 6549.12,
+      "value": 0.115399
+    },
+    {
+      "startSeconds": 6549.12,
+      "endSeconds": 6640.08,
+      "value": 0.179565
+    },
+    {
+      "startSeconds": 6640.08,
+      "endSeconds": 6731.04,
+      "value": 0.166864
+    },
+    {
+      "startSeconds": 6731.04,
+      "endSeconds": 6822.0,
+      "value": 0.190257
+    },
+    {
+      "startSeconds": 6822.0,
+      "endSeconds": 6912.96,
+      "value": 0.187147
+    },
+    {
+      "startSeconds": 6912.96,
+      "endSeconds": 7003.92,
+      "value": 0.103206
+    },
+    {
+      "startSeconds": 7003.92,
+      "endSeconds": 7094.88,
+      "value": 0.088049
+    },
+    {
+      "startSeconds": 7094.88,
+      "endSeconds": 7185.84,
+      "value": 0.058623
+    },
+    {
+      "startSeconds": 7185.84,
+      "endSeconds": 7276.8,
+      "value": 0.151936
+    },
+    {
+      "startSeconds": 7276.8,
+      "endSeconds": 7367.76,
+      "value": 0.09188
+    },
+    {
+      "startSeconds": 7367.76,
+      "endSeconds": 7458.72,
+      "value": 0.099373
+    },
+    {
+      "startSeconds": 7458.72,
+      "endSeconds": 7549.68,
+      "value": 0.09591
+    },
+    {
+      "startSeconds": 7549.68,
+      "endSeconds": 7640.64,
+      "value": 0.094764
+    },
+    {
+      "startSeconds": 7640.64,
+      "endSeconds": 7731.6,
+      "value": 0.045009
+    },
+    {
+      "startSeconds": 7731.6,
+      "endSeconds": 7822.56,
+      "value": 0.174966
+    },
+    {
+      "startSeconds": 7822.56,
+      "endSeconds": 7913.52,
+      "value": 0.128151
+    },
+    {
+      "startSeconds": 7913.52,
+      "endSeconds": 8004.48,
+      "value": 0.375827
+    },
+    {
+      "startSeconds": 8004.48,
+      "endSeconds": 8095.44,
+      "value": 0.23407
+    },
+    {
+      "startSeconds": 8095.44,
+      "endSeconds": 8186.4,
+      "value": 0.250737
+    },
+    {
+      "startSeconds": 8186.4,
+      "endSeconds": 8277.36,
+      "value": 0.147957
+    },
+    {
+      "startSeconds": 8277.36,
+      "endSeconds": 8368.32,
+      "value": 0.141778
+    },
+    {
+      "startSeconds": 8368.32,
+      "endSeconds": 8459.28,
+      "value": 0.243779
+    },
+    {
+      "startSeconds": 8459.28,
+      "endSeconds": 8550.24,
+      "value": 0.199249
+    },
+    {
+      "startSeconds": 8550.24,
+      "endSeconds": 8641.2,
+      "value": 0.07395
+    },
+    {
+      "startSeconds": 8641.2,
+      "endSeconds": 8732.16,
+      "value": 0.163136
+    },
+    {
+      "startSeconds": 8732.16,
+      "endSeconds": 8823.12,
+      "value": 0.188066
+    },
+    {
+      "startSeconds": 8823.12,
+      "endSeconds": 8914.08,
+      "value": 0.295821
+    },
+    {
+      "startSeconds": 8914.08,
+      "endSeconds": 9005.04,
+      "value": 0.226551
+    },
+    {
+      "startSeconds": 9005.04,
+      "endSeconds": 9096.0,
+      "value": 0.1131
+    }
+  ],
   "56IvdSggoFg": [
     {
       "startSeconds": 0.0,
