@@ -12,10 +12,11 @@
     <div class="shell">
       <p class="eyebrow">Unofficial fan project</p>
       <h1>PLAVE Lives with English Fan Subtitles</h1>
-      <p class="intro">Choose a livestream from the official PLAVE channel’s Live tab.</p>
+      <p class="intro">Watch official PLAVE livestreams and subtitled creator reactions.</p>
       <nav class="site-nav" aria-label="Main navigation">
         <a href="./" aria-current="page">Livestreams</a>
         <a href="highlights.html">Highlights</a>
+        <a href="#guest-heading" id="guest-nav" hidden>Creator reactions</a>
       </nav>
     </div>
   </header>
@@ -37,6 +38,16 @@
       </div>
       <div id="list-message" class="message" role="status">Loading livestreams…</div>
       <div id="video-grid" class="video-grid" aria-live="polite"></div>
+    </section>
+
+    <section id="guest-section" class="guest-section" aria-labelledby="guest-heading" hidden>
+      <div class="section-heading">
+        <div>
+          <h2 id="guest-heading">Creator reactions</h2>
+          <p class="sort-note">Subtitled excerpts from independent creators</p>
+        </div>
+      </div>
+      <div id="guest-grid" class="video-grid"></div>
     </section>
 
     <section id="player-view" class="player-view" aria-labelledby="player-title" hidden>
@@ -86,6 +97,6 @@
   <noscript>
     <div class="shell message message-error">JavaScript is required to load the livestream list and player.</div>
   </noscript>
-  <script src="app.js?v=20260721-highlight-end-v3" defer></script>
+  <script src="app.js?v=creator-reactions-v1" defer></script>
 </body>
 </html>

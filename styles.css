@@ -105,6 +105,9 @@ h1 {
 
 main { min-height: 60vh; }
 
+.guest-section { margin-top: 48px; }
+.site-nav a[hidden] { display: none; }
+
 #list-view, .player-view { padding: 32px 0 48px; }
 
 .section-heading {
