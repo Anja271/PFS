@@ -4,6 +4,7 @@
     "title": "Just a Little Taste of PLAVE 🥄 | SOLF’s PLAVE Deep Dive: Day 1",
     "creator": "SOLF",
     "startSeconds": 21449,
-    "endSeconds": 22638
+    "endSeconds": 22851,
+    "skip": { "from": 22638, "to": 22779.360 }
   }
 ]

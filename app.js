@@ -23,6 +23,7 @@
     pollTimer: null,
     initialStartSeconds: 0,
     initialEndSeconds: 0,
+    skipRequested: false,
     highlightEnded: false,
     returnToHighlights: false
   };
@@ -133,7 +134,11 @@
       const title = item.title.trim();
       const creator = typeof item.creator === "string" ? item.creator.trim() : "";
       if (!title || !creator) continue;
-      guests.set(youtubeId, { youtubeId, title, creator, startSeconds, endSeconds });
+      const skip = item.skip;
+      const validSkip = skip && Number.isFinite(skip.from) && Number.isFinite(skip.to)
+        && startSeconds < skip.from && skip.from < skip.to && skip.to < endSeconds;
+      guests.set(youtubeId, { youtubeId, title, creator, startSeconds, endSeconds,
+        skip: validSkip ? { from: skip.from, to: skip.to } : null });
     }
     return guests;
   }
@@ -401,6 +406,7 @@
     state.selectedVideo = null;
     state.initialStartSeconds = 0;
     state.initialEndSeconds = 0;
+    state.skipRequested = false;
     state.highlightEnded = false;
     state.returnToHighlights = false;
     elements.backLink.href = "./";
@@ -434,6 +440,7 @@
       : video.creator ? "← Back to creator reactions" : "← Back to livestreams";
     elements.playerTitle.textContent = video.title;
     setStatus(elements.playerStatus, video.youtubeId);
+    if (video.skip) elements.playerStatus.textContent += " · DASH music video skipped";
     elements.youtubeLink.href = `https://www.youtube.com/watch?v=${encodeURIComponent(video.youtubeId)}`
       + (state.initialStartSeconds ? `&t=${state.initialStartSeconds}s` : "");
     elements.playerMessage.hidden = true;
@@ -832,8 +839,21 @@
   }
 
   function updateSubtitles() {
-    if (!state.subtitlesEnabled || !state.player || typeof state.player.getCurrentTime !== "function") return;
+    if (!state.player || typeof state.player.getCurrentTime !== "function") return;
     const currentTime = state.player.getCurrentTime();
+    const skip = state.selectedVideo?.skip;
+    if (skip && currentTime >= skip.from && currentTime < skip.to) {
+      if (!state.skipRequested && window.YT?.PlayerState
+        && state.player.getPlayerState?.() === window.YT.PlayerState.PLAYING
+        && typeof state.player.seekTo === "function") {
+        state.skipRequested = true;
+        state.player.seekTo(skip.to, true);
+        return;
+      }
+    } else {
+      state.skipRequested = false;
+    }
+    if (!state.subtitlesEnabled) return;
     if (state.initialEndSeconds > state.initialStartSeconds && currentTime >= state.initialEndSeconds) {
       if (!state.highlightEnded) {
         state.highlightEnded = true;
