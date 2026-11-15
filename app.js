@@ -7,6 +7,7 @@
   const state = {
     videos: [],
     guests: new Map(),
+    guestVideoIds: new Set(),
     subtitleIds: new Set(),
     subtitleManifestLoaded: false,
     subtitleCoverage: new Map(),
@@ -102,6 +103,7 @@
 
     if (guestsResult.status === "fulfilled") {
       state.guests = normalizeGuestVideos(guestsResult.value, state.videos);
+      state.guestVideoIds = new Set(Array.from(state.guests.values(), (guest) => guest.youtubeId));
     }
     elements.guestGrid.replaceChildren(...Array.from(state.guests.values(), createVideoCard));
     renderVideoList();
@@ -127,8 +129,12 @@
     if (!Array.isArray(value)) return guests;
     const officialIds = new Set(officialVideos.map((video) => video.youtubeId));
     for (const item of value) {
-      if (!isValidVideo(item) || officialIds.has(item.youtubeId) || guests.has(item.youtubeId)) continue;
+      if (!isValidVideo(item) || officialIds.has(item.youtubeId)) continue;
       const { youtubeId, startSeconds, endSeconds } = item;
+      const excerpt = item.excerpt ?? "";
+      if (typeof excerpt !== "string" || (excerpt && !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(excerpt))) continue;
+      const key = guestKey(youtubeId, excerpt);
+      if (guests.has(key)) continue;
       if (!Number.isSafeInteger(startSeconds) || startSeconds < 0
         || !Number.isSafeInteger(endSeconds) || endSeconds <= startSeconds) continue;
       const title = item.title.trim();
@@ -137,10 +143,14 @@
       const skip = item.skip;
       const validSkip = skip && Number.isFinite(skip.from) && Number.isFinite(skip.to)
         && startSeconds < skip.from && skip.from < skip.to && skip.to < endSeconds;
-      guests.set(youtubeId, { youtubeId, title, creator, startSeconds, endSeconds,
+      guests.set(key, { youtubeId, title, creator, excerpt, startSeconds, endSeconds,
         skip: validSkip ? { from: skip.from, to: skip.to } : null });
     }
     return guests;
+  }
+
+  function guestKey(videoId, excerpt) {
+    return excerpt ? `${videoId}:${excerpt}` : videoId;
   }
 
   function normalizeChapterManifest(value) {
@@ -288,6 +298,7 @@
     const watch = document.createElement("a");
     watch.className = "button button-primary";
     watch.href = `?v=${encodeURIComponent(video.youtubeId)}`;
+    if (video.excerpt) watch.href += `&excerpt=${encodeURIComponent(video.excerpt)}`;
     watch.textContent = video.creator ? "Watch subtitled excerpt" : "Watch";
     watch.addEventListener("click", (event) => {
       if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
@@ -330,7 +341,7 @@
   }
 
   function getSubtitleCoverage(videoId) {
-    if (state.guests.has(videoId)) return "guest";
+    if (state.guestVideoIds.has(videoId)) return "guest";
     const entry = state.subtitleCoverage.get(videoId);
     if (entry) return entry.coverage;
     return state.subtitleIds.has(videoId) ? "full" : null;
@@ -360,9 +371,15 @@
       showMessage(elements.listMessage, "The video ID in the address is invalid. Choose a livestream below.", true);
       return;
     }
-    const guest = state.guests.get(requestedId);
+    const requestedExcerpt = params.get("excerpt");
+    const guest = state.guests.get(guestKey(requestedId, requestedExcerpt));
     if (guest) {
       showPlayerView(guest, guest.startSeconds, false, guest.endSeconds);
+      return;
+    }
+    if (requestedExcerpt && state.guestVideoIds.has(requestedId)) {
+      showListView();
+      showMessage(elements.listMessage, "This excerpt was not found. Choose a creator reaction below.", true);
       return;
     }
     const video = state.videos.find((item) => item.youtubeId === requestedId);
