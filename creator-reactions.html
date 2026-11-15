@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="PLAVE creator reactions with English chapter titles and selected fan subtitles.">
+  <title>Creator reactions — PLAVE Livestream Guide</title>
+  <link rel="stylesheet" href="styles.css?v=creator-chapters-v1">
+</head>
+<body>
+  <header class="site-header">
+    <div class="shell">
+      <p class="eyebrow">Unofficial fan project</p>
+      <h1>Creator reactions</h1>
+      <p class="intro">Independent creators react to PLAVE.</p>
+      <nav class="site-nav" aria-label="Main navigation">
+        <a href="./">Livestreams</a>
+        <a href="highlights.html">Highlights</a>
+        <a href="creator-reactions.html" aria-current="page">Creator reactions</a>
+      </nav>
+    </div>
+  </header>
+  <main class="shell" id="creator-page">
+    <a class="back-link" href="creator-reactions.html" id="creator-back" hidden>← Back to creator reactions</a>
+    <div class="section-heading">
+      <div>
+        <h2 id="creator-title">Videos</h2>
+        <p class="sort-note" id="creator-intro">Choose a video to see its chapters and English subtitle availability.</p>
+      </div>
+    </div>
+    <div id="creator-message" class="message" role="status">Loading creator reactions…</div>
+    <div id="creator-grid" class="video-grid"></div>
+    <ol id="creator-chapters" class="card-segment-list" aria-labelledby="creator-title" hidden></ol>
+    <noscript><p class="message message-error">JavaScript is required to show creator reactions and their chapters.</p></noscript>
+  </main>
+  <footer class="site-footer">
+    <div class="shell">Unofficial stream guide. No analytics or tracking.</div>
+  </footer>
+  <script src="app.js?v=creator-chapters-v1" defer></script>
+</body>
+</html>

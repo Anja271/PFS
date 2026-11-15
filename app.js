@@ -7,7 +7,8 @@
   const state = {
     videos: [],
     guests: new Map(),
-    guestVideoIds: new Set(),
+    guestChapters: new Map(),
+    officialListLoaded: false,
     subtitleIds: new Set(),
     subtitleManifestLoaded: false,
     subtitleCoverage: new Map(),
@@ -24,16 +25,14 @@
     pollTimer: null,
     initialStartSeconds: 0,
     initialEndSeconds: 0,
-    skipRequested: false,
+    nextSkip: 0,
     highlightEnded: false,
     returnToHighlights: false
   };
 
   const elements = {
     listView: document.getElementById("list-view"),
-    guestSection: document.getElementById("guest-section"),
-    guestGrid: document.getElementById("guest-grid"),
-    guestNav: document.getElementById("guest-nav"),
+
     playerView: document.getElementById("player-view"),
     videoGrid: document.getElementById("video-grid"),
     listMessage: document.getElementById("list-message"),
@@ -56,6 +55,11 @@
   document.addEventListener("DOMContentLoaded", init);
 
   async function init() {
+    const creatorPage = document.getElementById("creator-page");
+    if (creatorPage) {
+      await renderCreatorPage(creatorPage);
+      return;
+    }
     elements.filter.addEventListener("change", renderVideoList);
     elements.subtitleToggle.addEventListener("click", toggleSubtitles);
     elements.fullscreenToggle.addEventListener("click", togglePlayerFullscreen);
@@ -63,20 +67,19 @@
     document.addEventListener("fullscreenchange", updateFullscreenButton);
     window.addEventListener("popstate", route);
 
-    const [videosResult, subtitlesResult, coverageResult, chaptersResult, heatmapsResult, guestsResult] = await Promise.allSettled([
+    const [videosResult, subtitlesResult, coverageResult, chaptersResult, heatmapsResult, guestsResult, guestChaptersResult] = await Promise.allSettled([
       fetchJson("data/videos.json"),
       fetchJson("data/subtitles.json"),
       fetchJson("data/subtitle-coverage.json"),
       fetchJson("data/chapters.json"),
       fetchJson("data/heatmaps.json"),
-      fetchJson("data/guest-videos.json")
+      fetchJson("data/guest-videos.json"),
+      fetchJson("data/guest-chapters.json")
     ]);
 
     if (videosResult.status === "fulfilled" && Array.isArray(videosResult.value)) {
       state.videos = videosResult.value.filter(isValidVideo);
-    } else {
-      showMessage(elements.listMessage, "The livestream list could not be loaded. Please try again later.", true);
-      return;
+      state.officialListLoaded = true;
     }
 
     if (subtitlesResult.status === "fulfilled" && Array.isArray(subtitlesResult.value)) {
@@ -103,9 +106,10 @@
 
     if (guestsResult.status === "fulfilled") {
       state.guests = normalizeGuestVideos(guestsResult.value, state.videos);
-      state.guestVideoIds = new Set(Array.from(state.guests.values(), (guest) => guest.youtubeId));
     }
-    elements.guestGrid.replaceChildren(...Array.from(state.guests.values(), createVideoCard));
+    if (guestChaptersResult.status === "fulfilled") {
+      state.guestChapters = normalizeGuestChapters(guestChaptersResult.value);
+    }
     renderVideoList();
     route();
   }
@@ -131,26 +135,179 @@
     for (const item of value) {
       if (!isValidVideo(item) || officialIds.has(item.youtubeId)) continue;
       const { youtubeId, startSeconds, endSeconds } = item;
-      const excerpt = item.excerpt ?? "";
-      if (typeof excerpt !== "string" || (excerpt && !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(excerpt))) continue;
-      const key = guestKey(youtubeId, excerpt);
-      if (guests.has(key)) continue;
       if (!Number.isSafeInteger(startSeconds) || startSeconds < 0
         || !Number.isSafeInteger(endSeconds) || endSeconds <= startSeconds) continue;
       const title = item.title.trim();
       const creator = typeof item.creator === "string" ? item.creator.trim() : "";
-      if (!title || !creator) continue;
+      const excerpt = item.excerpt ?? "";
+      if (!title || !creator || typeof excerpt !== "string"
+        || (excerpt && !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(excerpt))) continue;
+      const guest = guests.get(youtubeId);
+      if (guest?.excerpts.some((entry) => entry.excerpt === excerpt)) continue;
       const skip = item.skip;
-      const validSkip = skip && Number.isFinite(skip.from) && Number.isFinite(skip.to)
-        && startSeconds < skip.from && skip.from < skip.to && skip.to < endSeconds;
-      guests.set(key, { youtubeId, title, creator, excerpt, startSeconds, endSeconds,
-        skip: validSkip ? { from: skip.from, to: skip.to } : null });
+      const skips = Number.isFinite(skip?.from) && Number.isFinite(skip?.to)
+        && startSeconds < skip.from && skip.from < skip.to && skip.to < endSeconds
+        ? [{ from: skip.from, to: skip.to }] : [];
+      const entry = { youtubeId, title, creator, excerpt, startSeconds, endSeconds, skips };
+      if (guest) {
+        guest.excerpts.push(entry);
+        if (!excerpt) Object.assign(guest, entry);
+      } else {
+        guests.set(youtubeId, { ...entry, excerpts: [entry] });
+      }
     }
+    for (const guest of guests.values()) guest.ranges = mergeGuestRanges(guest.excerpts);
     return guests;
   }
 
-  function guestKey(videoId, excerpt) {
-    return excerpt ? `${videoId}:${excerpt}` : videoId;
+  function mergeGuestRanges(excerpts) {
+    const merged = [];
+    for (const item of [...excerpts].sort((a, b) => a.startSeconds - b.startSeconds)) {
+      const prior = merged.at(-1);
+      if (prior && item.startSeconds <= prior.endSeconds) {
+        prior.endSeconds = Math.max(prior.endSeconds, item.endSeconds);
+        prior.skips.push(...item.skips);
+      } else {
+        merged.push({ startSeconds: item.startSeconds, endSeconds: item.endSeconds, skips: [...item.skips] });
+      }
+    }
+    return merged;
+  }
+
+  function normalizeGuestChapters(value) {
+    const result = new Map();
+    if (!value || typeof value !== "object") return result;
+    for (const [id, item] of Object.entries(value)) {
+      if (!isValidVideoId(id) || !Number.isSafeInteger(item?.durationSeconds) || item.durationSeconds <= 0) continue;
+      const chapters = normalizeChapterManifest({ [id]: item.chapters }).get(id) || [];
+      const bounded = chapters.filter((chapter) => chapter.startSeconds < item.durationSeconds);
+      result.set(id, bounded.map((chapter, i) => ({
+        ...chapter, endSeconds: bounded[i + 1]?.startSeconds ?? item.durationSeconds
+      })));
+    }
+    return result;
+  }
+
+  function guestChapterRuns(guest, chapter) {
+    return guest.ranges
+      .filter((range) => range.startSeconds < chapter.endSeconds && chapter.startSeconds < range.endSeconds)
+      .map((range) => {
+        let startSeconds = Math.max(range.startSeconds, chapter.startSeconds);
+        for (const skip of range.skips) {
+          if (startSeconds >= skip.from && startSeconds < skip.to) startSeconds = Math.ceil(skip.to);
+        }
+        return { ...range, startSeconds };
+      })
+      .filter((range) => range.startSeconds < Math.min(range.endSeconds, chapter.endSeconds));
+  }
+
+  function guestChapterUrl(id, chapter, run) {
+    return `./?v=${encodeURIComponent(id)}&chapter=${chapter.startSeconds}&t=${run.startSeconds}`;
+  }
+
+  function guestDetailUrl(id) {
+    return `creator-reactions.html?v=${encodeURIComponent(id)}`;
+  }
+
+  async function renderCreatorPage(page) {
+    const id = new URLSearchParams(window.location.search).get("v");
+    const message = document.getElementById("creator-message");
+    let guests;
+    try {
+      guests = normalizeGuestVideos(await fetchJson("data/guest-videos.json"), []);
+    } catch {
+      showMessage(message, "Creator reactions could not be loaded. Reload this page to try again.", true);
+      return;
+    }
+    if (!id) {
+      if (!guests.size) {
+        showMessage(message, "No creator reactions have been added yet.", false);
+        return;
+      }
+      page.querySelector("#creator-grid").replaceChildren(...Array.from(guests.values(), createCreatorCard));
+      message.hidden = true;
+      return;
+    }
+    const guest = guests.get(id);
+    if (!guest) {
+      showMessage(message, "This video is not listed. Return to Creator reactions to choose a video.", true);
+      return;
+    }
+    document.title = `${guest.title} — Creator reactions`;
+    document.getElementById("creator-back").hidden = false;
+    document.getElementById("creator-title").textContent = guest.title;
+    let chapters;
+    try {
+      chapters = normalizeGuestChapters(await fetchJson("data/guest-chapters.json")).get(id) || [];
+    } catch {
+      showMessage(message, "YouTube chapters could not be loaded. The subtitled excerpts are still available below.", true);
+    }
+    if (!chapters?.length) {
+      if (chapters) showMessage(message, "No YouTube chapters are listed for this video. Choose a subtitled excerpt below.", false);
+      page.querySelector("#creator-grid").replaceChildren(...guest.excerpts.map(createCreatorCard));
+      return;
+    }
+    page.querySelector("#creator-intro").textContent =
+      "Watch a subtitled chapter here; playback continues into the next chapter while subtitles are available.";
+    const list = document.getElementById("creator-chapters");
+    list.replaceChildren(...chapters.map((chapter) => createCreatorChapter(guest, chapter)));
+    list.hidden = false;
+    message.hidden = true;
+  }
+
+  function createCreatorCard(video) {
+    const card = document.createElement("article");
+    card.className = "video-card";
+    const content = document.createElement("div");
+    content.className = "card-content";
+    const heading = document.createElement("h3");
+    heading.className = "video-title";
+    const link = document.createElement("a");
+    link.className = "creator-title-link";
+    link.href = video.excerpts ? guestDetailUrl(video.youtubeId)
+      : `./?v=${encodeURIComponent(video.youtubeId)}${video.excerpt ? `&excerpt=${encodeURIComponent(video.excerpt)}` : ""}`;
+    link.textContent = video.title;
+    const detail = document.createElement("p");
+    detail.className = "video-date";
+    detail.textContent = video.excerpts ? video.creator
+      : `${formatChapterTime(video.startSeconds)}–${formatChapterTime(video.endSeconds)}`;
+    heading.appendChild(link);
+    content.append(heading, detail);
+    card.appendChild(content);
+    return card;
+  }
+
+  function createCreatorChapter(guest, chapter) {
+    const item = document.createElement("li");
+    const runs = guestChapterRuns(guest, chapter);
+    const fullyCovered = runs.length === 1 && runs[0].startSeconds === chapter.startSeconds
+      && runs[0].endSeconds >= chapter.endSeconds
+      && !runs[0].skips.some((skip) => skip.from < chapter.endSeconds && skip.to > chapter.startSeconds);
+    const link = document.createElement("a");
+    link.className = "card-segment-link creator-chapter-link";
+    link.href = runs.length ? guestChapterUrl(guest.youtubeId, chapter, runs[0])
+      : `https://www.youtube.com/watch?v=${encodeURIComponent(guest.youtubeId)}&t=${chapter.startSeconds}s`;
+    const title = document.createElement("span");
+    title.className = "card-segment-title";
+    title.textContent = chapter.title;
+    const time = document.createElement("span");
+    time.className = "card-segment-time";
+    time.textContent = formatChapterTime(chapter.startSeconds);
+    const status = document.createElement("span");
+    status.className = `subtitle-status ${runs.length ? "status-available" : "status-missing"}`;
+    status.textContent = fullyCovered ? "English subtitles"
+      : runs.length ? `Partial English subtitles · from ${formatChapterTime(runs[0].startSeconds)}`
+        : "No fan subtitles · YouTube";
+    link.append(title, time, status);
+    item.appendChild(link);
+    for (const run of runs.slice(1)) {
+      const extra = document.createElement("a");
+      extra.className = "creator-title-link";
+      extra.href = guestChapterUrl(guest.youtubeId, chapter, run);
+      extra.textContent = `Also subtitled from ${formatChapterTime(run.startSeconds)}`;
+      item.appendChild(extra);
+    }
+    return item;
   }
 
   function normalizeChapterManifest(value) {
@@ -244,7 +401,9 @@
       ? state.videos.filter((video) => hasAnySubtitles(video.youtubeId))
       : state.videos;
 
-    if (!state.subtitleManifestLoaded && !state.coverageManifestLoaded) {
+    if (!state.officialListLoaded) {
+      showMessage(elements.listMessage, "The livestream list could not be loaded. Please try again later.", true);
+    } else if (!state.subtitleManifestLoaded && !state.coverageManifestLoaded) {
       showMessage(elements.listMessage, "Subtitle availability could not be loaded. Livestreams are still available to watch.", true);
     } else if (videos.length === 0) {
       showMessage(
@@ -341,7 +500,7 @@
   }
 
   function getSubtitleCoverage(videoId) {
-    if (state.guestVideoIds.has(videoId)) return "guest";
+    if (state.guests.has(videoId)) return "guest";
     const entry = state.subtitleCoverage.get(videoId);
     if (entry) return entry.coverage;
     return state.subtitleIds.has(videoId) ? "full" : null;
@@ -371,21 +530,35 @@
       showMessage(elements.listMessage, "The video ID in the address is invalid. Choose a livestream below.", true);
       return;
     }
-    const requestedExcerpt = params.get("excerpt");
-    const guest = state.guests.get(guestKey(requestedId, requestedExcerpt));
-    if (guest) {
-      showPlayerView(guest, guest.startSeconds, false, guest.endSeconds);
-      return;
-    }
-    if (requestedExcerpt && state.guestVideoIds.has(requestedId)) {
-      showListView();
-      showMessage(elements.listMessage, "This excerpt was not found. Choose a creator reaction below.", true);
-      return;
-    }
-    const video = state.videos.find((item) => item.youtubeId === requestedId);
+    const guest = state.guests.get(requestedId);
+    const video = guest || state.videos.find((item) => item.youtubeId === requestedId);
     if (!video) {
       showListView();
-      showMessage(elements.listMessage, "This video is not in the official PLAVE Live list. Choose a livestream below.", true);
+      showMessage(elements.listMessage, "This video is not listed in the guide. Choose a video below.", true);
+      return;
+    }
+    if (guest) {
+      if (params.has("chapter")) {
+        const chapter = state.guestChapters.get(requestedId)?.find(
+          (item) => String(item.startSeconds) === params.get("chapter"));
+        const run = chapter && guestChapterRuns(guest, chapter).find(
+          (item) => String(item.startSeconds) === params.get("t"));
+        if (run) {
+          showPlayerView({ ...guest, ...run }, run.startSeconds, false, run.endSeconds);
+        } else {
+          window.location.href = guestDetailUrl(requestedId);
+        }
+        return;
+      }
+      const excerpt = params.get("excerpt") ?? "";
+      const entry = guest.excerpts.find((item) => item.excerpt === excerpt);
+      if (!entry) {
+        window.location.href = guestDetailUrl(requestedId);
+        return;
+      }
+      const range = guest.ranges.find((item) => item.startSeconds <= entry.startSeconds
+        && item.endSeconds >= entry.endSeconds);
+      showPlayerView({ ...entry, skips: range.skips }, entry.startSeconds, false, range.endSeconds);
       return;
     }
     const requestedStart = params.get("t");
@@ -423,7 +596,7 @@
     state.selectedVideo = null;
     state.initialStartSeconds = 0;
     state.initialEndSeconds = 0;
-    state.skipRequested = false;
+    state.nextSkip = 0;
     state.highlightEnded = false;
     state.returnToHighlights = false;
     elements.backLink.href = "./";
@@ -433,9 +606,7 @@
     elements.subtitleToggle.className = "button button-primary";
     elements.playerView.hidden = true;
     elements.listView.hidden = false;
-    elements.guestSection.hidden = state.guests.size === 0;
-    elements.guestNav.hidden = state.guests.size === 0;
-    document.title = "PLAVE Lives with English Fan Subtitles";
+    document.title = "PLAVE Livestream Guide";
   }
 
   async function showPlayerView(video, startSeconds, returnToHighlights, endSeconds) {
@@ -448,22 +619,20 @@
     state.highlightEnded = false;
     state.returnToHighlights = returnToHighlights;
     elements.listView.hidden = true;
-    elements.guestSection.hidden = true;
-    elements.guestNav.hidden = true;
     elements.playerView.hidden = false;
-    elements.backLink.href = returnToHighlights ? "highlights.html" : video.creator ? "./#guest-heading" : "./";
+    elements.backLink.href = returnToHighlights ? "highlights.html" : video.creator ? guestDetailUrl(video.youtubeId) : "./";
     elements.backLink.textContent = returnToHighlights
       ? "← Back to highlights"
-      : video.creator ? "← Back to creator reactions" : "← Back to livestreams";
+      : video.creator ? "← Back to video chapters" : "← Back to livestreams";
     elements.playerTitle.textContent = video.title;
     setStatus(elements.playerStatus, video.youtubeId);
-    if (video.skip) elements.playerStatus.textContent += " · DASH music video skipped";
+    if (video.skips?.length) elements.playerStatus.textContent += " · Includes a playback skip";
     elements.youtubeLink.href = `https://www.youtube.com/watch?v=${encodeURIComponent(video.youtubeId)}`
       + (state.initialStartSeconds ? `&t=${state.initialStartSeconds}s` : "");
     elements.playerMessage.hidden = true;
-    elements.highlightStart.hidden = state.initialStartSeconds === 0;
-    elements.highlightStart.textContent = state.initialStartSeconds > 0
-      ? `Preparing subtitled scene ${formatHighlightRange()}…`
+    elements.highlightStart.hidden = state.initialStartSeconds === 0 && !video.creator;
+    elements.highlightStart.textContent = state.initialStartSeconds > 0 || video.creator
+      ? `Preparing subtitled ${video.creator ? "excerpt" : "scene"} ${formatHighlightRange()}…`
       : "";
     elements.subtitleToggle.className = state.initialStartSeconds > 0
       ? "button button-secondary"
@@ -496,12 +665,14 @@
       window.location.href = "highlights.html";
       return;
     }
+    if (state.selectedVideo?.creator) {
+      window.location.href = guestDetailUrl(state.selectedVideo.youtubeId);
+      return;
+    }
     if (history.state && history.state.fromList) history.back();
     else {
-      const destination = state.selectedVideo?.creator ? "#guest-heading" : "";
-      history.replaceState({}, "", window.location.pathname + destination);
+      history.replaceState({}, "", window.location.pathname);
       route();
-      if (destination) document.getElementById("guest-heading").scrollIntoView();
     }
   }
 
@@ -551,15 +722,16 @@
           elements.fullscreenToggle.disabled = !state.cues.length;
           setChapterButtonsDisabled(false);
           disableYouTubeCaptions();
-          if (startSeconds > 0) {
+          if (startSeconds > 0 || state.selectedVideo?.creator) {
             prepareHighlightedScene();
-            elements.highlightStart.textContent = `Ready for subtitled scene ${formatHighlightRange()} — tap Play in the YouTube video`;
+            const label = state.selectedVideo?.creator ? "excerpt" : "scene";
+            elements.highlightStart.textContent = `Ready for subtitled ${label} ${formatHighlightRange()} — tap Play in the YouTube video`;
           }
         },
         onStateChange: handlePlayerStateChange,
         onApiChange: disableYouTubeCaptions,
         onAutoplayBlocked: () => {
-          elements.highlightStart.hidden = state.initialStartSeconds <= 0;
+          elements.highlightStart.hidden = state.initialStartSeconds <= 0 && !state.selectedVideo?.creator;
         },
         onError: () => {
           state.playerReady = false;
@@ -580,7 +752,7 @@
     if (
       !state.playerReady
       || !state.player
-      || state.initialStartSeconds <= 0
+      || (state.initialStartSeconds <= 0 && !state.selectedVideo?.creator)
       || typeof state.player.seekTo !== "function"
     ) return;
     state.player.seekTo(state.initialStartSeconds, true);
@@ -600,7 +772,7 @@
 
   function handlePlayerStateChange(event) {
     if (
-      state.initialStartSeconds > 0
+      (state.initialStartSeconds > 0 || state.selectedVideo?.creator)
       && window.YT
       && window.YT.PlayerState
       && event.data === window.YT.PlayerState.PLAYING
@@ -858,18 +1030,16 @@
   function updateSubtitles() {
     if (!state.player || typeof state.player.getCurrentTime !== "function") return;
     const currentTime = state.player.getCurrentTime();
-    const skip = state.selectedVideo?.skip;
-    if (skip && currentTime >= skip.from && currentTime < skip.to) {
-      if (!state.skipRequested && window.YT?.PlayerState
-        && state.player.getPlayerState?.() === window.YT.PlayerState.PLAYING
-        && typeof state.player.seekTo === "function") {
-        state.skipRequested = true;
+    const skip = state.selectedVideo?.skips?.find((range) => range.from <= currentTime && currentTime < range.to);
+    const playing = window.YT?.PlayerState?.PLAYING;
+    if (skip && playing !== undefined && typeof state.player.seekTo === "function" && state.player.getPlayerState?.() === playing) {
+      if (state.nextSkip !== skip.to) {
+        state.nextSkip = skip.to;
         state.player.seekTo(skip.to, true);
-        return;
       }
-    } else {
-      state.skipRequested = false;
+      return;
     }
+    state.nextSkip = 0;
     if (!state.subtitlesEnabled) return;
     if (state.initialEndSeconds > state.initialStartSeconds && currentTime >= state.initialEndSeconds) {
       if (!state.highlightEnded) {
@@ -881,9 +1051,13 @@
         state.activeCueKey = endedKey;
         elements.subtitleOverlay.textContent = "";
         elements.subtitleOverlay.classList.remove("has-text");
-        elements.subtitleFallback.textContent = "End of this subtitled highlight. Choose another highlight, or press Play again to continue without fan subtitles.";
+        elements.subtitleFallback.textContent = state.selectedVideo?.creator
+          ? "End of this subtitled excerpt. Press Play again to continue without fan subtitles."
+          : "End of this subtitled highlight. Choose another highlight, or press Play again to continue without fan subtitles.";
       }
-      elements.highlightStart.textContent = "End of this subtitled highlight — choose another scene or press Play again to continue.";
+      elements.highlightStart.textContent = state.selectedVideo?.creator
+        ? "End of this subtitled excerpt — press Play again to continue."
+        : "End of this subtitled highlight — choose another scene or press Play again to continue.";
       elements.highlightStart.hidden = false;
       return;
     }

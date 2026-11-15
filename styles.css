@@ -105,7 +105,14 @@ h1 {
 
 main { min-height: 60vh; }
 
-.guest-section { margin-top: 48px; }
+.creator-title-link {
+  display: inline-flex;
+  min-height: 48px;
+  align-items: center;
+  color: var(--primary);
+  overflow-wrap: anywhere;
+  text-underline-offset: 3px;
+}
 .site-nav a[hidden] { display: none; }
 
 #list-view, .player-view { padding: 32px 0 48px; }
@@ -172,6 +179,60 @@ select {
   flex-direction: column;
   gap: 16px;
   padding: 24px;
+}
+
+.creator-chapter-link .subtitle-status {
+  grid-column: 1 / -1;
+  justify-self: start;
+}
+
+.card-segment-list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding-left: 32px;
+}
+
+.card-segment-list li {
+  padding-left: 8px;
+}
+
+.card-segment-list li::marker {
+  color: var(--muted);
+  font-weight: 750;
+}
+
+.card-segment-link {
+  display: grid;
+  min-height: 48px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+  padding: 8px;
+  color: var(--text);
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  text-decoration: none;
+}
+
+.card-segment-link:hover,
+.card-segment-link:focus-visible {
+  border-color: var(--primary);
+}
+
+.card-segment-title {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-weight: 700;
+}
+
+.card-segment-time {
+  color: var(--primary);
+  font-size: 0.9rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 750;
+  white-space: nowrap;
 }
 
 .video-title {

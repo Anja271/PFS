@@ -7,3 +7,16 @@
 5. Watch the bounded draft in the same player before publishing. Validate WebVTT ordering, bounds, and readability. A single guest VTT uses the original YouTube ID and may cover multiple non-overlapping excerpts. The original entry retains its `?v=VIDEO_ID` URL; an additional entry sets an `excerpt` slug and uses `?v=VIDEO_ID&excerpt=SLUG`. Preserve existing excerpts and skips. Do not commit source captions, OCR dumps, frames, or recordings.
 
 This worked for the SOLF excerpt at 26:00–1:07:55: 1,258 local frame samples made context recoverable without sending the full image series to a generative model. The remaining savings come from filtering and aligning OCR output locally before translation.
+
+## Creator reactions catalogue
+
+`creator-reactions.html` groups the reviewed excerpt entries by YouTube ID,
+showing one card per video. For the video detail view,
+`data/guest-chapters.json` stores the source duration in seconds and the
+uploader's chapter start times with reviewed English titles. You can obtain
+the source boundaries without downloading media:
+`yt-dlp --skip-download --no-playlist --print "%(chapters)j" URL`.
+Keep chapter boundaries separate from the reviewed coverage intervals in
+`data/guest-videos.json`. The player merges touching coverage intervals,
+preserves approved skips, and does not use gaps between normal subtitle cues
+to decide where to stop.

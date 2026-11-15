@@ -22,13 +22,12 @@ const id = "WiIqJOpPycA";
 const entries = manifest.filter((item) => item.youtubeId === id);
 assert.equal(entries.length, 2);
 app.state.guests = app.normalizeGuestVideos([...manifest, ...entries], []);
-assert.equal(app.state.guests.size, manifest.length);
+assert.equal(app.state.guests.size, new Set(manifest.map((item) => item.youtubeId)).size);
 assert.equal(app.normalizeGuestVideos(entries, [{ youtubeId: id }]).size, 0);
-app.state.guestVideoIds = new Set(Array.from(app.state.guests.values(), (guest) => guest.youtubeId));
 assert.equal(app.getSubtitleCoverage(id), "guest");
 const calls = [];
 app.setView((video, start, fromHighlights, end) => {
-  calls.push([video.youtubeId, start, end, video.skip?.from ?? null, video.skip?.to ?? null]);
+  calls.push([video.youtubeId, start, end, video.skips[0]?.from ?? null, video.skips[0]?.to ?? null]);
 });
 window.location.search = `?v=${id}&excerpt=first-impressions&t=1&end=10`;
 app.route();
