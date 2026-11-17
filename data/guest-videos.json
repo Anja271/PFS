@@ -1,6 +1,17 @@
 [
   {
     "youtubeId": "WiIqJOpPycA",
+    "title": "Just a Little Taste of PLAVE 🥄 | SOLF’s PLAVE Deep Dive: Day 1",
+    "creator": "SOLF",
+    "startSeconds": 21449,
+    "endSeconds": 22851,
+    "skip": {
+      "from": 22638,
+      "to": 22779.36
+    }
+  },
+  {
+    "youtubeId": "WiIqJOpPycA",
     "excerpt": "first-impressions",
     "title": "SOLF’s PLAVE Deep Dive: First Impressions, Positions & Member Chemistry",
     "creator": "SOLF",
@@ -9,10 +20,18 @@
   },
   {
     "youtubeId": "WiIqJOpPycA",
-    "title": "Just a Little Taste of PLAVE 🥄 | SOLF’s PLAVE Deep Dive: Day 1",
+    "excerpt": "wait-for-you",
+    "title": "SOLF’s PLAVE Deep Dive: Logo Teaser, Wait for you MV & Stage Reaction",
     "creator": "SOLF",
-    "startSeconds": 21449,
-    "endSeconds": 22851,
-    "skip": { "from": 22638, "to": 22779.360 }
+    "startSeconds": 4075,
+    "endSeconds": 5255
+  },
+  {
+    "youtubeId": "WiIqJOpPycA",
+    "excerpt": "why-and-the-6th-summer",
+    "title": "SOLF’s PLAVE Deep Dive: Why? & The 6th Summer",
+    "creator": "SOLF",
+    "startSeconds": 5255,
+    "endSeconds": 7025
   }
 ]

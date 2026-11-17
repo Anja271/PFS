@@ -66,7 +66,7 @@ app.state.guests = app.normalizeGuestVideos(records, []);
 app.state.guestChapters = app.normalizeGuestChapters(JSON.parse(readFileSync('data/guest-chapters.json', 'utf8')));
 const published = app.state.guests.get(guest.youtubeId);
 assert.equal(app.state.guests.size, 1);
-assert.equal(published.excerpts.length, 2);
+assert.equal(published.excerpts.length, 4);
 const chapters = app.state.guestChapters.get(guest.youtubeId);
 assert.equal(chapters.length, 62);
 assert.equal(chapters.at(-1).endSeconds, 36676);
@@ -74,19 +74,19 @@ for (const start of [1560, 3540, 3900]) {
   const chapter = chapters.find(c => c.startSeconds === start);
   const run = app.guestChapterRuns(published, chapter)[0];
   assert.equal(run.startSeconds, start);
-  assert.equal(run.endSeconds, 4075);
+  assert.equal(run.endSeconds, 7025);
   window.location.search = `?v=${guest.youtubeId}&chapter=${start}&t=${start}&end=${start + 1}`;
   app.route();
-  assert.deepEqual(calls.pop(), [guest.youtubeId, start, false, 4075]);
+  assert.deepEqual(calls.pop(), [guest.youtubeId, start, false, 7025]);
 }
 const partial = chapters.find(c => c.startSeconds === 20903);
-const noSubs = chapters.find(c => c.startSeconds === 4075);
+const noSubs = chapters.find(c => c.startSeconds === 7025);
 assert.equal(app.createCreatorChapter(published, partial).children[0].children[2].textContent,
   'Partial English subtitles · from 5:57:29');
-assert.match(app.createCreatorChapter(published, noSubs).children[0].href, /youtube\.com.*t=4075s/);
+assert.match(app.createCreatorChapter(published, noSubs).children[0].href, /youtube\.com.*t=7025s/);
 window.location.search = `?v=${guest.youtubeId}&excerpt=first-impressions`;
 app.route();
-assert.deepEqual(calls.pop(), [guest.youtubeId, 1560, false, 4075]);
+assert.deepEqual(calls.pop(), [guest.youtubeId, 1560, false, 7025]);
 window.location.search = `?v=${guest.youtubeId}`;
 app.route();
 assert.deepEqual(calls.pop(), [guest.youtubeId, 21449, false, 22851]);

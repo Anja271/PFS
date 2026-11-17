@@ -20,7 +20,7 @@ const app = context.app;
 const manifest = JSON.parse(readFileSync("data/guest-videos.json", "utf8"));
 const id = "WiIqJOpPycA";
 const entries = manifest.filter((item) => item.youtubeId === id);
-assert.equal(entries.length, 2);
+assert.equal(entries.length, 4);
 app.state.guests = app.normalizeGuestVideos([...manifest, ...entries], []);
 assert.equal(app.state.guests.size, new Set(manifest.map((item) => item.youtubeId)).size);
 assert.equal(app.normalizeGuestVideos(entries, [{ youtubeId: id }]).size, 0);
@@ -31,7 +31,12 @@ app.setView((video, start, fromHighlights, end) => {
 });
 window.location.search = `?v=${id}&excerpt=first-impressions&t=1&end=10`;
 app.route();
-assert.deepEqual(calls.pop(), [id, 1560, 4075, null, null]);
+assert.deepEqual(calls.pop(), [id, 1560, 7025, null, null]);
+for (const [excerpt, start] of [["wait-for-you", 4075], ["why-and-the-6th-summer", 5255]]) {
+  window.location.search = `?v=${id}&excerpt=${excerpt}`;
+  app.route();
+  assert.deepEqual(calls.pop(), [id, start, 7025, null, null]);
+}
 window.location.search = `?v=${id}`;
 app.route();
 assert.deepEqual(calls.pop(), [id, 21449, 22851, 22638, 22779.360]);
