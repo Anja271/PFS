@@ -7,6 +7,7 @@
   const state = {
     videos: [],
     guests: new Map(),
+    fanEdits: new Map(),
     guestChapters: new Map(),
     officialListLoaded: false,
     subtitleIds: new Set(),
@@ -20,6 +21,7 @@
     player: null,
     playerReady: false,
     cues: [],
+    visualCaptions: [],
     subtitlesEnabled: false,
     activeCueKey: null,
     pollTimer: null,
@@ -47,6 +49,7 @@
     chapterSection: document.getElementById("chapter-section"),
     chapterList: document.getElementById("chapter-list"),
     subtitleOverlay: document.getElementById("subtitle-overlay"),
+    visualCaptionOverlay: document.getElementById("visual-caption-overlay"),
     subtitleFallback: document.getElementById("subtitle-fallback"),
     youtubeLink: document.getElementById("youtube-link"),
     backLink: document.getElementById("back-link")
@@ -67,14 +70,16 @@
     document.addEventListener("fullscreenchange", updateFullscreenButton);
     window.addEventListener("popstate", route);
 
-    const [videosResult, subtitlesResult, coverageResult, chaptersResult, heatmapsResult, guestsResult, guestChaptersResult] = await Promise.allSettled([
+    const [videosResult, subtitlesResult, coverageResult, chaptersResult, heatmapsResult, guestsResult, guestChaptersResult, fanResult, fanChaptersResult] = await Promise.allSettled([
       fetchJson("data/videos.json"),
       fetchJson("data/subtitles.json"),
       fetchJson("data/subtitle-coverage.json"),
       fetchJson("data/chapters.json"),
       fetchJson("data/heatmaps.json"),
       fetchJson("data/guest-videos.json"),
-      fetchJson("data/guest-chapters.json")
+      fetchJson("data/guest-chapters.json"),
+      fetchJson("data/fan-edit-videos.json"),
+      fetchJson("data/fan-edit-chapters.json")
     ]);
 
     if (videosResult.status === "fulfilled" && Array.isArray(videosResult.value)) {
@@ -109,6 +114,14 @@
     }
     if (guestChaptersResult.status === "fulfilled") {
       state.guestChapters = normalizeGuestChapters(guestChaptersResult.value);
+    }
+    if (fanResult.status === "fulfilled") {
+      state.fanEdits = normalizeGuestVideos(fanResult.value, state.videos);
+    }
+    if (fanChaptersResult.status === "fulfilled") {
+      for (const [id, chapters] of normalizeGuestChapters(fanChaptersResult.value)) {
+        state.guestChapters.set(id, chapters);
+      }
     }
     renderVideoList();
     route();
@@ -206,22 +219,26 @@
   }
 
   function guestDetailUrl(id) {
-    return `creator-reactions.html?v=${encodeURIComponent(id)}`;
+    return `${state.fanEdits.has(id) ? "fan-edits.html" : "creator-reactions.html"}?v=${encodeURIComponent(id)}`;
   }
 
   async function renderCreatorPage(page) {
+    const fanEdit = page.dataset?.catalog === "fan-edits";
+    const label = fanEdit ? "Fan edits" : "Creator reactions";
+    const listing = fanEdit ? "fan-edits.html" : "creator-reactions.html";
     const id = new URLSearchParams(window.location.search).get("v");
     const message = document.getElementById("creator-message");
     let guests;
     try {
-      guests = normalizeGuestVideos(await fetchJson("data/guest-videos.json"), []);
+      guests = normalizeGuestVideos(await fetchJson(fanEdit ? "data/fan-edit-videos.json" : "data/guest-videos.json"), []);
+      if (fanEdit) state.fanEdits = guests;
     } catch {
-      showMessage(message, "Creator reactions could not be loaded. Reload this page to try again.", true);
+      showMessage(message, `${label} could not be loaded. Reload this page to try again.`, true);
       return;
     }
     if (!id) {
       if (!guests.size) {
-        showMessage(message, "No creator reactions have been added yet.", false);
+        showMessage(message, `No ${label.toLowerCase()} have been added yet.`, false);
         return;
       }
       page.querySelector("#creator-grid").replaceChildren(...Array.from(guests.values(), createCreatorCard));
@@ -230,15 +247,18 @@
     }
     const guest = guests.get(id);
     if (!guest) {
-      showMessage(message, "This video is not listed. Return to Creator reactions to choose a video.", true);
+      showMessage(message, `This video is not listed. Return to ${label} to choose a video.`, true);
       return;
     }
-    document.title = `${guest.title} — Creator reactions`;
-    document.getElementById("creator-back").hidden = false;
+    document.title = `${guest.title} — ${label}`;
+    const back = document.getElementById("creator-back");
+    back.hidden = false;
+    back.href = listing;
+    back.textContent = `Back to ${label.toLowerCase()}`;
     document.getElementById("creator-title").textContent = guest.title;
     let chapters;
     try {
-      chapters = normalizeGuestChapters(await fetchJson("data/guest-chapters.json")).get(id) || [];
+      chapters = normalizeGuestChapters(await fetchJson(fanEdit ? "data/fan-edit-chapters.json" : "data/guest-chapters.json")).get(id) || [];
     } catch {
       showMessage(message, "YouTube chapters could not be loaded. The subtitled excerpts are still available below.", true);
     }
@@ -481,7 +501,10 @@
   function setStatus(element, videoId) {
     element.className = "subtitle-status";
     const coverage = getSubtitleCoverage(videoId);
-    if (coverage === "guest") {
+    if (coverage === "fan-edit") {
+      element.textContent = "English fan subtitles · on-screen captions included";
+      element.classList.add("status-available");
+    } else if (coverage === "guest") {
       element.textContent = "English fan subtitles for this excerpt";
       element.classList.add("status-available");
     } else if (!state.subtitleManifestLoaded && !state.coverageManifestLoaded) {
@@ -500,6 +523,7 @@
   }
 
   function getSubtitleCoverage(videoId) {
+    if (state.fanEdits.has(videoId)) return "fan-edit";
     if (state.guests.has(videoId)) return "guest";
     const entry = state.subtitleCoverage.get(videoId);
     if (entry) return entry.coverage;
@@ -530,7 +554,7 @@
       showMessage(elements.listMessage, "The video ID in the address is invalid. Choose a livestream below.", true);
       return;
     }
-    const guest = state.guests.get(requestedId);
+    const guest = state.fanEdits.get(requestedId) || state.guests.get(requestedId);
     const video = guest || state.videos.find((item) => item.youtubeId === requestedId);
     if (!video) {
       showListView();
@@ -594,6 +618,7 @@
     }
     resetSubtitleDisplay("Fan subtitles are off.");
     state.selectedVideo = null;
+    state.visualCaptions = [];
     state.initialStartSeconds = 0;
     state.initialEndSeconds = 0;
     state.nextSkip = 0;
@@ -637,7 +662,7 @@
     elements.subtitleToggle.className = state.initialStartSeconds > 0
       ? "button button-secondary"
       : "button button-primary";
-    document.title = `${video.title} — PLAVE Lives`;
+    document.title = `${video.title} — ${state.fanEdits.has(video.youtubeId) ? "Fan edits" : "PLAVE Lives"}`;
 
     const hasSubtitles = hasAnySubtitles(video.youtubeId);
     state.cues = [];
@@ -785,26 +810,48 @@
   async function loadVtt(videoId) {
     try {
       const coverage = getSubtitleCoverage(videoId);
-      const directory = coverage === "guest" ? "guest-subtitles"
+      const directory = coverage === "fan-edit" ? "fan-edit-subtitles" : coverage === "guest" ? "guest-subtitles"
         : coverage === "highlights" ? "highlight-subtitles" : "subtitles";
       const response = await fetch(`${directory}/${encodeURIComponent(videoId)}.vtt`, { cache: "no-cache" });
       if (!response.ok) throw new Error("VTT missing");
       const cues = parseVtt(await response.text());
       if (cues.length === 0) throw new Error("VTT invalid");
+      state.visualCaptions = [];
+      if (coverage === "fan-edit") {
+        state.visualCaptions = normalizeVisualCaptions(await fetchJson(`fan-edit-captions/${encodeURIComponent(videoId)}.json`));
+        if (!state.visualCaptions.length) throw new Error("Visual captions missing");
+      }
       state.cues = cues;
       elements.subtitleToggle.disabled = false;
     } catch (error) {
       state.cues = [];
+      state.visualCaptions = [];
       elements.subtitleToggle.disabled = true;
       elements.subtitleToggle.textContent = "Fan subtitles unavailable";
       showMessage(
         elements.playerMessage,
-        error.message === "VTT missing"
+        error.message === "Visual captions missing"
+          ? "The on-screen text translations could not be loaded. Reload this page to try again."
+          : error.message === "VTT missing"
           ? "The fan subtitle file is listed but could not be found. The video can still be watched."
           : "The fan subtitle file is invalid or contains no readable cues. The video can still be watched.",
         true
       );
     }
+  }
+
+  function normalizeVisualCaptions(value) {
+    if (!Array.isArray(value)) return [];
+    const result = [];
+    for (const item of value) {
+      if (!Number.isFinite(item?.start) || !Number.isFinite(item?.end)
+        || item.start < 0 || item.end <= item.start || typeof item.text !== "string"
+        || !item.text.trim() || typeof item.attribution !== "string"
+        || (result.length && item.start < result.at(-1).end)) return [];
+      result.push({start: item.start, end: item.end, text: item.text,
+        attribution: item.attribution, kind: item.kind === "note" ? "note" : "caption"});
+    }
+    return result;
   }
 
   function parseVtt(source) {
@@ -1051,6 +1098,10 @@
         state.activeCueKey = endedKey;
         elements.subtitleOverlay.textContent = "";
         elements.subtitleOverlay.classList.remove("has-text");
+        if (elements.visualCaptionOverlay) {
+          elements.visualCaptionOverlay.textContent = "";
+          elements.visualCaptionOverlay.classList.remove("has-text");
+        }
         elements.subtitleFallback.textContent = state.selectedVideo?.creator
           ? "End of this subtitled excerpt. Press Play again to continue without fan subtitles."
           : "End of this subtitled highlight. Choose another highlight, or press Play again to continue without fan subtitles.";
@@ -1067,12 +1118,19 @@
       state.activeCueKey = null;
     }
     const active = state.cues.filter((cue) => currentTime >= cue.start && currentTime < cue.end);
-    const key = active.map((cue) => `${cue.start}:${cue.end}:${cue.text}`).join("|");
+    const visual = state.visualCaptions.filter((cue) => currentTime >= cue.start && currentTime < cue.end);
+    const visualText = visual.map((cue) => cue.kind === "note" ? cue.text
+      : `[Caption: ${cue.text}${cue.attribution ? `\n— ${cue.attribution}` : ""}]`).join("\n");
+    const key = active.map((cue) => `${cue.start}:${cue.end}:${cue.text}`).join("|") + `|visual:${visualText}`;
     if (key === state.activeCueKey) return;
     state.activeCueKey = key;
     const text = active.map((cue) => cue.text).join("\n");
     elements.subtitleOverlay.textContent = text;
-    elements.subtitleFallback.textContent = text || "…";
+    if (elements.visualCaptionOverlay) {
+      elements.visualCaptionOverlay.textContent = visualText;
+      elements.visualCaptionOverlay.classList.toggle("has-text", Boolean(visualText));
+    }
+    elements.subtitleFallback.textContent = [text, visualText ? `On-screen text: ${visualText}` : ""].filter(Boolean).join("\n\n") || "…";
     elements.subtitleOverlay.classList.toggle("has-text", Boolean(text));
   }
 
@@ -1081,6 +1139,10 @@
     state.activeCueKey = null;
     elements.subtitleOverlay.textContent = "";
     elements.subtitleOverlay.classList.remove("has-text");
+    if (elements.visualCaptionOverlay) {
+      elements.visualCaptionOverlay.textContent = "";
+      elements.visualCaptionOverlay.classList.remove("has-text");
+    }
     elements.subtitleFallback.textContent = message;
     elements.subtitleToggle.setAttribute("aria-pressed", "false");
   }

@@ -197,6 +197,18 @@ Never grant a blanket approval for arbitrary shell or Python commands. If the Co
 
 Because the filename did not change, the subtitle manifest normally does not need to change. The website requests VTT files with cache revalidation, while GitHub Pages/CDN caching can still take a short time to expire.
 
+## Fan edits
+
+`fan-edits.html` lists subtitled fan compilations, separate from official lives
+and creator reactions. `data/fan-edit-videos.json` and `data/fan-edit-chapters.json`
+contain reviewed English metadata and navigation. Dialogue comes from
+`fan-edit-subtitles/VIDEO_ID.vtt`; independently timed on-screen translations
+come from `fan-edit-captions/VIDEO_ID.json` with `start`, `end`, `text`,
+`attribution`, and optional `kind: "note"`. Source media remains on YouTube.
+The chapter player continues through the complete subtitled coverage, not just
+to the next chapter boundary. Run `python tools/test_fan_edits.py` alongside
+the existing regression suites and `node --check app.js` after changes.
+
 ## Local preview
 
 Opening `index.html` directly with a `file://` URL can block JSON requests. Use any simple static server instead, for example:

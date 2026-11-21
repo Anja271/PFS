@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="description" content="PLAVE livestreams with optional English fan subtitles.">
   <title>PLAVE Lives with English Fan Subtitles</title>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css?v=fan-edits-v3">
 </head>
 <body>
   <header class="site-header">
@@ -17,6 +17,7 @@
         <a href="./" aria-current="page">Livestreams</a>
         <a href="highlights.html">Highlights</a>
         <a href="creator-reactions.html">Creator reactions</a>
+        <a href="fan-edits.html">Fan edits</a>
       </nav>
     </div>
   </header>
@@ -50,6 +51,7 @@
       <div class="player-frame" id="player-frame">
         <div id="youtube-player"></div>
         <div id="subtitle-overlay" class="subtitle-overlay" aria-hidden="true"></div>
+        <div id="visual-caption-overlay" class="visual-caption-overlay" aria-hidden="true"></div>
         <div id="highlight-start" class="highlight-start-banner" role="status" hidden></div>
       </div>
 
@@ -89,6 +91,6 @@
   <noscript>
     <div class="shell message message-error">JavaScript is required to load the livestream list and player.</div>
   </noscript>
-  <script src="app.js?v=creator-chapters-v1" defer></script>
+  <script src="app.js?v=fan-edits-v3" defer></script>
 </body>
 </html>

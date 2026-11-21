@@ -607,3 +607,32 @@ select {
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; }
 }
+
+.visual-caption-overlay {
+  position: absolute;
+  top: 16px;
+  left: 8%;
+  right: 8%;
+  z-index: 2;
+  display: none;
+  width: fit-content;
+  max-width: 84%;
+  margin-inline: auto;
+  padding: 8px 16px;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.88);
+  border-radius: 8px;
+  font-size: clamp(0.875rem, 1.8vw, 1.375rem);
+  font-weight: 650;
+  line-height: 1.35;
+  text-align: center;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+  pointer-events: none;
+}
+
+.visual-caption-overlay.has-text { display: block; }
+
+.player-frame:fullscreen .visual-caption-overlay {
+  font-size: clamp(1rem, 2vw, 1.75rem);
+}

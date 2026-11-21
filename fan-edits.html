@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="PLAVE fan edits with English fan subtitles for dialogue and on-screen captions.">
+  <title>Fan edits — PLAVE Livestream Guide</title>
+  <link rel="stylesheet" href="styles.css?v=fan-edits-v3">
+</head>
+<body>
+  <header class="site-header">
+    <div class="shell">
+      <p class="eyebrow">Unofficial fan project</p>
+      <h1>Fan edits</h1>
+      <p class="intro">PLAVE moments, lovingly edited by fans — with the on-screen jokes translated too.</p>
+      <nav class="site-nav" aria-label="Main navigation">
+        <a href="./">Livestreams</a>
+        <a href="highlights.html">Highlights</a>
+        <a href="creator-reactions.html">Creator reactions</a>
+        <a href="fan-edits.html" aria-current="page">Fan edits</a>
+      </nav>
+    </div>
+  </header>
+  <main class="shell" id="creator-page" data-catalog="fan-edits">
+    <a class="back-link" href="fan-edits.html" id="creator-back" hidden>Back to fan edits</a>
+    <div class="section-heading">
+      <div>
+        <h2 id="creator-title">Videos</h2>
+        <p class="sort-note" id="creator-intro">Choose a video to watch with English subtitles. [Caption: …] marks on-screen text.</p>
+      </div>
+    </div>
+    <div id="creator-message" class="message" role="status">Loading fan edits…</div>
+    <div id="creator-grid" class="video-grid"></div>
+    <ol id="creator-chapters" class="card-segment-list" aria-labelledby="creator-title" hidden></ol>
+    <noscript><p class="message message-error">JavaScript is required to show fan edits and their chapters.</p></noscript>
+  </main>
+  <footer class="site-footer">
+    <div class="shell">Unofficial English fan subtitles. Original edits belong to their respective creators.</div>
+  </footer>
+  <script src="app.js?v=fan-edits-v3" defer></script>
+</body>
+</html>
