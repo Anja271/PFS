@@ -113,6 +113,24 @@ main { min-height: 60vh; }
   overflow-wrap: anywhere;
   text-underline-offset: 3px;
 }
+
+.original-channel {
+  display: block;
+  margin-top: 8px;
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.original-channel a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--primary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
 .site-nav a[hidden] { display: none; }
 
 #list-view, .player-view { padding: 32px 0 48px; }

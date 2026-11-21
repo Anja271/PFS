@@ -152,6 +152,9 @@
         || !Number.isSafeInteger(endSeconds) || endSeconds <= startSeconds) continue;
       const title = item.title.trim();
       const creator = typeof item.creator === "string" ? item.creator.trim() : "";
+      const creatorUrl = typeof item.creatorUrl === "string"
+        && /^https:\/\/www\.youtube\.com\/(?:@[^/?#\s]+|channel\/UC[A-Za-z0-9_-]{22})$/.test(item.creatorUrl)
+        ? item.creatorUrl : "";
       const excerpt = item.excerpt ?? "";
       if (!title || !creator || typeof excerpt !== "string"
         || (excerpt && !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(excerpt))) continue;
@@ -161,7 +164,7 @@
       const skips = Number.isFinite(skip?.from) && Number.isFinite(skip?.to)
         && startSeconds < skip.from && skip.from < skip.to && skip.to < endSeconds
         ? [{ from: skip.from, to: skip.to }] : [];
-      const entry = { youtubeId, title, creator, excerpt, startSeconds, endSeconds, skips };
+      const entry = { youtubeId, title, creator, creatorUrl, excerpt, startSeconds, endSeconds, skips };
       if (guest) {
         guest.excerpts.push(entry);
         if (!excerpt) Object.assign(guest, entry);
@@ -256,6 +259,7 @@
     back.href = listing;
     back.textContent = `Back to ${label.toLowerCase()}`;
     document.getElementById("creator-title").textContent = guest.title;
+    appendCreatorCredit(document.getElementById("creator-title"), guest);
     let chapters;
     try {
       chapters = normalizeGuestChapters(await fetchJson(fanEdit ? "data/fan-edit-chapters.json" : "data/guest-chapters.json")).get(id) || [];
@@ -292,9 +296,28 @@
     detail.textContent = video.excerpts ? video.creator
       : `${formatChapterTime(video.startSeconds)}–${formatChapterTime(video.endSeconds)}`;
     heading.appendChild(link);
+    appendCreatorCredit(heading, video);
+    if (video.excerpts) detail.textContent = "English fan subtitles";
     content.append(heading, detail);
     card.appendChild(content);
     return card;
+  }
+
+  function appendCreatorCredit(heading, video) {
+    if (!heading || !video.creator) return;
+    const credit = document.createElement("span");
+    credit.className = "original-channel";
+    credit.textContent = "Original channel: ";
+    const channel = document.createElement(video.creatorUrl ? "a" : "span");
+    channel.textContent = video.creator;
+    if (video.creatorUrl) {
+      channel.href = video.creatorUrl;
+      channel.target = "_blank";
+      channel.rel = "noopener noreferrer";
+      channel.setAttribute("aria-label", `Original YouTube channel: ${video.creator} (opens in a new tab)`);
+    }
+    credit.appendChild(channel);
+    heading.appendChild(credit);
   }
 
   function createCreatorChapter(guest, chapter) {
@@ -650,6 +673,7 @@
       ? "← Back to highlights"
       : video.creator ? "← Back to video chapters" : "← Back to livestreams";
     elements.playerTitle.textContent = video.title;
+    appendCreatorCredit(elements.playerTitle, video);
     setStatus(elements.playerStatus, video.youtubeId);
     if (video.skips?.length) elements.playerStatus.textContent += " · Includes a playback skip";
     elements.youtubeLink.href = `https://www.youtube.com/watch?v=${encodeURIComponent(video.youtubeId)}`

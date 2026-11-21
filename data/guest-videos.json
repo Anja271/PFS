@@ -8,7 +8,8 @@
     "skip": {
       "from": 22638,
       "to": 22779.36
-    }
+    },
+    "creatorUrl": "https://www.youtube.com/@solf0911"
   },
   {
     "youtubeId": "WiIqJOpPycA",
@@ -16,7 +17,8 @@
     "title": "SOLF’s PLAVE Deep Dive: First Impressions, Positions & Member Chemistry",
     "creator": "SOLF",
     "startSeconds": 1560,
-    "endSeconds": 4075
+    "endSeconds": 4075,
+    "creatorUrl": "https://www.youtube.com/@solf0911"
   },
   {
     "youtubeId": "WiIqJOpPycA",
@@ -24,7 +26,8 @@
     "title": "SOLF’s PLAVE Deep Dive: Logo Teaser, Wait for you MV & Stage Reaction",
     "creator": "SOLF",
     "startSeconds": 4075,
-    "endSeconds": 5255
+    "endSeconds": 5255,
+    "creatorUrl": "https://www.youtube.com/@solf0911"
   },
   {
     "youtubeId": "WiIqJOpPycA",
@@ -32,6 +35,7 @@
     "title": "SOLF’s PLAVE Deep Dive: Why? & The 6th Summer",
     "creator": "SOLF",
     "startSeconds": 5255,
-    "endSeconds": 7025
+    "endSeconds": 7025,
+    "creatorUrl": "https://www.youtube.com/@solf0911"
   }
 ]
